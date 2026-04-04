@@ -35,20 +35,36 @@
     main{position:relative;z-index:1;}
 
     /* ── SELECTOR DE DIVISIÓN ── */
-    #division-selector{position:fixed;inset:0;z-index:500;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:24px 24px 100px;}
+    /* FIX MÓVIL: scroll interno, sin position fixed overflow */
+    #division-selector{
+      position:fixed;inset:0;z-index:500;
+      background:var(--dark);
+      display:flex;flex-direction:column;
+      align-items:center;
+      overflow-y:auto;          /* scroll si el contenido no cabe */
+      -webkit-overflow-scrolling:touch;
+      padding:40px 24px 40px;
+      gap:24px;
+    }
     #division-selector.hidden{display:none;}
-    .div-sel-logo{height:clamp(80px,12vw,140px);width:auto;object-fit:contain;filter:drop-shadow(0 4px 24px rgba(0,0,0,.6));}
-    .div-sel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(13px,2vw,16px);letter-spacing:4px;color:var(--muted);text-transform:uppercase;text-align:center;}
-    .div-sel-league-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,5vw,52px);letter-spacing:3px;color:#fff;text-align:center;line-height:1;margin-top:-8px;}
-    .div-sel-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}
-    .div-sel-sponsors{position:absolute;bottom:32px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:14px;}
+    .div-sel-logo{height:clamp(70px,11vw,130px);width:auto;object-fit:contain;filter:drop-shadow(0 4px 24px rgba(0,0,0,.6));flex-shrink:0;}
+    .div-sel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(12px,2vw,15px);letter-spacing:4px;color:var(--muted);text-transform:uppercase;text-align:center;flex-shrink:0;}
+    .div-sel-league-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,50px);letter-spacing:3px;color:#fff;text-align:center;line-height:1;margin-top:-8px;flex-shrink:0;}
+    .div-sel-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;flex-shrink:0;}
+
+    /* Sponsors dentro del flujo normal (no absolute) */
+    .div-sel-sponsors{
+      display:flex;flex-direction:column;align-items:center;gap:14px;
+      width:100%;padding-bottom:8px;
+      flex-shrink:0;
+    }
     .div-sel-sponsors-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
     .div-sel-sponsors-logos{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;}
-    .sponsor-logo-wrap{height:80px;display:flex;align-items:center;justify-content:center;opacity:.7;transition:opacity .2s;filter:grayscale(30%);}
+    .sponsor-logo-wrap{height:70px;display:flex;align-items:center;justify-content:center;opacity:.7;transition:opacity .2s;filter:grayscale(30%);}
     .sponsor-logo-wrap:hover{opacity:1;filter:none;}
-    .sponsor-logo-wrap img{height:100%;width:auto;max-width:200px;object-fit:contain;}
+    .sponsor-logo-wrap img{height:100%;width:auto;max-width:180px;object-fit:contain;}
     .sponsor-placeholder{height:40px;min-width:100px;border:1px dashed rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;padding:0 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;}
-    .div-card{width:clamp(200px,28vw,280px);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:32px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+    .div-card{width:clamp(200px,28vw,270px);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;flex-shrink:0;}
     .div-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;}
     .div-card.primera::before{background:radial-gradient(ellipse at 50% 0%,rgba(248,8,8,.18),transparent 70%);}
     .div-card.segunda::before{background:radial-gradient(ellipse at 50% 0%,rgba(48,9,220,.18),transparent 70%);}
@@ -56,10 +72,10 @@
     .div-card.primera:hover{border-color:rgba(248,8,8,.5);}
     .div-card.segunda:hover{border-color:rgba(48,9,220,.5);}
     .div-card:hover::before{opacity:1;}
-    .div-card-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,80px);line-height:1;margin-bottom:8px;position:relative;z-index:1;}
+    .div-card-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,78px);line-height:1;margin-bottom:8px;position:relative;z-index:1;}
     .div-card.primera .div-card-num{color:var(--red);}
     .div-card.segunda .div-card-num{color:#0555a0;}
-    .div-card-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:3px;text-transform:uppercase;color:var(--text);position:relative;z-index:1;}
+    .div-card-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:var(--text);position:relative;z-index:1;}
     .div-card-sub{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:1px;position:relative;z-index:1;}
     .div-card-arrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--muted);margin-top:20px;text-transform:uppercase;position:relative;z-index:1;}
 
@@ -228,28 +244,14 @@
     /* ── MODAL COMPARTIR ── */
     #share-modal{display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.94);backdrop-filter:blur(20px);align-items:center;justify-content:center;flex-direction:column;gap:24px;padding:20px;}
     #share-modal.open{display:flex;}
-
-    /* Card que se va a capturar */
-    .share-card{
-      width:460px;max-width:90vw;
-      background:#0E1117;
-      border-radius:16px;
-      overflow:hidden;
-      font-family:'Barlow Condensed',sans-serif;
-      position:relative;
-    }
+    .share-card{width:460px;max-width:90vw;background:#0E1117;border-radius:16px;overflow:hidden;font-family:'Barlow Condensed',sans-serif;position:relative;}
     .share-card-stripe{height:5px;background:linear-gradient(90deg,#f80808 0%,#f80808 50%,#3009dc 50%,#3009dc 100%);}
-    .share-card-header{
-      padding:18px 24px 14px;
-      display:flex;align-items:center;justify-content:space-between;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
+    .share-card-header{padding:18px 24px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);}
     .share-card-league-wrap{display:flex;align-items:center;gap:10px;}
     .share-card-league-logo{width:32px;height:32px;object-fit:contain;display:block;}
     .share-card-league-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:#fff;line-height:1;}
     .share-card-league-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#6B7280;margin-top:1px;}
     .share-card-round-badge{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#f2b34e;background:rgba(242,179,78,.1);border:1px solid rgba(242,179,78,.25);padding:4px 10px;border-radius:2px;}
-
     .share-card-body{padding:20px 24px 16px;}
     .share-team-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
     .share-team-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.06);}
@@ -262,23 +264,10 @@
     .share-score{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;letter-spacing:-1px;}
     .share-score.winner{color:#E8EAF0;}
     .share-score.loser{color:#374151;}
-
-    .share-card-footer{
-      padding:12px 24px 16px;
-      border-top:1px solid rgba(255,255,255,.06);
-      display:flex;align-items:center;justify-content:space-between;
-    }
+    .share-card-footer{padding:12px 24px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
     .share-card-meta{font-size:11px;letter-spacing:1px;color:#6B7280;font-family:'Barlow Condensed',sans-serif;}
     .share-card-mvp-text{font-size:11px;letter-spacing:1px;color:#f2b34e;font-family:'Barlow Condensed',sans-serif;}
-    .share-card-watermark{
-      padding:10px 24px 14px;
-      text-align:center;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:11px;letter-spacing:4px;
-      color:rgba(255,255,255,.12);
-    }
-
-    /* Acciones debajo de la card */
+    .share-card-watermark{padding:10px 24px 14px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:rgba(255,255,255,.12);}
     .share-modal-actions{display:flex;gap:12px;align-items:center;}
     .share-modal-hint{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-align:center;}
     .share-dl-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:4px;border:none;cursor:pointer;background:var(--gold);color:#000;transition:all .2s;display:flex;align-items:center;gap:8px;}
@@ -433,32 +422,175 @@
     .round-box input{width:80px;flex-shrink:0;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--gold);background:rgba(255,255,255,.06);border-color:rgba(242,179,78,.2);}
     .round-box input:focus{border-color:rgba(242,179,78,.5);}
 
+    /* ── BULK IMPORT NÓMINA ── */
+    .bulk-import-box{background:rgba(255,255,255,.02);border:1px solid rgba(242,179,78,.2);border-radius:6px;padding:18px;margin-bottom:18px;}
+    .bulk-import-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+    .bulk-import-hint{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+    .bulk-import-hint code{font-family:monospace;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:3px;font-size:11px;color:var(--text);}
+    .bulk-preview{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:4px;padding:12px;margin-top:12px;font-size:12px;color:var(--muted);font-family:monospace;max-height:120px;overflow-y:auto;display:none;}
+    .bulk-preview.show{display:block;}
+    .bulk-status{font-size:12px;margin-top:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+    .bulk-status.ok{color:#4ADE80;}
+    .bulk-status.err{color:#F87171;}
+    .bulk-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+
     @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
     .reveal.visible{opacity:1;transform:none;}
+
+    /* ════════════════════════════════════════════
+       MOBILE — solo afecta pantallas ≤ 768px
+    ════════════════════════════════════════════ */
     @media(max-width:768px){
+
+      /* NAV */
+      nav{padding:0 16px;height:56px;gap:8px;}
       .nav-links{display:none;}
-      .hero-stats{gap:28px;}
-      .standings-row{grid-template-columns:32px 1fr repeat(4,44px);}
-      .standings-row>*:nth-child(7),.standings-row>*:nth-child(8),
-      .standings-header span:nth-child(7),.standings-header span:nth-child(8){display:none;}
-      .form-row{grid-template-columns:1fr;}
-      .game-admin-actions{flex-direction:column;}
-      .hero-league-logo img{height:clamp(100px,20vw,160px);}
-      .div-sel-cards{flex-direction:column;align-items:center;}
-      .div-card{width:min(280px,85vw);}
-      .round-box{flex-wrap:wrap;}
-      .sponsors-banner-logos{gap:24px;}
-      .sponsors-banner-logos .sponsor-logo-wrap{height:52px;}
-      .teams-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
-      .roster-team-header{flex-direction:column;text-align:center;gap:16px;}
-      .roster-team-stats{justify-content:center;}
-      .roster-row{grid-template-columns:36px 1fr 60px 60px 60px;}
-      .roster-table-header{grid-template-columns:36px 1fr 60px 60px 60px;}
-      .share-card{width:95vw;}
+      .nav-logo{font-size:18px;}
+      .nav-cta{padding:7px 12px;font-size:11px;letter-spacing:1px;}
+      .div-badge{font-size:10px;padding:4px 8px;letter-spacing:1px;}
+
+      /* HERO */
+      .hero{padding:80px 20px 48px;min-height:100svh;}
+      .hero-title{font-size:clamp(52px,14vw,80px);}
+      .hero-sub{font-size:14px;max-width:100%;}
+      .hero-badges{gap:10px;}
+      .badge{padding:9px 16px;font-size:13px;}
+      .hero-stats{gap:24px;margin-top:36px;}
+      .stat-num{font-size:34px;}
+      .stat-label{font-size:10px;}
+      .hero-league-logo img{height:clamp(90px,22vw,130px);}
+      .playoff-bracket-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
+
+      /* SECTIONS */
+      section{padding:48px 16px;}
+      .section-header{flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:center;}
+      .section-title{font-size:clamp(28px,8vw,40px);}
+      .section-line{display:none;}
+
+      /* DIVISION SELECTOR MÓVIL — scroll interno natural */
+      #division-selector{
+        padding:32px 16px 32px;
+        gap:20px;
+        justify-content:flex-start;   /* top-align so content flows down */
+      }
+      .div-sel-logo{height:clamp(60px,16vw,90px);}
+      .div-sel-league-name{font-size:clamp(22px,6vw,34px);}
+      .div-sel-cards{flex-direction:column;align-items:center;gap:12px;width:100%;}
+      .div-card{width:min(280px,90vw);padding:22px 18px;}
+      .div-card-num{font-size:clamp(44px,10vw,62px);}
+      .div-sel-sponsors{padding-bottom:0;}
+      .div-sel-sponsors-logos .sponsor-logo-wrap{height:38px;}
+      .div-sel-sponsors-logos{gap:16px;}
+
+      /* STANDINGS */
+      .standings-header{grid-template-columns:32px 1fr 40px 40px 56px;padding:10px 12px;gap:0;}
+      .standings-header span:nth-child(6),.standings-header span:nth-child(7),.standings-header span:nth-child(8){display:none;}
+      .standings-row{grid-template-columns:32px 1fr 40px 40px 56px;padding:12px 12px;gap:0;}
+      .standings-row>*:nth-child(6),.standings-row>*:nth-child(7),.standings-row>*:nth-child(8){display:none;}
+      .team-logo{width:38px;height:38px;}
+      .team-logo img{width:100%;height:100%;}
+      .team-name{font-size:13px;line-height:1.2;}
+      .rank{font-size:14px;}
+      .cell{font-size:13px;}
+      .cell.pct{font-size:14px;}
+      .legend{flex-wrap:wrap;gap:12px;font-size:11px;}
+
+      /* TEAMS GRID */
+      .teams-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+      .team-card{padding:20px 12px 16px;border-radius:6px;}
+      .team-card-logo{width:72px;height:72px;margin-bottom:12px;}
+      .team-card-name{font-size:13px;}
+      .team-card-abbr{font-size:10px;}
+      .team-card-cta{display:none;}
+
+      /* ROSTER */
+      #roster-root{padding:40px 16px;}
+      .roster-team-header{flex-direction:column;text-align:center;gap:14px;padding:20px 16px;}
+      .roster-team-stats{justify-content:center;gap:16px;}
+      .roster-stat-num{font-size:22px;}
+      .roster-table-header{grid-template-columns:32px 1fr 52px 52px 52px;padding:10px 12px;}
+      .roster-row{grid-template-columns:32px 1fr 52px 52px 52px;padding:12px 12px;}
+      .roster-rank{font-size:13px;}
+      .roster-name{font-size:13px;}
+      .roster-cell{font-size:13px;}
+      .roster-cell.pts{font-size:15px;}
+
+      /* GAMES */
+      .games-grid{grid-template-columns:1fr;gap:14px;}
+      .game-card-header{flex-wrap:wrap;gap:4px;}
+      .game-round{font-size:10px;}
+      .game-date{font-size:11px;}
+      .ts-logo{width:36px;height:36px;}
+      .ts-logo img{width:100%;height:100%;}
+      .ts-name{font-size:13px;}
+      .ts-score{font-size:30px;}
+      .game-footer{flex-wrap:wrap;gap:6px;font-size:11px;}
+      .games-filter{gap:8px;}
+      .filter-btn{font-size:11px;padding:7px 14px;letter-spacing:1px;}
+
+      /* ANOTADORES */
+      #scorers-root .standings-header{grid-template-columns:32px 1fr 50px 50px 56px!important;padding:10px 12px;}
+      #scorers-root .standings-row{grid-template-columns:32px 1fr 50px 50px 56px!important;padding:12px 12px;}
+
+      /* NOTICIAS */
+      #news-root{padding:48px 16px;}
+      .news-card-title{font-size:16px;}
+
+      /* FOTOS */
+      .album-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+
+      /* SANCIONES */
+      .sanction-card{padding:16px;}
+      .sanction-player{font-size:16px;}
+
+      /* SPONSORS */
+      .sponsors-banner{padding:32px 16px;}
+      .sponsors-banner-logos{gap:20px;}
+      .sponsors-banner-logos .sponsor-logo-wrap{height:44px;}
+
+      /* FOOTER */
+      footer{padding:28px 16px;flex-direction:column;align-items:flex-start;gap:10px;}
+
+      /* SHARE MODAL */
+      #share-modal{padding:16px;}
+      .share-card{width:95vw;max-width:100%;}
       .share-score{font-size:48px;}
-      .playoff-bracket-btn{font-size:10px;padding:6px 10px;}
+      .share-team-name{font-size:16px;}
+      .share-card-body{padding:14px 16px 10px;}
+      .share-card-footer{padding:10px 16px;}
+      .share-modal-actions{flex-direction:column;width:100%;}
+      .share-dl-btn,.share-close-btn{width:100%;justify-content:center;text-align:center;}
+
+      /* ADMIN */
+      .admin-body{padding:16px;}
+      .form-row{grid-template-columns:1fr;}
+      .game-admin-actions{flex-direction:column;gap:6px;}
+      .game-admin-item{flex-direction:column;align-items:flex-start;}
+      .round-box{flex-wrap:wrap;}
+      .admin-actions{flex-wrap:wrap;}
+      .admin-actions .btn{flex:1;min-width:120px;}
+      .bulk-actions{flex-direction:column;}
+      .bulk-actions .btn{width:100%;}
+
+      /* EDIT MODALS */
+      .edit-box{padding:20px 16px;}
+      #pwd-modal .pwd-box{padding:28px 20px;}
+
+      /* TOUCH targets mínimo */
+      .filter-btn,.badge,.btn,.nav-cta,.div-badge,.roster-back,
+      .share-btn,.lb-btn,.lb-close,.admin-close{min-height:44px;}
+      .nav-cta{min-height:36px;}
+    }
+
+    /* Extra small — iPhone SE etc. */
+    @media(max-width:380px){
+      .hero-title{font-size:clamp(44px,13vw,64px);}
+      .teams-grid{grid-template-columns:repeat(2,1fr);}
+      .standings-header,.standings-row{grid-template-columns:28px 1fr 36px 36px 50px!important;}
+      .album-grid{grid-template-columns:repeat(2,1fr);}
+      .share-score{font-size:40px;}
     }
   </style>
 </head>
@@ -686,7 +818,34 @@
 
       <!-- TAB NÓMINA -->
       <div id="tab-roster" class="admin-pane">
-        <p class="section-subtitle">Agregar jugador a nómina</p>
+
+        <!-- ══ IMPORTACIÓN MASIVA DESDE EXCEL ══ -->
+        <div class="bulk-import-box">
+          <div class="bulk-import-title">📋 Importar lista desde Excel</div>
+          <div class="bulk-import-hint">
+            Copia y pega las filas directamente desde Excel (o Google Sheets).<br>
+            Columnas esperadas (en orden): <code>Nombre</code> &nbsp;|&nbsp; <code>#Camiseta</code> &nbsp;|&nbsp; <code>Puntos</code> &nbsp;|&nbsp; <code>Partidos</code><br>
+            Los campos de camiseta, puntos y partidos son opcionales (puedes dejarlos vacíos).<br>
+            El equipo lo eliges abajo antes de importar.
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Equipo destino</label>
+              <select id="bulk-team-select"></select>
+            </div>
+          </div>
+          <textarea id="bulk-paste-area"
+            placeholder="Pega aquí tu lista de Excel&#10;Ej:&#10;Juan Pérez&#9;7&#9;45&#9;6&#10;Pedro Soto&#9;&#9;&#9;&#10;Carlos Rojas&#9;23&#9;80&#9;9"
+            style="min-height:110px;font-family:monospace;font-size:13px;"></textarea>
+          <div class="bulk-status" id="bulk-status"></div>
+          <div class="bulk-preview" id="bulk-preview"></div>
+          <div class="bulk-actions">
+            <button class="btn btn-outline" onclick="previewBulk()">🔍 Vista previa</button>
+            <button class="btn btn-gold" onclick="importBulk()" id="bulk-import-btn">⬆ Importar todos</button>
+          </div>
+        </div>
+
+        <p class="section-subtitle" style="margin-top:4px;">Agregar jugador individual</p>
         <div class="form-row">
           <div class="form-group"><label>Nombre del jugador</label><input type="text" id="pl-name" placeholder="ej: Juan Pérez" /></div>
           <div class="form-group"><label>Número de camiseta</label><input type="number" id="pl-number" placeholder="ej: 23" min="0" max="99" /></div>
@@ -921,7 +1080,9 @@ function selectDivision(div) {
 }
 
 function showDivisionSelector() {
-  document.getElementById('division-selector').classList.remove('hidden');
+  const sel = document.getElementById('division-selector');
+  sel.classList.remove('hidden');
+  sel.scrollTop = 0;
   window.scrollTo(0, 0);
 }
 
@@ -1219,11 +1380,8 @@ function openShareModal(gameId) {
   const away    = teams[g.away];
   const homeWon = +g.homeScore > +g.awayScore;
 
-  // Cabecera
   document.getElementById('sc-division-label').textContent = `${divCfg().label} · ${league.season}`;
   document.getElementById('sc-round-label').textContent    = `Jornada ${g.round}`;
-
-  // Equipos y scores
   document.getElementById('sc-home-name').textContent  = home?.name  || g.home;
   document.getElementById('sc-away-name').textContent  = away?.name  || g.away;
   document.getElementById('sc-home-score').textContent = g.homeScore;
@@ -1231,38 +1389,25 @@ function openShareModal(gameId) {
   document.getElementById('sc-home-score').className   = `share-score ${homeWon ? 'winner' : 'loser'}`;
   document.getElementById('sc-away-score').className   = `share-score ${homeWon ? 'loser'  : 'winner'}`;
 
-  // Logos locales (desde la carpeta del sitio, no crossorigin)
   const buildLogoHTML = (team, colorFallback) => {
     if (team?.logo) return `<img src="${team.logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'share-team-logo-placeholder\' style=\'background:${colorFallback}\'>${team.abbr}</div>'">`;
     return `<div class="share-team-logo-placeholder" style="background:${colorFallback}">${team?.abbr||'?'}</div>`;
   };
   document.getElementById('sc-home-logo-wrap').innerHTML = buildLogoHTML(home, home?.color||'#333');
   document.getElementById('sc-away-logo-wrap').innerHTML = buildLogoHTML(away, away?.color||'#333');
-
-  // Footer
   document.getElementById('sc-venue').textContent   = `🏟️ ${g.venue}  ·  📅 ${g.date}`;
   document.getElementById('sc-mvp').textContent     = g.mvp ? `⭐ MVP: ${g.mvp}` : '';
-
   document.getElementById('share-modal').classList.add('open');
 }
 
-function closeShareModal() {
-  document.getElementById('share-modal').classList.remove('open');
-}
+function closeShareModal() { document.getElementById('share-modal').classList.remove('open'); }
 
 function downloadShareCard() {
   const btn  = document.getElementById('share-dl-btn');
   const card = document.getElementById('share-card');
   btn.textContent = '⏳ Generando...';
   btn.classList.add('loading');
-
-  html2canvas(card, {
-    backgroundColor: '#0E1117',
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
-  }).then(canvas => {
+  html2canvas(card, { backgroundColor:'#0E1117', scale:2, useCORS:true, allowTaint:true, logging:false }).then(canvas => {
     const link = document.createElement('a');
     link.download = `resultado-lsc-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -1276,7 +1421,6 @@ function downloadShareCard() {
   });
 }
 
-// Cerrar share modal con Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('share-modal').classList.contains('open')) closeShareModal();
@@ -1285,8 +1429,7 @@ document.addEventListener('keydown', e => {
 });
 
 async function renderScorers() {
-  const { data, error } = await _supabase
-    .from(divCfg().playersTable).select('*').gt('games', 0);
+  const { data, error } = await _supabase.from(divCfg().playersTable).select('*').gt('games', 0);
   const teams = divTeams();
   const top10 = error ? [] : (data || [])
     .map(p => ({ ...p, ppg: p.points / p.games }))
@@ -1323,8 +1466,7 @@ async function renderScorers() {
 }
 
 async function renderNews() {
-  const { data, error } = await _supabase
-    .from(divCfg().newsTable).select('*').order('id',{ascending:false});
+  const { data, error } = await _supabase.from(divCfg().newsTable).select('*').order('id',{ascending:false});
   const news = error ? [] : (data||[]);
   const cards = news.map(n => {
     const imgBlock = n.image_url
@@ -1367,8 +1509,7 @@ function toggleNews(id) {
 }
 
 async function renderPhotos() {
-  const { data, error } = await _supabase
-    .from(divCfg().photosTable).select('*').order('id',{ascending:false});
+  const { data, error } = await _supabase.from(divCfg().photosTable).select('*').order('id',{ascending:false});
   const photos = error ? [] : (data || []);
   lbPhotos = photos;
   const items = photos.map((p,i) => `
@@ -1401,8 +1542,7 @@ function updateLightbox() {
 }
 
 async function renderSanctions() {
-  const { data, error } = await _supabase
-    .from(divCfg().sanctionsTable).select('*').order('id',{ascending:false});
+  const { data, error } = await _supabase.from(divCfg().sanctionsTable).select('*').order('id',{ascending:false});
   const sanctions = error ? [] : (data||[]);
   const teams = divTeams();
   const typeLabels = { roja:'Tarjeta Roja', amarilla:'Tarjeta Amarilla', suspension:'Suspensión', economica:'Sanción Económica', otra:'Sanción' };
@@ -1436,6 +1576,123 @@ function renderFooter() {
     <div class="footer-logo">${league.abbr}<span>·</span>${league.country.toUpperCase()} ${league.season}</div>
     <div class="footer-copy">© ${league.season} ${league.name} · Todos los derechos reservados</div>
     <div style="font-size:12px;color:var(--muted);">${league.flag} Hecho en ${league.country}</div>`;
+}
+
+/* ══════════════════════════════════════════
+   IMPORTACIÓN MASIVA DESDE EXCEL
+   Formato por fila: Nombre [TAB/#] Camiseta [TAB] Puntos [TAB] Partidos
+   Soporta separadores: tab, coma, punto y coma
+══════════════════════════════════════════ */
+function parseBulkRows(raw) {
+  const results = [];
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  for (const line of lines) {
+    // Detectar separador
+    let cols;
+    if (line.includes('\t')) {
+      cols = line.split('\t').map(c => c.trim());
+    } else if (line.includes(';')) {
+      cols = line.split(';').map(c => c.trim());
+    } else if (line.includes(',')) {
+      cols = line.split(',').map(c => c.trim());
+    } else {
+      // Sin separador claro: intentar separar nombre de número al final
+      // Ej: "Juan Pérez 23" o "Juan Pérez #23"
+      const match = line.match(/^(.+?)\s+#?(\d+)\s*$/);
+      if (match) {
+        cols = [match[1].trim(), match[2].trim()];
+      } else {
+        cols = [line]; // solo nombre, sin número
+      }
+    }
+
+    const name = cols[0] ? cols[0].replace(/^#/, '').trim() : '';
+    if (!name) continue;
+
+    // Limpiar # del número por si acaso
+    const rawNum = cols[1] !== undefined ? String(cols[1]).replace(/[^0-9]/g, '').trim() : '';
+    const number = rawNum !== '' ? parseInt(rawNum, 10) : null;
+    const points = cols[2] !== undefined && cols[2] !== '' ? parseInt(cols[2], 10) : 0;
+    const games  = cols[3] !== undefined && cols[3] !== '' ? parseInt(cols[3], 10) : 0;
+
+    results.push({
+      name,
+      number: isNaN(number) ? null : number,
+      points: isNaN(points) ? 0 : points,
+      games:  isNaN(games)  ? 0 : games,
+    });
+  }
+  return results;
+}
+
+function previewBulk() {
+  const raw     = document.getElementById('bulk-paste-area').value;
+  const preview = document.getElementById('bulk-preview');
+  const status  = document.getElementById('bulk-status');
+  if (!raw.trim()) {
+    status.className = 'bulk-status err';
+    status.textContent = '⚠ Pega datos primero.';
+    preview.classList.remove('show');
+    return;
+  }
+  const rows = parseBulkRows(raw);
+  if (!rows.length) {
+    status.className = 'bulk-status err';
+    status.textContent = '⚠ No se encontraron filas válidas.';
+    preview.classList.remove('show');
+    return;
+  }
+  status.className = 'bulk-status ok';
+  status.textContent = `✓ ${rows.length} jugador${rows.length > 1 ? 'es' : ''} detectado${rows.length > 1 ? 's' : ''}.`;
+  preview.classList.add('show');
+  preview.innerHTML = rows.map((r, i) =>
+    `<div style="color:var(--text);padding:2px 0;">${i+1}. <strong>${r.name}</strong>${r.number !== null ? ' · #'+r.number : ''} · ${r.points} pts · ${r.games} PJ</div>`
+  ).join('');
+}
+
+async function importBulk() {
+  const raw    = document.getElementById('bulk-paste-area').value;
+  const team   = document.getElementById('bulk-team-select').value;
+  const btn    = document.getElementById('bulk-import-btn');
+  const status = document.getElementById('bulk-status');
+
+  if (!raw.trim()) { showToast('⚠ Pega datos primero'); return; }
+  if (!team)       { showToast('⚠ Selecciona el equipo destino'); return; }
+
+  const rows = parseBulkRows(raw);
+  if (!rows.length) { showToast('⚠ No hay filas válidas para importar'); return; }
+
+  btn.textContent = '⏳ Importando...';
+  btn.disabled = true;
+
+  const payload = rows.map(r => ({
+    name:     r.name,
+    team:     team,
+    number:   r.number,
+    points:   r.points,
+    games:    r.games,
+    position: null,
+  }));
+
+  const { error } = await _supabase.from(divCfg().playersTable).insert(payload);
+
+  btn.textContent = '⬆ Importar todos';
+  btn.disabled = false;
+
+  if (error) {
+    showToast('⚠ Error al importar: ' + error.message);
+    status.className = 'bulk-status err';
+    status.textContent = '⚠ Error: ' + error.message;
+    return;
+  }
+
+  document.getElementById('bulk-paste-area').value = '';
+  document.getElementById('bulk-preview').classList.remove('show');
+  status.className = 'bulk-status ok';
+  status.textContent = `✓ ${rows.length} jugador${rows.length>1?'es':''} importado${rows.length>1?'s':''} correctamente.`;
+
+  await renderPlayersAdminList();
+  showToast(`✓ ${rows.length} jugadores importados`);
 }
 
 /* ══ ADMIN ══ */
@@ -1495,9 +1752,9 @@ function populateAdminSelects() {
     const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
     sel.innerHTML+=`<option value="${g.id}">J${g.round} · ${h} vs ${a}</option>`;
   });
-  ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team'].forEach(sid=>{
+  ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team','bulk-team-select'].forEach(sid=>{
     const s=document.getElementById(sid); if(!s) return;
-    s.innerHTML = sid==='pl-filter-team' ? '<option value="">— Todos los equipos —</option>' : '';
+    s.innerHTML = (sid==='pl-filter-team') ? '<option value="">— Todos los equipos —</option>' : '';
     Object.entries(teams).forEach(([id,t])=>{ s.innerHTML+=`<option value="${id}">${t.name}</option>`; });
   });
   document.getElementById('ng-round').value=divCfg().round;
