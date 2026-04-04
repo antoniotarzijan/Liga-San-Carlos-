@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playoffs · Liga San Carlos 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-primary:   #f80808;
+      --color-secondary: #3009dc;
+      --color-accent:    #f2b34e;
+      --color-bg:        #08090C;
+      --color-bg2:       #111318;
+      --color-card:      #161920;
+      --color-text:      #E8EAF0;
+      --color-muted:     #6B7280;
+      --color-border:    rgba(255,255,255,0.07);
+      --red:    #f80808;
+      --blue:   #3009dc;
+      --gold:   #f2b34e;
+      --dark:   #08090C;
+      --dark2:  #111318;
+      --card:   #161920;
+      --text:   #E8EAF0;
+      --muted:  #6B7280;
+      --border: rgba(255,255,255,0.07);
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size: 180px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 clamp(16px,5vw,80px);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,9,12,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; }
+    .nav-logo span { color: var(--red); }
+    .nav-back {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      transition: all .15s;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+    .nav-div-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .div-tab {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 2px;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+    .div-tab.primera { background: rgba(248,8,8,.12); color: var(--red); border: 1px solid rgba(248,8,8,.25); }
+    .div-tab.segunda { background: rgba(48,9,220,.12); color: #4e7fff; border: 1px solid rgba(48,9,220,.25); }
+    .div-tab.active.primera { background: var(--red); color: #fff; }
+    .div-tab.active.segunda { background: var(--blue); color: #fff; }
+
+    /* ── HERO STRIP ── */
+    .playoff-hero {
+      position: relative;
+      z-index: 1;
+      padding: 100px clamp(16px,5vw,80px) 40px;
+      text-align: center;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(248,8,8,.15), transparent 65%);
+      border-bottom: 1px solid var(--border);
+    }
+    .playoff-hero.segunda-active {
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(48,9,220,.15), transparent 65%);
+    }
+    .playoff-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .playoff-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(42px, 7vw, 88px);
+      letter-spacing: 2px;
+      line-height: .95;
+    }
+    .playoff-title .accent-red { color: var(--red); }
+    .playoff-title .accent-blue { color: #4e7fff; }
+    .playoff-div-sub {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(16px, 2.5vw, 24px);
+      letter-spacing: 4px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .playoff-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 16px;
+      padding: 8px 18px;
+      border-radius: 99px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .pill-pending {
+      background: rgba(107,114,128,.12);
+      border: 1px solid rgba(107,114,128,.25);
+      color: var(--muted);
+    }
+    .pill-active {
+      background: rgba(248,8,8,.12);
+      border: 1px solid rgba(248,8,8,.3);
+      color: var(--red);
+    }
+    .pill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .pill-active .pill-dot { animation: pulse 1.2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* ── MAIN CONTAINER ── */
+    main { position: relative; z-index: 1; }
+
+    .bracket-page {
+      padding: 40px clamp(12px,3vw,60px) 80px;
+    }
+
+    /* ── ROUND LABELS ROW ── */
+    .bracket-rounds-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+    .round-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      flex: 1;
+    }
+    .round-label.champion { color: var(--gold); }
+
+    /* ── BRACKET LAYOUT ── */
+    .bracket-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+
+    /* Each round column */
+    .bracket-col {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 160px;
+      position: relative;
+    }
+
+    /* Connector lines column */
+    .connector-col {
+      width: 28px;
+      flex-shrink: 0;
+      position: relative;
+      align-self: stretch;
+    }
+
+    /* Spacer to vertically center matchups */
+    .bracket-spacer { flex: 1; }
+
+    /* ── MATCHUP CARD ── */
+    .matchup {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 0 4px;
+      transition: border-color .2s;
+      position: relative;
+    }
+    .matchup:hover { border-color: rgba(255,255,255,.18); }
+    .matchup.semifinal { border-color: rgba(248,8,8,.2); }
+    .matchup.final     { border-color: rgba(242,179,78,.3); }
+    .matchup.champion-match { border-color: rgba(242,179,78,.5); }
+
+    .matchup-round-tag {
+      padding: 5px 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .matchup.semifinal .matchup-round-tag { color: rgba(248,8,8,.7); }
+    .matchup.final .matchup-round-tag { color: var(--gold); }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0;
+      border-bottom: 1px solid var(--border);
+      min-height: 44px;
+      position: relative;
+    }
+    .team-row:last-child { border-bottom: none; }
+    .team-row.winner { background: rgba(74,222,128,.04); }
+    .team-row.loser  { background: transparent; }
+
+    .team-seed {
+      width: 24px;
+      height: 100%;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .team-row.winner .team-seed { color: var(--gold); background: rgba(242,179,78,.07); border-right-color: rgba(242,179,78,.15); }
+
+    .team-logo-sm {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 6px;
+    }
+    .team-logo-sm img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .team-logo-placeholder {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 8px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .team-name-bracket {
+      flex: 1;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .3px;
+      padding: 0 8px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .team-row.winner .team-name-bracket { color: var(--text); }
+    .team-row.loser .team-name-bracket  { color: var(--muted); }
+    .team-row.tbd .team-name-bracket    { color: rgba(107,114,128,.4); font-style: italic; }
+
+    .team-score-bracket {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      line-height: 1;
+      width: 36px;
+      text-align: center;
+      flex-shrink: 0;
+      padding: 0 4px;
+    }
+    .team-row.winner .team-score-bracket { color: var(--text); }
+    .team-row.loser .team-score-bracket  { color: var(--muted); }
+    .team-row.tbd .team-score-bracket    { color: rgba(107,114,128,.2); font-size: 14px; }
+
+    .winner-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(74,222,128,.2);
+      border: 1px solid rgba(74,222,128,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      margin-right: 6px;
+      flex-shrink: 0;
+      color: #4ADE80;
+    }
+
+    /* ── CHAMPION CARD ── */
+    .champion-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    .champion-card {
+      background: linear-gradient(135deg, rgba(242,179,78,.1), rgba(242,179,78,.04));
+      border: 1px solid rgba(242,179,78,.35);
+      border-radius: 8px;
+      padding: 24px 20px;
+      text-align: center;
+      margin: 4px;
+      position: relative;
+      overflow: hidden;
+      min-width: 140px;
+    }
+    .champion-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(242,179,78,.15), transparent 65%);
+    }
+    .champion-trophy {
+      font-size: 32px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .champion-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .champion-logo {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .champion-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .champion-logo-placeholder {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      color: #fff;
+      opacity: .6;
+    }
+    .champion-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--gold);
+      position: relative;
+      z-index: 1;
+    }
+    .champion-tbd {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      color: rgba(242,179,78,.3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── CONNECTOR SVG LINES ── */
+    .bracket-svg-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .connector-line {
+      fill: none;
+      stroke: rgba(255,255,255,.08);
+      stroke-width: 1.5;
+    }
+
+    /* ── LEGEND ── */
+    .bracket-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+      padding: 16px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── ADMIN SECTION ── */
+    #playoff-admin {
+      display: none;
+      background: var(--dark2);
+      border-top: 1px solid var(--border);
+    }
+    #playoff-admin.open { display: block; }
+    .padmin-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 36px clamp(16px,4vw,48px);
+    }
+    .padmin-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .padmin-title span { color: var(--red); }
+    .padmin-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .padmin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    .padmin-matchup-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .padmin-matchup-header {
+      padding: 10px 14px;
+      background: rgba(255,255,255,.04);
+      border-bottom: 1px solid var(--border);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .padmin-matchup-body { padding: 14px; }
+    .padmin-row {
+      display: grid;
+      grid-template-columns: 1fr 60px;
+      gap: 10px;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .padmin-row:last-child { border-bottom: none; }
+    .padmin-team-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .padmin-select {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: 13px;
+      outline: none;
+    }
+    .padmin-select:focus { border-color: rgba(255,255,255,.2); }
+    .padmin-select option { background: var(--dark2); }
+    .padmin-score-input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px;
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .padmin-score-input::-webkit-outer-spin-button,
+    .padmin-score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .padmin-score-input:focus { border-color: rgba(255,255,255,.2); }
+    .padmin-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-red  { background: var(--red); color: #fff; }
+    .btn-red:hover  { background: #c8001a; }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-gold:hover { background: #e0951f; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--muted); }
+    .btn-outline:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+
+    /* Modal contraseña */
+    #ppwd-modal {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,.9);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+    }
+    #ppwd-modal.open { display: flex; }
+    .ppwd-box {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+    }
+    .ppwd-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; margin-bottom:4px; }
+    .ppwd-sub   { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    .ppwd-input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size:15px;
+      letter-spacing:3px;
+      text-align:center;
+      outline:none;
+      margin-bottom:8px;
+    }
+    .ppwd-err { font-size:12px; color:var(--red); min-height:14px; margin-bottom:8px; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+    .pwd-shake { animation: shake .4s ease; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #4ADE80; color: #000;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700; font-size: 13px;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 12px 24px; border-radius: 4px;
+      transition: transform .3s; z-index: 9999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .admin-toggle-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .admin-toggle-btn:hover { border-color: rgba(255,255,255,.2); color: var(--text); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .bracket-col { min-width: 130px; }
+      .team-name-bracket { font-size: 11px; }
+      .team-score-bracket { font-size: 18px; width: 30px; }
+      .padmin-grid { grid-template-columns: 1fr; }
+      .nav-logo { font-size: 17px; }
+    }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeUp .5s ease both; }
+  </style>
+</head>
+<body>
+
+<!-- ══ MODAL CONTRASEÑA ══ -->
+<div id="ppwd-modal">
+  <div class="ppwd-box">
+    <div style="font-size:30px;margin-bottom:10px;">🔒</div>
+    <div class="ppwd-title">Admin · Playoffs</div>
+    <div class="ppwd-sub">Contraseña para gestionar el bracket</div>
+    <input type="password" class="ppwd-input" id="ppwd-input"
+      placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')checkPPwd()"
+      oninput="document.getElementById('ppwd-err').textContent=''" />
+    <div class="ppwd-err" id="ppwd-err"></div>
+    <button class="btn btn-red" style="width:100%;margin-bottom:8px;" onclick="checkPPwd()">Entrar →</button>
+    <button class="btn btn-outline" style="width:100%;" onclick="document.getElementById('ppwd-modal').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-logo">LSC<span>·</span>2026</div>
+  <div class="nav-div-tabs">
+    <button class="div-tab primera active" id="tab-btn-primera" onclick="switchDiv('primera')">1° División</button>
+    <button class="div-tab segunda" id="tab-btn-segunda" onclick="switchDiv('segunda')">2° División</button>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="admin-toggle-btn" onclick="openAdminModal()">⚙ Admin</button>
+    <a href="index.html" class="nav-back">← Volver</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="playoff-hero fade-in" id="playoff-hero">
+  <div class="playoff-eyebrow">🏆 Liga San Carlos · Temporada 2026</div>
+  <div class="playoff-title">CUADRO DE <span class="accent-red" id="hero-accent">PLAYOFFS</span></div>
+  <div class="playoff-div-sub" id="hero-div-sub">Primera División</div>
+  <div class="playoff-status-pill pill-pending" id="status-pill">
+    <span class="pill-dot"></span>
+    <span id="status-text">Fase regular en curso</span>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main>
+  <div class="bracket-page" id="bracket-container">
+    <!-- Bracket renders here -->
+  </div>
+
+  <!-- ══ PANEL ADMIN PLAYOFFS ══ -->
+  <div id="playoff-admin">
+    <div class="padmin-wrap">
+      <div class="padmin-title">Panel <span>Playoffs</span></div>
+      <div class="padmin-subtitle" id="padmin-div-label">Gestión del cuadro — Primera División</div>
+      <div class="padmin-grid" id="padmin-grid"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button class="btn btn-outline" onclick="closeAdminPanel()">Cerrar panel</button>
+        <button class="btn btn-gold" onclick="saveAllMatchups()">💾 Guardar todo</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════
+   CONFIG — mirrors index.html CONFIG
+═══════════════════════════════════════════ */
+const CONFIG = {
+  divisions: {
+    primera: {
+      label: 'Primera División',
+      playoffTable: 'playoffs',
+      teams: {
+        EXMAN: { abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
+        ANANA: { abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/añaña.png' },
+        OLDDS: { abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
+        INGUC: { abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
+        TRO:   { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
+        SWD:   { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png' },
+        OWLS:  { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png' },
+        SAL:   { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
+        BAR:   { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png' },
+      },
+    },
+    segunda: {
+      label: 'Segunda División',
+      playoffTable: 'playoffs_segunda',
+      teams: {
+        T2A: { abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
+        T2B: { abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
+        T2C: { abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png' },
+        T2D: { abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png' },
+        T2E: { abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png' },
+        T2F: { abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusqueños.png' },
+        T2G: { abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
+        T2H: { abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
+        T2I: { abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png' },
+      },
+    },
+  },
+};
+
+const ADMIN_PWD    = 'lsc2026';
+const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ── State ── */
+let activeDivision = 'primera';
+// bracket data: array of 15 matchups
+// IDs:  QF: 1-4 (Q1..Q4), SF: 5-6 (S1..S2), F: 7 (Final), 3P: 8 (3er puesto)
+// Structure: { id, round, slot, team1, team2, score1, score2, winner }
+let bracketData = {}; // keyed by division
+
+const divCfg   = () => CONFIG.divisions[activeDivision];
+const divTeams = () => divCfg().teams;
+
+/* ── Bracket structure definition ── */
+// 8 teams, 3 rounds: QF (4 games), SF (2 games), F (1 game) + 3rd place
+const BRACKET_STRUCTURE = [
+  // Quarterfinals
+  { id: 'QF1', round: 'QF', slot: 0, label: 'Cuartos de Final 1', seeds: [1, 8] },
+  { id: 'QF2', round: 'QF', slot: 1, label: 'Cuartos de Final 2', seeds: [4, 5] },
+  { id: 'QF3', round: 'QF', slot: 2, label: 'Cuartos de Final 3', seeds: [3, 6] },
+  { id: 'QF4', round: 'QF', slot: 3, label: 'Cuartos de Final 4', seeds: [2, 7] },
+  // Semifinals
+  { id: 'SF1', round: 'SF', slot: 0, label: 'Semifinal 1', seeds: [] },
+  { id: 'SF2', round: 'SF', slot: 1, label: 'Semifinal 2', seeds: [] },
+  // Final
+  { id: 'F1', round: 'F', slot: 0, label: 'Gran Final', seeds: [] },
+];
+
+/* ── Load data from Supabase ── */
+async function loadBracket(div) {
+  const table = CONFIG.divisions[div].playoffTable;
+  const { data, error } = await _sb.from(table).select('*').order('slot');
+  if (error || !data || data.length === 0) {
+    // Init default structure
+    bracketData[div] = BRACKET_STRUCTURE.map(m => ({
+      ...m, team1: null, team2: null, score1: null, score2: null, winner: null,
+    }));
+  } else {
+    bracketData[div] = BRACKET_STRUCTURE.map(m => {
+      const row = data.find(r => r.match_id === m.id);
+      return row
+        ? { ...m, team1: row.team1 || null, team2: row.team2 || null,
+            score1: row.score1 ?? null, score2: row.score2 ?? null,
+            winner: row.winner || null }
+        : { ...m, team1: null, team2: null, score1: null, score2: null, winner: null };
+    });
+  }
+}
+
+async function saveBracket(div) {
+  const table = CONFIG.divisions[div].playoffTable;
+  const rows = bracketData[div].map(m => ({
+    match_id: m.id, round: m.round, slot: m.slot,
+    team1: m.team1, team2: m.team2,
+    score1: m.score1, score2: m.score2, winner: m.winner,
+  }));
+  const { error } = await _sb.from(table).upsert(rows, { onConflict: 'match_id' });
+  if (error) { showToast('⚠ Error: ' + error.message); return false; }
+  return true;
+}
+
+/* ── Switch division ── */
+async function switchDiv(div) {
+  activeDivision = div;
+  document.getElementById('tab-btn-primera').classList.toggle('active', div === 'primera');
+  document.getElementById('tab-btn-segunda').classList.toggle('active', div === 'segunda');
+
+  const hero = document.getElementById('playoff-hero');
+  hero.classList.toggle('segunda-active', div === 'segunda');
+
+  document.getElementById('hero-accent').textContent = 'PLAYOFFS';
+  document.getElementById('hero-div-sub').textContent = divCfg().label;
+  document.getElementById('hero-accent').style.color = div === 'primera' ? 'var(--red)' : '#4e7fff';
+
+  if (!bracketData[div]) {
+    document.getElementById('bracket-container').innerHTML =
+      '<p style="text-align:center;padding:60px;color:var(--muted);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:2px;text-transform:uppercase;">Cargando bracket...</p>';
+    await loadBracket(div);
+  }
+  renderBracket();
+  updateStatus();
+}
+
+/* ── Status pill ── */
+function updateStatus() {
+  const data = bracketData[activeDivision];
+  if (!data) return;
+  const finalMatch = data.find(m => m.id === 'F1');
+  const pill = document.getElementById('status-pill');
+  const txt  = document.getElementById('status-text');
+  if (finalMatch && finalMatch.winner) {
+    pill.className = 'playoff-status-pill pill-active';
+    const t = divTeams()[finalMatch.winner];
+    txt.textContent = `🏆 Campeón: ${t ? t.name : finalMatch.winner}`;
+  } else {
+    const anyResult = data.some(m => m.winner);
+    pill.className = 'playoff-status-pill ' + (anyResult ? 'pill-active' : 'pill-pending');
+    txt.textContent = anyResult ? 'Playoffs en curso' : 'Fase regular en curso';
+  }
+}
+
+/* ── Logo helper ── */
+function teamLogoSmall(teamId) {
+  const t = divTeams()[teamId];
+  if (!t) return `<div style="width:28px;height:28px;"></div>`;
+  if (t.logo) return `<div class="team-logo-sm"><img src="${t.logo}" alt="${t.abbr}" onerror="this.onerror=null;this.style.display='none'"></div>`;
+  return `<div class="team-logo-sm"><div class="team-logo-placeholder" style="background:${t.color}">${t.abbr.slice(0,3)}</div></div>`;
+}
+
+/* ── Render a single matchup card ── */
+function renderMatchup(m, cls = '') {
+  const teams = divTeams();
+
+  const renderTeamRow = (teamId, score, isWinner, seed) => {
+    const t = teams[teamId];
+    const rowCls = !teamId ? 'tbd' : isWinner ? 'winner' : (m.winner ? 'loser' : '');
+    const name = t ? t.name : (teamId ? teamId : 'Por definir');
+    const scoreVal = score !== null && score !== undefined ? score : '-';
+    const check = isWinner ? '<div class="winner-check">✓</div>' : '<div style="width:22px;flex-shrink:0;"></div>';
+    return `<div class="team-row ${rowCls}">
+      <div class="team-seed">${seed || '·'}</div>
+      ${teamId ? teamLogoSmall(teamId) : '<div style="width:28px;height:28px;margin:0 6px;"></div>'}
+      <div class="team-name-bracket">${name}</div>
+      ${check}
+      <div class="team-score-bracket">${scoreVal}</div>
+    </div>`;
+  };
+
+  const isFinal = m.id === 'F1';
+  const is3P    = m.id === '3P';
+  const isSF    = m.round === 'SF';
+  const cardCls = isFinal ? 'final champion-match' : isSF ? 'semifinal' : '';
+
+  return `<div class="matchup ${cardCls} ${cls}">
+    <div class="matchup-round-tag">${m.label}</div>
+    ${renderTeamRow(m.team1, m.score1, m.winner === m.team1, m.seeds?.[0])}
+    ${renderTeamRow(m.team2, m.score2, m.winner === m.team2, m.seeds?.[1])}
+  </div>`;
+}
+
+/* ── Main bracket render ── */
+function renderBracket() {
+  const data    = bracketData[activeDivision];
+  if (!data) return;
+  const teams   = divTeams();
+
+  const qf = data.filter(m => m.round === 'QF');
+  const sf = data.filter(m => m.round === 'SF');
+  const f  = data.find(m => m.round === 'F');
+
+  const finalWinner = f && f.winner ? teams[f.winner] : null;
+
+  const html = `
+    <div class="bracket-rounds-header">
+      <div class="round-label">Cuartos de Final</div>
+      <div class="round-label" style="width:28px;max-width:28px;"></div>
+      <div class="round-label">Semifinales</div>
+      <div class="round-label" style="width:28px;max-width:28px;"></div>
+      <div class="round-label champion">Final</div>
+      <div class="round-label" style="width:28px;max-width:28px;"></div>
+    </div>
+
+    <div class="bracket-wrap" id="bracket-wrap">
+      <!-- QF Column -->
+      <div class="bracket-col" id="col-qf">
+        ${[qf[0], null, qf[1]].map((m, i) => m
+          ? `<div class="bracket-spacer"></div>${renderMatchup(m)}<div class="bracket-spacer"></div>`
+          : `<div style="flex:1;min-height:20px;"></div>`
+        ).join('')}
+      </div>
+
+      <!-- QF → SF connector -->
+      <div class="connector-col" id="conn-qf-sf" style="position:relative;">
+        <svg class="bracket-svg-lines" id="svg-left" style="width:28px;height:100%;"></svg>
+      </div>
+
+      <!-- SF Column top half -->
+      <div class="bracket-col" id="col-sf-top">
+        <div class="bracket-spacer"></div>
+        ${sf[0] ? renderMatchup(sf[0]) : ''}
+        <div style="flex:2;"></div>
+      </div>
+
+      <!-- SF → F connector left -->
+      <div class="connector-col" style="position:relative;">
+        <svg class="bracket-svg-lines" id="svg-mid-l" style="width:28px;height:100%;"></svg>
+      </div>
+
+      <!-- FINAL + Champion -->
+      <div class="bracket-col" style="min-width:160px;">
+        <div class="bracket-spacer"></div>
+        ${f ? renderMatchup(f) : ''}
+        <!-- Champion display -->
+        <div class="champion-wrap" style="margin-top:12px;">
+          <div class="champion-card">
+            <div class="champion-trophy">🏆</div>
+            <div class="champion-label">Campeón</div>
+            ${finalWinner
+              ? `<div class="champion-logo">${finalWinner.logo ? `<img src="${finalWinner.logo}" alt="${finalWinner.name}">` : `<div class="champion-logo-placeholder" style="background:${finalWinner.color}">${finalWinner.abbr}</div>`}</div><div class="champion-name">${finalWinner.name}</div>`
+              : `<div class="champion-tbd">Por definir</div>`
+            }
+          </div>
+        </div>
+        <div class="bracket-spacer"></div>
+      </div>
+
+      <!-- F → SF connector right -->
+      <div class="connector-col" style="position:relative;">
+        <svg class="bracket-svg-lines" id="svg-mid-r" style="width:28px;height:100%;"></svg>
+      </div>
+
+      <!-- SF Column bottom half -->
+      <div class="bracket-col" id="col-sf-bot">
+        <div style="flex:2;"></div>
+        ${sf[1] ? renderMatchup(sf[1]) : ''}
+        <div class="bracket-spacer"></div>
+      </div>
+
+      <!-- SF → QF right connector -->
+      <div class="connector-col" id="conn-sf-qf" style="position:relative;">
+        <svg class="bracket-svg-lines" id="svg-right" style="width:28px;height:100%;"></svg>
+      </div>
+
+      <!-- QF right column -->
+      <div class="bracket-col" id="col-qf-r">
+        ${[qf[2], null, qf[3]].map((m, i) => m
+          ? `<div class="bracket-spacer"></div>${renderMatchup(m)}<div class="bracket-spacer"></div>`
+          : `<div style="flex:1;min-height:20px;"></div>`
+        ).join('')}
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="bracket-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#4ADE80;"></span>Ganador de serie</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--gold);"></span>Líder de llave</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--red);opacity:.5;"></span>Semifinalista</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--gold);opacity:.8;"></span>Finalista</div>
+    </div>
+  `;
+
+  document.getElementById('bracket-container').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════════ */
+function openAdminModal() {
+  document.getElementById('ppwd-input').value = '';
+  document.getElementById('ppwd-err').textContent = '';
+  document.getElementById('ppwd-modal').classList.add('open');
+  setTimeout(() => document.getElementById('ppwd-input').focus(), 100);
+}
+
+function checkPPwd() {
+  if (document.getElementById('ppwd-input').value === ADMIN_PWD) {
+    document.getElementById('ppwd-modal').classList.remove('open');
+    openAdminPanel();
+  } else {
+    const box = document.querySelector('.ppwd-box');
+    document.getElementById('ppwd-err').textContent = 'Contraseña incorrecta';
+    box.classList.remove('pwd-shake'); void box.offsetWidth; box.classList.add('pwd-shake');
+    document.getElementById('ppwd-input').value = '';
+    document.getElementById('ppwd-input').focus();
+  }
+}
+
+function openAdminPanel() {
+  document.getElementById('padmin-div-label').textContent =
+    `Gestión del cuadro — ${divCfg().label}`;
+  renderAdminPanel();
+  document.getElementById('playoff-admin').classList.add('open');
+  document.getElementById('playoff-admin').scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeAdminPanel() {
+  document.getElementById('playoff-admin').classList.remove('open');
+}
+
+function renderAdminPanel() {
+  const data   = bracketData[activeDivision] || [];
+  const teams  = divTeams();
+  const teamOptions = '<option value="">— Por definir —</option>' +
+    Object.entries(teams).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
+
+  const grid = document.getElementById('padmin-grid');
+  grid.innerHTML = data.map(m => `
+    <div class="padmin-matchup-card" id="padmin-${m.id}">
+      <div class="padmin-matchup-header">
+        <span>${m.label}</span>
+        ${m.id === 'F1' ? '<span style="color:var(--gold)">🏆</span>' : ''}
+      </div>
+      <div class="padmin-matchup-body">
+        <div class="padmin-row">
+          <select class="padmin-select" id="pm-t1-${m.id}" onchange="patchMatch('${m.id}','team1',this.value)">
+            ${teamOptions}
+          </select>
+          <input type="number" class="padmin-score-input" id="pm-s1-${m.id}"
+            placeholder="–" min="0"
+            oninput="patchMatch('${m.id}','score1',this.value)" />
+        </div>
+        <div class="padmin-row">
+          <select class="padmin-select" id="pm-t2-${m.id}" onchange="patchMatch('${m.id}','team2',this.value)">
+            ${teamOptions}
+          </select>
+          <input type="number" class="padmin-score-input" id="pm-s2-${m.id}"
+            placeholder="–" min="0"
+            oninput="patchMatch('${m.id}','score2',this.value)" />
+        </div>
+        <div class="padmin-row" style="border-bottom:none;margin-top:4px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Ganador</div>
+          <select class="padmin-select" id="pm-w-${m.id}" onchange="patchMatch('${m.id}','winner',this.value)" style="grid-column:1/-1;width:100%;margin-top:6px;">
+            <option value="">— Sin definir —</option>
+            ${Object.entries(teams).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Fill current values
+  data.forEach(m => {
+    const t1 = document.getElementById(`pm-t1-${m.id}`);
+    const t2 = document.getElementById(`pm-t2-${m.id}`);
+    const s1 = document.getElementById(`pm-s1-${m.id}`);
+    const s2 = document.getElementById(`pm-s2-${m.id}`);
+    const w  = document.getElementById(`pm-w-${m.id}`);
+    if (t1) t1.value = m.team1 || '';
+    if (t2) t2.value = m.team2 || '';
+    if (s1) s1.value = m.score1 !== null ? m.score1 : '';
+    if (s2) s2.value = m.score2 !== null ? m.score2 : '';
+    if (w)  w.value  = m.winner || '';
+  });
+}
+
+function patchMatch(id, field, value) {
+  const data = bracketData[activeDivision];
+  if (!data) return;
+  const m = data.find(x => x.id === id);
+  if (!m) return;
+  if (field === 'score1' || field === 'score2') {
+    m[field] = value === '' ? null : +value;
+  } else {
+    m[field] = value || null;
+  }
+}
+
+async function saveAllMatchups() {
+  const ok = await saveBracket(activeDivision);
+  if (ok) {
+    renderBracket();
+    updateStatus();
+    showToast('✓ Bracket guardado');
+  }
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── Init ── */
+(async () => {
+  await loadBracket('primera');
+  renderBracket();
+  updateStatus();
+})();
+</script>
+</body>
+</html>
