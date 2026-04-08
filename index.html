@@ -336,18 +336,30 @@
     .filter-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
     .filter-btn:hover:not(.active){border-color:rgba(255,255,255,.2);color:var(--text);}
 
-    /* ── MODAL CONTRASEÑA ── */
-    #pwd-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;}
-    #pwd-modal.open{display:flex;}
-    .pwd-box{background:var(--card);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:36px 32px;width:100%;max-width:340px;text-align:center;}
-    .pwd-icon{font-size:36px;margin-bottom:12px;}
-    .pwd-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:6px;}
-    .pwd-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
-    .pwd-input-wrap{position:relative;margin-bottom:10px;}
-    .pwd-input-wrap input{padding-right:44px;letter-spacing:3px;font-size:16px;text-align:center;}
-    .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:0;}
-    .pwd-error{font-size:12px;color:var(--red);margin-bottom:12px;min-height:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
-    .pwd-shake{animation:shake .4s ease;}
+    /* ══════════════════════════════════════════
+       MODAL LOGIN (reemplaza el modal de contraseña)
+       ══════════════════════════════════════════ */
+    #login-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;}
+    #login-modal.open{display:flex;}
+    .login-box{background:var(--card);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:36px 32px;width:100%;max-width:360px;text-align:center;}
+    .login-icon{font-size:36px;margin-bottom:12px;}
+    .login-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:6px;}
+    .login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+    .login-form-group{margin-bottom:14px;text-align:left;}
+    .login-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .login-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:4px;padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+    .login-input:focus{border-color:rgba(255,255,255,.25);}
+    .login-input-wrap{position:relative;}
+    .login-input-wrap .login-input{padding-right:44px;}
+    .login-pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:0;}
+    .login-error{font-size:12px;color:var(--red);margin-bottom:12px;min-height:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;text-align:left;}
+    .login-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;width:100%;margin-bottom:10px;}
+    .login-btn-primary{background:var(--red);color:#fff;}
+    .login-btn-primary:hover{background:#c8001a;}
+    .login-btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+    .login-btn-outline{background:none;border:1px solid var(--border);color:var(--muted);}
+    .login-btn-outline:hover{border-color:rgba(255,255,255,.25);color:var(--text);}
+    .login-shake{animation:shake .4s ease;}
     @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 
     /* ── PANEL ADMIN ── */
@@ -357,9 +369,13 @@
     .admin-top{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
     .admin-top h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
     .admin-top h2 span{color:var(--red);}
+    .admin-top-right{display:flex;align-items:center;gap:10px;}
     .admin-div-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:2px;}
     .admin-div-label.primera{background:rgba(248,8,8,.15);color:var(--red);border:1px solid rgba(248,8,8,.3);}
     .admin-div-label.segunda{background:rgba(48,9,220,.15);color:#8b7fef;border:1px solid rgba(48,9,220,.3);}
+    /* ── BOTÓN LOGOUT ── */
+    .admin-logout-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:3px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#F87171;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+    .admin-logout-btn:hover{background:rgba(248,113,113,.18);border-color:rgba(248,113,113,.5);}
     .admin-close{background:none;border:1px solid var(--border);color:var(--muted);font-size:18px;width:36px;height:36px;border-radius:4px;cursor:pointer;transition:all .15s;}
     .admin-close:hover{border-color:var(--red);color:var(--red);}
     .admin-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
@@ -557,8 +573,9 @@
       .bulk-actions{flex-direction:column;}
       .bulk-actions .btn{width:100%;}
       .edit-box{padding:20px 16px;}
-      #pwd-modal .pwd-box{padding:28px 20px;}
+      #login-modal .login-box{padding:28px 20px;}
       .player-score-row{grid-template-columns:1fr 80px;}
+      .admin-logout-btn{font-size:10px;padding:5px 10px;}
     }
     @media(max-width:380px){
       .hero-title{font-size:clamp(44px,13vw,64px);}
@@ -600,19 +617,32 @@
   </div>
 </div>
 
-<!-- ══ MODAL CONTRASEÑA ══ -->
-<div id="pwd-modal">
-  <div class="pwd-box">
-    <div class="pwd-icon">🔒</div>
-    <div class="pwd-title">Área Admin</div>
-    <div class="pwd-sub">Ingresa la contraseña para continuar</div>
-    <div class="pwd-input-wrap">
-      <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()" oninput="document.getElementById('pwd-err').textContent=''" />
-      <button class="pwd-toggle" onclick="togglePwdVis()">👁</button>
+<!-- ══════════════════════════════════════════
+     MODAL LOGIN (reemplaza el modal de contraseña)
+     ══════════════════════════════════════════ -->
+<div id="login-modal">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">Área Admin</div>
+    <div class="login-sub">Ingresa tus credenciales de administrador</div>
+    <div class="login-form-group">
+      <label class="login-label" for="login-email">Correo electrónico</label>
+      <input class="login-input" type="email" id="login-email" placeholder="admin@ligasancarlos.cl"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()"
+        oninput="clearLoginError()" />
     </div>
-    <div class="pwd-error" id="pwd-err"></div>
-    <button class="btn btn-red" style="width:100%;" onclick="checkPwd()">Entrar →</button>
-    <button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="closePwdModal()">Cancelar</button>
+    <div class="login-form-group">
+      <label class="login-label" for="login-pwd">Contraseña</label>
+      <div class="login-input-wrap">
+        <input class="login-input" type="password" id="login-pwd" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')submitLogin()"
+          oninput="clearLoginError()" />
+        <button class="login-pwd-toggle" onclick="toggleLoginPwd()" type="button">👁</button>
+      </div>
+    </div>
+    <div class="login-error" id="login-err"></div>
+    <button class="login-btn login-btn-primary" id="login-submit-btn" onclick="submitLogin()">Entrar →</button>
+    <button class="login-btn login-btn-outline" onclick="closeLoginModal()">Cancelar</button>
   </div>
 </div>
 
@@ -718,7 +748,13 @@
         <h2>Panel <span>Admin</span></h2>
         <span class="admin-div-label" id="admin-div-label">—</span>
       </div>
-      <button class="admin-close" onclick="closeAdmin()">✕</button>
+      <!-- Botones logout + cerrar -->
+      <div class="admin-top-right">
+        <button class="admin-logout-btn" onclick="logoutAdmin()" title="Cerrar sesión">
+          <span>⏻</span> Salir
+        </button>
+        <button class="admin-close" onclick="closeAdmin()">✕</button>
+      </div>
     </div>
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchTab('tab-result')">🏀 Resultado</button>
@@ -953,6 +989,9 @@
 </main>
 
 <script>
+/* ══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN
+══════════════════════════════════════════════════════════════ */
 const CONFIG = {
   league: {
     name:'Liga San Carlos', abbr:'LSC', season:'2026', country:'', flag:'🇨🇱',
@@ -995,11 +1034,42 @@ const CONFIG = {
   },
 };
 
-const ADMIN_PWD    = 'lsc2026';
+/* ══════════════════════════════════════════════════════════════
+   SUPABASE + AUTH
+══════════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
-const _supabase    = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* UID del único administrador autorizado */
+const ADMIN_UID = 'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c';
+
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* Estado de sesión actual */
+let _currentSession = null;
+
+/* Verifica si la sesión activa corresponde al admin autorizado */
+function isAdmin() {
+  return _currentSession?.user?.id === ADMIN_UID;
+}
+
+/* Escucha cambios de sesión (login / logout / refresh de token) */
+_supabase.auth.onAuthStateChange((event, session) => {
+  _currentSession = session;
+  if (event === 'SIGNED_OUT') {
+    closeAdmin();
+  }
+});
+
+/* Al cargar la página, recupera la sesión existente (si la hay) */
+(async () => {
+  const { data } = await _supabase.auth.getSession();
+  _currentSession = data.session;
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   ESTADO GLOBAL
+══════════════════════════════════════════════════════════════ */
 let activeDivision  = 'primera';
 let STATE           = { games:[] };
 let editingId       = null;
@@ -1283,7 +1353,6 @@ function renderGames() {
         </div>
       </div>`;
 
-    /* PARTIDO FINALIZADO — clic abre el detalle */
     const homeWon=+g.homeScore>+g.awayScore;
     return `
       <div class="game-card finished reveal" onclick="openGameDetail(${g.id})">
@@ -1335,7 +1404,6 @@ async function openGameDetail(gameId) {
   const home=teams[g.home], away=teams[g.away];
   const homeWon=+g.homeScore>+g.awayScore;
 
-  /* Buscar stats en game_stats */
   const {data:stats}=await _supabase
     .from('game_stats').select('*')
     .eq('game_id',gameId).eq('division',activeDivision)
@@ -1346,13 +1414,11 @@ async function openGameDetail(gameId) {
   const awayStats=statsData.filter(s=>s.team===g.away).sort((a,b)=>b.points-a.points);
   const hasStats=statsData.length>0;
 
-  /* Logo inline */
   const teamLogoHTML=(team)=>{
     if (team?.logo) return `<img src="${team.logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">`;
     return `<div style="width:100%;height:100%;border-radius:8px;background:${team?.color||'#333'}44;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#fff;">${team?.abbr||'?'}</div>`;
   };
 
-  /* Fila de jugador */
   const playerRowHTML=(s,isMvp)=>{
     const pts=s.points||0;
     const numLabel=s.player_number!=null?`<span style="font-size:11px;color:#6B7280;min-width:24px;text-align:center;font-family:'Barlow Condensed',sans-serif;">#${s.player_number}</span>`:'<span style="min-width:24px;display:inline-block;"></span>';
@@ -1382,8 +1448,6 @@ async function openGameDetail(gameId) {
 
   content.innerHTML=`
     <div style="height:4px;background:linear-gradient(90deg,#f80808 50%,#3009dc 50%);"></div>
-
-    <!-- Header info -->
     <div style="padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
         <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">Jornada ${g.round} · ${divCfg().label}</div>
@@ -1391,8 +1455,6 @@ async function openGameDetail(gameId) {
       </div>
       <div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4ADE80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:4px 10px;border-radius:3px;flex-shrink:0;">✓ Finalizado</div>
     </div>
-
-    <!-- Marcador -->
     <div style="padding:18px 18px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
         <div style="display:flex;align-items:center;gap:12px;">
@@ -1422,8 +1484,6 @@ async function openGameDetail(gameId) {
         </div>
       </div>`:''}
     </div>
-
-    <!-- Estadísticas por jugador -->
     ${hasStats?`
     <div style="border-top:1px solid rgba(255,255,255,.08);">
       <div style="padding:10px 16px 4px;display:flex;align-items:center;justify-content:space-between;">
@@ -1435,8 +1495,6 @@ async function openGameDetail(gameId) {
     <div style="padding:20px;text-align:center;border-top:1px solid rgba(255,255,255,.08);">
       <div style="color:#6B7280;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;">No hay estadísticas por jugador registradas para este partido.</div>
     </div>`}
-
-    <!-- Footer con botón compartir -->
     <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:center;">
       <button onclick="event.stopPropagation();closeGameDetail();setTimeout(()=>openShareModal(${g.id}),150);"
         style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 22px;border-radius:3px;background:rgba(242,179,78,.1);border:1px solid rgba(242,179,78,.3);color:#f2b34e;cursor:pointer;transition:all .2s;">
@@ -1650,8 +1708,218 @@ function renderFooter(){
 }
 
 /* ══════════════════════════════════════════════════════════════
-   PUNTOS POR JUGADOR (admin)
+   AUTH — LOGIN MODAL
 ══════════════════════════════════════════════════════════════ */
+
+/** Abre el modal de login de Supabase Auth */
+function openAdmin() {
+  // Si ya hay sesión válida del admin, abre directo el panel
+  if (isAdmin()) {
+    openAdminPanel();
+    return;
+  }
+  // Si hay sesión pero no es el admin autorizado, rechaza
+  if (_currentSession) {
+    showToast('⚠ Tu cuenta no tiene permisos de administrador');
+    return;
+  }
+  // Sin sesión: muestra el formulario de login
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('login-submit-btn').disabled = false;
+  document.getElementById('login-submit-btn').textContent = 'Entrar →';
+  document.getElementById('login-modal').classList.add('open');
+  setTimeout(() => document.getElementById('login-email').focus(), 100);
+}
+/* ══ MODO ADMIN POR URL (?admin) ══ */
+(function checkAdminUrlParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('admin')) {
+    // Limpia el parámetro de la URL sin recargar la página
+    const cleanUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, '', cleanUrl);
+    // Espera a que el DOM y la sesión estén listos
+    window.addEventListener('load', () => {
+      setTimeout(openAdmin, 400);
+    });
+  }
+})();
+
+function closeLoginModal() {
+  document.getElementById('login-modal').classList.remove('open');
+}
+
+function clearLoginError() {
+  document.getElementById('login-err').textContent = '';
+}
+
+function toggleLoginPwd() {
+  const inp = document.getElementById('login-pwd');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+async function submitLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pwd   = document.getElementById('login-pwd').value;
+  const btn   = document.getElementById('login-submit-btn');
+  const errEl = document.getElementById('login-err');
+
+  if (!email || !pwd) {
+    errEl.textContent = 'Completa ambos campos';
+    shakeLoginBox();
+    return;
+  }
+
+  // Estado de carga
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  errEl.textContent = '';
+
+  const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pwd });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Entrar →';
+    errEl.textContent = 'Correo o contraseña incorrectos';
+    shakeLoginBox();
+    document.getElementById('login-pwd').value = '';
+    document.getElementById('login-pwd').focus();
+    return;
+  }
+
+  // Login exitoso — verificar UID
+  _currentSession = data.session;
+
+  if (!isAdmin()) {
+    // Cerrar sesión inmediatamente si no es el admin autorizado
+    await _supabase.auth.signOut();
+    _currentSession = null;
+    btn.disabled = false;
+    btn.textContent = 'Entrar →';
+    errEl.textContent = 'No tienes permisos de administrador';
+    shakeLoginBox();
+    return;
+  }
+
+  // Todo OK: cerrar modal y abrir panel
+  closeLoginModal();
+  openAdminPanel();
+}
+
+function shakeLoginBox() {
+  const box = document.querySelector('.login-box');
+  box.classList.remove('login-shake');
+  void box.offsetWidth; // reflow para reiniciar animación
+  box.classList.add('login-shake');
+}
+
+/** Cierra sesión de Supabase y cierra el panel admin */
+async function logoutAdmin() {
+  await _supabase.auth.signOut();
+  _currentSession = null;
+  closeAdmin();
+  showToast('✓ Sesión cerrada');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════════════════════════════ */
+function openAdminPanel() {
+  // Doble chequeo de seguridad antes de mostrar el panel
+  if (!isAdmin()) {
+    showToast('⚠ Acceso denegado');
+    return;
+  }
+  const lbl = document.getElementById('admin-div-label');
+  lbl.textContent = activeDivision === 'primera' ? '1° División' : '2° División';
+  lbl.className   = `admin-div-label ${activeDivision}`;
+  populateAdminSelects();
+  renderAdminLists();
+  document.getElementById('admin-round-input').value = divCfg().round;
+  document.getElementById('admin-panel').classList.add('open');
+}
+
+function closeAdmin() {
+  document.getElementById('admin-panel').classList.remove('open');
+}
+
+function saveRound(){
+  const val=+document.getElementById('admin-round-input').value;
+  if(!val||val<1){showToast('⚠ Ingresa un número válido');return;}
+  divCfg().round=val;
+  renderHero();renderStandings();renderGames();
+  showToast(`✓ Jornada actual: J${val}`);
+}
+
+function switchTab(id){
+  const tabIds=['tab-result','tab-games','tab-results','tab-roster','tab-news','tab-photos','tab-sanctions'];
+  document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',tabIds[i]===id));
+  document.querySelectorAll('.admin-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='tab-roster') renderPlayersAdminList();
+  if(id==='tab-news') renderNewsAdminList();
+  if(id==='tab-photos') renderPhotosAdminList();
+  if(id==='tab-sanctions') renderSanctionsAdminList();
+}
+
+function populateAdminSelects(){
+  const teams=divTeams();
+  const sel=document.getElementById('res-game-select');
+  sel.innerHTML='<option value="">— Selecciona partido —</option>';
+  STATE.games.filter(g=>g.type==='upcoming'||g.type==='live').forEach(g=>{
+    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
+    sel.innerHTML+=`<option value="${g.id}">J${g.round} · ${h} vs ${a}</option>`;
+  });
+  ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team','bulk-team-select'].forEach(sid=>{
+    const s=document.getElementById(sid);if(!s) return;
+    s.innerHTML=(sid==='pl-filter-team')?'<option value="">— Todos los equipos —</option>':'';
+    Object.entries(teams).forEach(([id,t])=>{s.innerHTML+=`<option value="${id}">${t.name}</option>`;});
+  });
+  document.getElementById('ng-round').value=divCfg().round;
+  document.getElementById('ng-venue').selectedIndex=0;
+}
+
+function renderAdminLists(){
+  const teams=divTeams();
+  const upList=document.getElementById('upcoming-admin-list');
+  const upcoming=STATE.games.filter(g=>g.type==='upcoming'||g.type==='live');
+  upList.innerHTML=upcoming.length?upcoming.map(g=>{
+    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
+    return `<div class="game-admin-item">
+      <div class="game-admin-item-info">
+        <div class="game-admin-item-teams">J${g.round} · ${h} vs ${a}</div>
+        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="tag-upcoming">⏳ PRÓXIMO</span></div>
+      </div>
+      <div class="game-admin-actions">
+        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteGame(${g.id})">✕</button>
+      </div>
+    </div>`;
+  }).join(''):'<p style="color:var(--muted);font-size:13px;">No hay partidos próximos.</p>';
+
+  const resList=document.getElementById('results-admin-list');
+  const finished=STATE.games.filter(g=>g.type==='finished');
+  resList.innerHTML=finished.length?finished.map(g=>{
+    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
+    const homeWon=+g.homeScore>+g.awayScore;
+    return `<div class="game-admin-item is-finished">
+      <div class="game-admin-item-info">
+        <div class="game-admin-item-teams">
+          J${g.round} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
+          <strong style="color:var(--gold);margin:0 6px;">${g.homeScore}–${g.awayScore}</strong>
+          <span style="color:${!homeWon?'#4ADE80':'var(--muted)'}">${a}</span>
+        </div>
+        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue}${g.mvp?' · ⭐ '+g.mvp:''} · <span class="tag-finished">✓ FINALIZADO</span></div>
+      </div>
+      <div class="game-admin-actions">
+        <button class="btn btn-blue" style="padding:6px 12px;font-size:11px;" onclick="openEditModal(${g.id})">✏ Editar</button>
+        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteGame(${g.id})">✕</button>
+      </div>
+    </div>`;
+  }).join(''):'<p style="color:var(--muted);font-size:13px;">Aún no hay resultados cargados.</p>';
+}
+
+/* ══ PUNTOS POR JUGADOR (admin) ══ */
 async function loadPlayerScoringUI(homeId,awayId,homeContainerId,awayContainerId){
   const teams=divTeams();
   const homeTeam=teams[homeId], awayTeam=teams[awayId];
@@ -1837,111 +2105,7 @@ async function importBulk(){
   showToast(`✓ ${rows.length} jugadores importados`);
 }
 
-/* ══ ADMIN ══ */
-function openAdmin(){
-  document.getElementById('pwd-input').value='';
-  document.getElementById('pwd-err').textContent='';
-  document.getElementById('pwd-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('pwd-input').focus(),100);
-}
-function closePwdModal(){document.getElementById('pwd-modal').classList.remove('open');}
-function togglePwdVis(){const i=document.getElementById('pwd-input');i.type=i.type==='password'?'text':'password';}
-function checkPwd(){
-  if(document.getElementById('pwd-input').value===ADMIN_PWD){closePwdModal();openAdminPanel();}
-  else{
-    const box=document.querySelector('.pwd-box');
-    document.getElementById('pwd-err').textContent='Contraseña incorrecta';
-    box.classList.remove('pwd-shake');void box.offsetWidth;box.classList.add('pwd-shake');
-    document.getElementById('pwd-input').value='';
-    document.getElementById('pwd-input').focus();
-  }
-}
-
-function openAdminPanel(){
-  const lbl=document.getElementById('admin-div-label');
-  lbl.textContent=activeDivision==='primera'?'1° División':'2° División';
-  lbl.className=`admin-div-label ${activeDivision}`;
-  populateAdminSelects();renderAdminLists();
-  document.getElementById('admin-round-input').value=divCfg().round;
-  document.getElementById('admin-panel').classList.add('open');
-}
-function closeAdmin(){document.getElementById('admin-panel').classList.remove('open');}
-
-function saveRound(){
-  const val=+document.getElementById('admin-round-input').value;
-  if(!val||val<1){showToast('⚠ Ingresa un número válido');return;}
-  divCfg().round=val;
-  renderHero();renderStandings();renderGames();
-  showToast(`✓ Jornada actual: J${val}`);
-}
-
-function switchTab(id){
-  const tabIds=['tab-result','tab-games','tab-results','tab-roster','tab-news','tab-photos','tab-sanctions'];
-  document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',tabIds[i]===id));
-  document.querySelectorAll('.admin-pane').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='tab-roster') renderPlayersAdminList();
-  if(id==='tab-news') renderNewsAdminList();
-  if(id==='tab-photos') renderPhotosAdminList();
-  if(id==='tab-sanctions') renderSanctionsAdminList();
-}
-
-function populateAdminSelects(){
-  const teams=divTeams();
-  const sel=document.getElementById('res-game-select');
-  sel.innerHTML='<option value="">— Selecciona partido —</option>';
-  STATE.games.filter(g=>g.type==='upcoming'||g.type==='live').forEach(g=>{
-    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
-    sel.innerHTML+=`<option value="${g.id}">J${g.round} · ${h} vs ${a}</option>`;
-  });
-  ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team','bulk-team-select'].forEach(sid=>{
-    const s=document.getElementById(sid);if(!s) return;
-    s.innerHTML=(sid==='pl-filter-team')?'<option value="">— Todos los equipos —</option>':'';
-    Object.entries(teams).forEach(([id,t])=>{s.innerHTML+=`<option value="${id}">${t.name}</option>`;});
-  });
-  document.getElementById('ng-round').value=divCfg().round;
-  document.getElementById('ng-venue').selectedIndex=0;
-}
-
-function renderAdminLists(){
-  const teams=divTeams();
-  const upList=document.getElementById('upcoming-admin-list');
-  const upcoming=STATE.games.filter(g=>g.type==='upcoming'||g.type==='live');
-  upList.innerHTML=upcoming.length?upcoming.map(g=>{
-    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
-    return `<div class="game-admin-item">
-      <div class="game-admin-item-info">
-        <div class="game-admin-item-teams">J${g.round} · ${h} vs ${a}</div>
-        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="tag-upcoming">⏳ PRÓXIMO</span></div>
-      </div>
-      <div class="game-admin-actions">
-        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteGame(${g.id})">✕</button>
-      </div>
-    </div>`;
-  }).join(''):'<p style="color:var(--muted);font-size:13px;">No hay partidos próximos.</p>';
-
-  const resList=document.getElementById('results-admin-list');
-  const finished=STATE.games.filter(g=>g.type==='finished');
-  resList.innerHTML=finished.length?finished.map(g=>{
-    const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
-    const homeWon=+g.homeScore>+g.awayScore;
-    return `<div class="game-admin-item is-finished">
-      <div class="game-admin-item-info">
-        <div class="game-admin-item-teams">
-          J${g.round} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
-          <strong style="color:var(--gold);margin:0 6px;">${g.homeScore}–${g.awayScore}</strong>
-          <span style="color:${!homeWon?'#4ADE80':'var(--muted)'}">${a}</span>
-        </div>
-        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue}${g.mvp?' · ⭐ '+g.mvp:''} · <span class="tag-finished">✓ FINALIZADO</span></div>
-      </div>
-      <div class="game-admin-actions">
-        <button class="btn btn-blue" style="padding:6px 12px;font-size:11px;" onclick="openEditModal(${g.id})">✏ Editar</button>
-        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteGame(${g.id})">✕</button>
-      </div>
-    </div>`;
-  }).join(''):'<p style="color:var(--muted);font-size:13px;">Aún no hay resultados cargados.</p>';
-}
-
+/* ══ FILL SCORE FORM ══ */
 async function fillScoreForm(){
   const id=+document.getElementById('res-game-select').value;
   const g=STATE.games.find(x=>x.id===id);
@@ -1968,7 +2132,7 @@ async function fillScoreForm(){
   document.getElementById('mvp-preview').style.display='none';
 }
 
-/* ══ GUARDAR RESULTADO (con game_stats) ══ */
+/* ══ GUARDAR RESULTADO ══ */
 async function saveResult(){
   const id=+document.getElementById('res-game-select').value;
   if(!id){showToast('⚠ Selecciona un partido');return;}
@@ -1980,46 +2144,35 @@ async function saveResult(){
   const date=document.getElementById('res-date').value;
   const manualMvp=document.getElementById('sf-mvp').value.trim();
 
-  /* Recoger puntos por jugador */
   const homeScores=collectPlayerScores('home',_scoringHomePlayers);
   const awayScores=collectPlayerScores('away',_scoringAwayPlayers);
-
-  /* MVP automático */
   const autoMvp=calcMvp(homeScores,awayScores);
   const mvpFinal=manualMvp||(autoMvp?autoMvp.name:null);
 
-  /* 1. Guardar resultado del partido */
   const {error:gameErr}=await _supabase.from(divCfg().dbTable).update({
     type:'finished',home_score:+hs,away_score:+as,
     ...(date&&{date}),mvp:mvpFinal||null,
   }).eq('id',id);
   if(gameErr){showToast('⚠ Error: '+gameErr.message);return;}
 
-  /* 2. Guardar stats por jugador en game_stats */
   const statsPayload=[
     ...homeScores.filter(s=>s.played||s.pts>0).map(s=>({
-      game_id:id, player_id:s.id, player_name:s.name,
-      player_number:s.number, team:game.home,
-      points:s.pts, played:s.played, division:activeDivision,
+      game_id:id,player_id:s.id,player_name:s.name,
+      player_number:s.number,team:game.home,
+      points:s.pts,played:s.played,division:activeDivision,
     })),
     ...awayScores.filter(s=>s.played||s.pts>0).map(s=>({
-      game_id:id, player_id:s.id, player_name:s.name,
-      player_number:s.number, team:game.away,
-      points:s.pts, played:s.played, division:activeDivision,
+      game_id:id,player_id:s.id,player_name:s.name,
+      player_number:s.number,team:game.away,
+      points:s.pts,played:s.played,division:activeDivision,
     })),
   ];
   if(statsPayload.length>0){
-    /* Eliminar stats anteriores de este partido (por si se re-guarda) */
-    console.log('activeDivision:', activeDivision);
-console.log('id del partido:', id);
-console.log('statsPayload:', statsPayload);
-
     await _supabase.from('game_stats').delete().eq('game_id',id).eq('division',activeDivision);
     const {error:statsErr}=await _supabase.from('game_stats').insert(statsPayload);
     if(statsErr) console.warn('Error guardando game_stats:',statsErr.message);
   }
 
-  /* 3. Actualizar estadísticas acumuladas de cada jugador */
   const playersWithActivity=[...homeScores,...awayScores].filter(s=>s.played||s.pts>0);
   if(playersWithActivity.length>0){
     showToast('⏳ Actualizando estadísticas...');
@@ -2032,7 +2185,6 @@ console.log('statsPayload:', statsPayload);
     }
   }
 
-  /* 4. Resetear formulario */
   await loadState();
   document.getElementById('score-form').style.display='none';
   document.getElementById('player-scoring-section').style.display='none';
@@ -2304,6 +2456,7 @@ async function deleteSanction(id){
   await renderSanctions();await renderSanctionsAdminList();showToast('Sanción eliminada');
 }
 
+/* ══ REVEAL ANIMATIONS ══ */
 function activateReveal(){
   const io=new IntersectionObserver(entries=>{
     entries.forEach((e,i)=>{
