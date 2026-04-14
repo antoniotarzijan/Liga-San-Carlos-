@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil Jugador · Liga San Carlos</title>
+  <link rel="icon" type="image/png" href="images/logo liga.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red:    #f80808;
+      --blue:   #3009dc;
+      --gold:   #f2b34e;
+      --dark:   #08090C;
+      --dark2:  #111318;
+      --card:   #161920;
+      --card2:  #1c2029;
+      --text:   #E8EAF0;
+      --muted:  #6B7280;
+      --border: rgba(255,255,255,0.07);
+      --green:  #4ADE80;
+      --scarlet:#F87171;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family:'Barlow',sans-serif;
+      background:var(--dark);
+      color:var(--text);
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+    body::before {
+      content:'';
+      position:fixed; inset:0; z-index:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size:180px; pointer-events:none; opacity:0.6;
+    }
+
+    /* NAV */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      padding:0 clamp(16px,6vw,120px); height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(8,9,12,0.9); backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo {
+      font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px;
+      text-decoration:none; color:var(--text);
+    }
+    .nav-logo span { color:var(--red); }
+    .nav-back {
+      display:flex; align-items:center; gap:8px;
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:12px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); text-decoration:none;
+      padding:7px 14px; border:1px solid var(--border); border-radius:3px;
+      transition:all .15s;
+    }
+    .nav-back:hover { color:var(--text); border-color:rgba(255,255,255,.2); }
+
+    /* MAIN */
+    main { position:relative; z-index:1; padding-top:64px; }
+
+    /* HERO JUGADOR */
+    .player-hero {
+      position:relative; overflow:hidden;
+      padding:60px clamp(24px,8vw,120px) 48px;
+      background:linear-gradient(135deg, rgba(248,8,8,.08) 0%, transparent 50%),
+                 linear-gradient(225deg, rgba(48,9,220,.08) 0%, transparent 50%),
+                 var(--dark2);
+      border-bottom:1px solid var(--border);
+    }
+    .player-hero-bg-num {
+      position:absolute; right:-20px; top:50%; transform:translateY(-50%);
+      font-family:'Bebas Neue',sans-serif; font-size:clamp(180px,22vw,280px);
+      color:rgba(255,255,255,.03); letter-spacing:-10px; line-height:1;
+      pointer-events:none; user-select:none;
+    }
+    .player-hero-inner {
+      position:relative; z-index:1;
+      display:flex; align-items:center; gap:36px; flex-wrap:wrap;
+    }
+    .player-avatar {
+      width:clamp(80px,12vw,120px); height:clamp(80px,12vw,120px);
+      border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(28px,4vw,48px); color:#fff;
+      border:3px solid rgba(255,255,255,.1);
+      position:relative; overflow:hidden;
+    }
+    .player-avatar-initials { position:relative; z-index:1; }
+    .player-info { flex:1; min-width:200px; }
+    .player-division-badge {
+      display:inline-block;
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:10px; letter-spacing:3px; text-transform:uppercase;
+      padding:3px 10px; border-radius:2px; margin-bottom:10px;
+    }
+    .player-division-badge.primera {
+      background:rgba(248,8,8,.12); color:var(--red);
+      border:1px solid rgba(248,8,8,.25);
+    }
+    .player-division-badge.segunda {
+      background:rgba(48,9,220,.12); color:#8b7fef;
+      border:1px solid rgba(48,9,220,.25);
+    }
+    .player-name {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(40px,7vw,80px); line-height:.9;
+      letter-spacing:1px; margin-bottom:10px;
+    }
+    .player-meta {
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+      font-family:'Barlow Condensed',sans-serif; font-size:13px;
+      color:var(--muted); letter-spacing:1px;
+    }
+    .player-meta-team {
+      display:flex; align-items:center; gap:8px;
+    }
+    .player-meta-team img {
+      width:22px; height:22px; object-fit:contain;
+    }
+    .player-meta-dot { opacity:.3; }
+    .player-number-badge {
+      font-family:'Bebas Neue',sans-serif; font-size:20px;
+      color:var(--gold); letter-spacing:1px;
+    }
+
+    /* STATS STRIP */
+    .stats-strip {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:1px; background:var(--border);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .stat-box {
+      background:var(--dark2); padding:28px 20px;
+      text-align:center; position:relative; overflow:hidden;
+    }
+    .stat-box::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    }
+    .stat-box:first-child::before { background:var(--gold); }
+    .stat-box:nth-child(2)::before { background:var(--red); }
+    .stat-box:nth-child(3)::before { background:var(--blue); }
+    .stat-box:nth-child(4)::before { background:var(--green); }
+    .stat-box-num {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(36px,5vw,52px); line-height:1;
+    }
+    .stat-box:first-child .stat-box-num { color:var(--gold); }
+    .stat-box:nth-child(2) .stat-box-num { color:var(--red); }
+    .stat-box:nth-child(3) .stat-box-num { color:#8b7fef; }
+    .stat-box:nth-child(4) .stat-box-num { color:var(--green); }
+    .stat-box-label {
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); margin-top:6px;
+    }
+
+    /* CONTENIDO */
+    .content { padding:clamp(40px,6vw,80px) clamp(24px,8vw,120px); }
+
+    /* SECCIÓN HEADER */
+    .sec-header {
+      display:flex; align-items:baseline; gap:16px;
+      margin-bottom:24px; flex-wrap:wrap;
+    }
+    .sec-title {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(28px,4vw,40px); letter-spacing:1px;
+    }
+    .sec-tag {
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:11px; letter-spacing:3px; text-transform:uppercase;
+      color:var(--red); padding:3px 9px;
+      border:1px solid var(--red); border-radius:2px;
+    }
+    .sec-line { flex:1; height:1px; background:var(--border); }
+
+    /* TABLA DE PARTIDOS */
+    .games-table {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:6px; overflow:hidden;
+    }
+    .games-table-header {
+      display:grid;
+      grid-template-columns:60px 1fr 1fr 80px 80px 80px;
+      padding:12px 20px;
+      background:rgba(255,255,255,.04);
+      border-bottom:1px solid var(--border);
+      gap:8px;
+    }
+    .games-table-header span {
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); text-align:center;
+    }
+    .games-table-header span:nth-child(2),
+    .games-table-header span:nth-child(3) { text-align:left; }
+
+    .game-row {
+      display:grid;
+      grid-template-columns:60px 1fr 1fr 80px 80px 80px;
+      padding:14px 20px; gap:8px;
+      border-bottom:1px solid var(--border);
+      align-items:center; transition:background .15s;
+      position:relative;
+    }
+    .game-row:last-child { border-bottom:none; }
+    .game-row:hover { background:rgba(255,255,255,.03); }
+    .game-row.best-game::before {
+      content:''; position:absolute; left:0; top:0; bottom:0;
+      width:3px; background:var(--gold);
+    }
+
+    .gr-round {
+      font-family:'Bebas Neue',sans-serif; font-size:22px;
+      color:var(--muted); text-align:center;
+    }
+    .gr-date {
+      font-family:'Barlow Condensed',sans-serif; font-size:13px;
+      color:var(--muted); margin-top:2px;
+    }
+    .gr-opponent {
+      display:flex; align-items:center; gap:10px;
+    }
+    .gr-opp-logo {
+      width:32px; height:32px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .gr-opp-logo img { width:100%; height:100%; object-fit:contain; }
+    .gr-opp-name {
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:15px;
+    }
+    .gr-result {
+      font-family:'Barlow Condensed',sans-serif; font-weight:700;
+      font-size:14px; text-align:center;
+    }
+    .gr-result.win { color:var(--green); }
+    .gr-result.loss { color:var(--scarlet); }
+    .gr-score {
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:13px; color:var(--muted); text-align:center;
+    }
+    .gr-pts {
+      font-family:'Bebas Neue',sans-serif; font-size:28px;
+      text-align:center; line-height:1;
+    }
+    .gr-pts.high { color:var(--gold); }
+    .gr-pts.mid  { color:var(--text); }
+    .gr-pts.low  { color:var(--muted); }
+
+    /* GRÁFICO DE BARRAS */
+    .chart-wrap {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:6px; padding:28px 24px;
+      margin-bottom:40px;
+    }
+    .chart-bars {
+      display:flex; align-items:flex-end;
+      gap:8px; height:120px; margin-top:16px;
+    }
+    .bar-col {
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; gap:6px; height:100%;
+      justify-content:flex-end;
+    }
+    .bar-val {
+      font-family:'Bebas Neue',sans-serif; font-size:16px;
+      color:var(--text); line-height:1;
+    }
+    .bar-fill {
+      width:100%; border-radius:3px 3px 0 0;
+      transition:height .4s ease;
+      min-height:4px;
+    }
+    .bar-label {
+      font-family:'Barlow Condensed',sans-serif; font-size:11px;
+      color:var(--muted); letter-spacing:1px; margin-top:4px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:100%; text-align:center;
+    }
+
+    /* EMPTY */
+    .empty-state {
+      padding:60px; text-align:center;
+      color:var(--muted);
+      font-family:'Barlow Condensed',sans-serif;
+      font-size:14px; letter-spacing:2px; text-transform:uppercase;
+    }
+    .empty-state-icon { font-size:40px; margin-bottom:16px; opacity:.4; }
+
+    /* LOADING */
+    #loading-screen {
+      position:fixed; inset:0; z-index:999;
+      background:var(--dark);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+    }
+    .loading-logo {
+      font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px;
+    }
+    .loading-logo span { color:var(--red); }
+    .loading-bar {
+      width:160px; height:2px; background:rgba(255,255,255,.08);
+      border-radius:2px; overflow:hidden;
+    }
+    .loading-bar-fill {
+      height:100%; background:var(--red);
+      animation:loadBar 1s ease infinite;
+      border-radius:2px;
+    }
+    @keyframes loadBar {
+      0%   { width:0%; margin-left:0; }
+      50%  { width:60%; margin-left:20%; }
+      100% { width:0%; margin-left:100%; }
+    }
+
+    /* ERROR */
+    #error-screen {
+      display:none; position:fixed; inset:0; z-index:998;
+      background:var(--dark);
+      align-items:center; justify-content:center; flex-direction:column;
+      gap:16px; text-align:center; padding:24px;
+    }
+    #error-screen.show { display:flex; }
+    .error-icon { font-size:48px; }
+    .error-title {
+      font-family:'Bebas Neue',sans-serif; font-size:32px;
+      letter-spacing:1px;
+    }
+    .error-sub { font-size:14px; color:var(--muted); max-width:320px; }
+
+    /* ANIMATIONS */
+    .fade-in {
+      opacity:0; transform:translateY(20px);
+      animation:fadeIn .5s ease forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity:1; transform:translateY(0); }
+    }
+    .fade-in:nth-child(1) { animation-delay:.05s; }
+    .fade-in:nth-child(2) { animation-delay:.1s; }
+    .fade-in:nth-child(3) { animation-delay:.15s; }
+    .fade-in:nth-child(4) { animation-delay:.2s; }
+
+    /* MOBILE */
+    @media(max-width:768px) {
+      nav { padding:0 16px; }
+      .player-hero { padding:40px 16px 32px; }
+      .player-hero-inner { gap:20px; }
+      .player-name { font-size:clamp(34px,10vw,56px); }
+      .stats-strip { grid-template-columns:repeat(2,1fr); }
+      .content { padding:32px 16px; }
+      .games-table-header,
+      .game-row {
+        grid-template-columns:44px 1fr 80px 70px;
+      }
+      .games-table-header span:nth-child(3),
+      .games-table-header span:nth-child(5),
+      .game-row>*:nth-child(3),
+      .game-row>*:nth-child(5) { display:none; }
+      .gr-pts { font-size:22px; }
+      .chart-bars { height:90px; gap:5px; }
+      .bar-val { font-size:13px; }
+      .bar-label { font-size:10px; }
+    }
+    @media(max-width:420px) {
+      .games-table-header,
+      .game-row { grid-template-columns:36px 1fr 64px; }
+      .games-table-header span:nth-child(4),
+      .game-row>*:nth-child(4) { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-logo">LSC<span>·</span>2026</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+
+<!-- ERROR -->
+<div id="error-screen">
+  <div class="error-icon">⚠</div>
+  <div class="error-title">Jugador no encontrado</div>
+  <div class="error-sub">No se encontró información para este jugador. Verifica el enlace o regresa al inicio.</div>
+  <a href="index.html" style="margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;background:var(--red);color:#fff;border-radius:3px;text-decoration:none;">← Volver al inicio</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">LSC<span>·</span>2026</a>
+  <a href="javascript:history.back()" class="nav-back">← Volver</a>
+</nav>
+
+<main id="main-content" style="display:none;">
+
+  <!-- HERO -->
+  <div class="player-hero" id="player-hero">
+    <div class="player-hero-bg-num" id="hero-bg-num"></div>
+    <div class="player-hero-inner">
+      <div class="player-avatar" id="player-avatar">
+        <div class="player-avatar-initials" id="player-initials">?</div>
+      </div>
+      <div class="player-info">
+        <div class="player-division-badge" id="division-badge">—</div>
+        <div class="player-name" id="player-name">—</div>
+        <div class="player-meta" id="player-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="stat-box fade-in">
+      <div class="stat-box-num" id="stat-ppg">—</div>
+      <div class="stat-box-label">Puntos por partido</div>
+    </div>
+    <div class="stat-box fade-in">
+      <div class="stat-box-num" id="stat-total">—</div>
+      <div class="stat-box-label">Puntos totales</div>
+    </div>
+    <div class="stat-box fade-in">
+      <div class="stat-box-num" id="stat-gp">—</div>
+      <div class="stat-box-label">Partidos jugados</div>
+    </div>
+    <div class="stat-box fade-in">
+      <div class="stat-box-num" id="stat-best">—</div>
+      <div class="stat-box-label">Mejor partido</div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="content">
+
+    <!-- GRÁFICO -->
+    <div id="chart-section" style="display:none;">
+      <div class="sec-header">
+        <h2 class="sec-title">Evolución</h2>
+        <span class="sec-tag">Puntos por partido</span>
+        <div class="sec-line"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE PARTIDOS -->
+    <div class="sec-header">
+      <h2 class="sec-title">Historial</h2>
+      <span class="sec-tag" id="games-count-tag">0 Partidos</span>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="games-table" id="games-table">
+      <div class="games-table-header">
+        <span>J</span>
+        <span>Rival</span>
+        <span>Resultado</span>
+        <span>Marcador</span>
+        <span>Resultado</span>
+        <span>PTS</span>
+      </div>
+      <div id="games-rows">
+        <div class="empty-state">
+          <div class="empty-state-icon">🏀</div>
+          Cargando partidos...
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   CONFIG — debe coincidir con index.html
+══════════════════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const DIVISIONS = {
+  primera: {
+    label:'Primera División',
+    playersTable:'players',
+    gamesTable:'games',
+  },
+  segunda: {
+    label:'Segunda División',
+    playersTable:'players_segunda',
+    gamesTable:'games_segunda',
+  },
+};
+
+const TEAMS = {
+  /* Primera */
+  EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
+  ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
+  OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
+  INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
+  TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
+  SWD:  { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png' },
+  OWLS: { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png' },
+  SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
+  BAR:  { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png' },
+  /* Segunda */
+  T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
+  T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
+  T2C:{ abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png' },
+  T2D:{ abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png' },
+  T2E:{ abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png' },
+  T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png' },
+  T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
+  T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
+  T2I:{ abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png' },
+};
+
+/* ══ PARAMS ══ */
+const params   = new URLSearchParams(location.search);
+const playerId = params.get('id');
+const division = params.get('div') || 'primera';
+const divCfg   = DIVISIONS[division] || DIVISIONS.primera;
+
+function hide(id)  { const el=document.getElementById(id); if(el) el.style.display='none'; }
+function show(id,d){ const el=document.getElementById(id); if(el) el.style.display=d||'block'; }
+
+function getInitials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+/* ══ MAIN LOAD ══ */
+async function loadPlayer() {
+  if (!playerId) { showError(); return; }
+
+  /* 1. Datos del jugador */
+  const { data: player, error: pErr } = await _sb
+    .from(divCfg.playersTable).select('*').eq('id', playerId).single();
+
+  if (pErr || !player) { showError(); return; }
+
+  /* 2. game_stats del jugador */
+  const { data: stats } = await _sb
+    .from('game_stats')
+    .select('*')
+    .eq('player_id', playerId)
+    .eq('division', division)
+    .order('game_id', { ascending: true });
+
+  const playerStats = stats || [];
+
+  /* 3. Partidos para cruzar info (local/visita/marcador) */
+  let gameIds = playerStats.map(s => s.game_id);
+  let games   = [];
+  if (gameIds.length > 0) {
+    const { data: gData } = await _sb
+      .from(divCfg.gamesTable)
+      .select('*')
+      .in('id', gameIds);
+    games = gData || [];
+  }
+
+  /* Render */
+  renderHero(player);
+  renderStats(player, playerStats);
+  renderChart(playerStats, games);
+  renderGames(player, playerStats, games);
+
+  hide('loading-screen');
+  show('main-content');
+}
+
+function showError() {
+  hide('loading-screen');
+  show('error-screen');
+  document.getElementById('error-screen').classList.add('show');
+}
+
+/* ══ RENDER HERO ══ */
+function renderHero(player) {
+  const team    = TEAMS[player.team] || {};
+  const initials = getInitials(player.name);
+  const color   = team.color || '#333';
+
+  /* Avatar */
+  const avatar = document.getElementById('player-avatar');
+  avatar.style.background = color + '33';
+  avatar.style.borderColor = color + '66';
+  document.getElementById('player-initials').textContent = initials;
+
+  /* Número de fondo */
+  document.getElementById('hero-bg-num').textContent =
+    player.number != null ? `#${player.number}` : '';
+
+  /* Badge división */
+  const badge = document.getElementById('division-badge');
+  badge.textContent = divCfg.label;
+  badge.className = `player-division-badge ${division}`;
+
+  /* Nombre */
+  document.getElementById('player-name').textContent = player.name;
+
+  /* Meta */
+  const numberStr = player.number != null
+    ? `<span class="player-number-badge">#${player.number}</span> <span class="player-meta-dot">·</span>` : '';
+  const posStr = player.position
+    ? `<span>${player.position}</span> <span class="player-meta-dot">·</span>` : '';
+  const teamLogoStr = team.logo
+    ? `<img src="${team.logo}" alt="${team.abbr}" onerror="this.style.display='none'">` : '';
+
+  document.getElementById('player-meta').innerHTML = `
+    ${numberStr}
+    <div class="player-meta-team">
+      <div style="width:22px;height:22px;display:flex;align-items:center;">${teamLogoStr}</div>
+      <span>${team.name || player.team}</span>
+    </div>
+    ${posStr ? `<span class="player-meta-dot">·</span>${posStr}` : ''}
+  `;
+
+  document.title = `${player.name} · Liga San Carlos`;
+}
+
+/* ══ RENDER STATS ══ */
+function renderStats(player, stats) {
+  const gp    = player.games || 0;
+  const total = player.points || 0;
+  const ppg   = gp > 0 ? (total / gp).toFixed(1) : '0.0';
+  const best  = stats.length > 0 ? Math.max(...stats.map(s => s.points || 0)) : 0;
+
+  document.getElementById('stat-ppg').textContent   = ppg;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-gp').textContent    = gp;
+  document.getElementById('stat-best').textContent  = best > 0 ? best : '—';
+}
+
+/* ══ RENDER CHART ══ */
+function renderChart(stats, games) {
+  if (stats.length < 2) return;
+
+  const section = document.getElementById('chart-section');
+  section.style.display = 'block';
+
+  const maxPts = Math.max(...stats.map(s => s.points || 0), 1);
+  const barContainer = document.getElementById('chart-bars');
+
+  barContainer.innerHTML = stats.map(s => {
+    const g = games.find(x => x.id === s.game_id);
+    const pts = s.points || 0;
+    const pct = Math.max((pts / maxPts) * 100, 3);
+    const hue = pts >= maxPts * 0.7 ? '#f2b34e' :
+                pts >= maxPts * 0.4 ? '#E8EAF0' : '#6B7280';
+    const label = g ? `J${g.round}` : '—';
+
+    return `<div class="bar-col">
+      <div class="bar-val">${pts}</div>
+      <div class="bar-fill" style="height:${pct}%;background:${hue};"></div>
+      <div class="bar-label">${label}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ RENDER GAMES ══ */
+function renderGames(player, stats, games) {
+  const tag   = document.getElementById('games-count-tag');
+  const tbody = document.getElementById('games-rows');
+
+  if (stats.length === 0) {
+    tag.textContent = '0 Partidos';
+    tbody.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🏀</div>
+      Aún no hay partidos registrados con estadísticas.
+    </div>`;
+    return;
+  }
+
+  const maxPts = Math.max(...stats.map(s => s.points || 0), 1);
+  tag.textContent = `${stats.length} Partido${stats.length !== 1 ? 's' : ''}`;
+
+  /* Ordenar por game_id descendente (más reciente primero) */
+  const sorted = [...stats].sort((a, b) => b.game_id - a.game_id);
+
+  tbody.innerHTML = sorted.map(s => {
+    const g   = games.find(x => x.id === s.game_id);
+    const pts = s.points || 0;
+
+    /* Rival */
+    const isHome  = g ? g.home === player.team : null;
+    const rivId   = g ? (isHome ? g.away : g.home) : null;
+    const rival   = rivId ? (TEAMS[rivId] || {}) : {};
+    const rivName = rival.name || rivId || '—';
+    const rivLogo = rival.logo
+      ? `<div class="gr-opp-logo"><img src="${rival.logo}" alt="${rivName}" onerror="this.style.display='none'"></div>` : '';
+
+    /* Resultado */
+    let resultLabel = '—', resultCls = '', scoreStr = '—';
+    if (g && g.home_score != null) {
+      const hs = +g.home_score, as = +g.away_score;
+      const myScore  = isHome ? hs : as;
+      const oppScore = isHome ? as : hs;
+      const won      = myScore > oppScore;
+      resultLabel = won ? 'Victoria' : 'Derrota';
+      resultCls   = won ? 'win' : 'loss';
+      scoreStr    = `${myScore} – ${oppScore}`;
+    }
+
+    /* Color puntos */
+    const ptsCls = pts >= maxPts * 0.7 ? 'high' : pts > 0 ? 'mid' : 'low';
+    const isBest = pts === maxPts && pts > 0;
+    const roundLabel = g ? g.round : '—';
+    const dateStr  = g ? (g.date || '') : '';
+
+    return `<div class="game-row ${isBest ? 'best-game' : ''}">
+      <div>
+        <div class="gr-round">${roundLabel}</div>
+        <div class="gr-date">${dateStr}</div>
+      </div>
+      <div class="gr-opponent">
+        ${rivLogo}
+        <div class="gr-opp-name">${rivName}</div>
+      </div>
+      <div class="gr-result ${resultCls}">${resultLabel}</div>
+      <div class="gr-score">${scoreStr}</div>
+      <div class="gr-result ${resultCls}" style="font-size:12px;">${resultLabel}</div>
+      <div class="gr-pts ${ptsCls}">${pts}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ INIT ══ */
+loadPlayer().catch(() => showError());
+</script>
+</body>
+</html>
