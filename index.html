@@ -1299,7 +1299,7 @@ async function showRoster(teamId) {
     return `<div class="roster-row ${topCls}">
       <div class="roster-rank">${i+1}</div>
       <div style="display:flex;align-items:center;gap:0;">
-        <a href="player.html?id=${p.id}&div=${activeDivision}" class="roster-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color=''">${p.name}${numBadge}</a>${posBadge}
+        <a href="player.html?id=${p.id}&div=${activeDivision}" class="roster-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)onmouseout="this.style.color='inherit'">${p.name}${numBadge}</a>${posBadge}
       </div>
       <div class="roster-cell">${p.games||0}</div>
       <div class="roster-cell pts">${p.points||0}</div>
@@ -1597,7 +1597,7 @@ async function renderScorers() {
       <div class="rank">${i+1}</div>
       <div class="team-info">
         ${t?bigLogo(s.team):''}
-        <div><a href="player.html?id=${s.id}&div=${activeDivision}" class="team-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color=''">${s.name}</a>      </div>
+        <div><a href="player.html?id=${s.id}&div=${activeDivision}" class="team-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='inherit'">${s.name}</a>      </div>
       <div class="cell">${s.games}</div>
       <div class="cell">${s.points}</div>
       <div class="cell pct">${s.ppg.toFixed(1)}</div>
