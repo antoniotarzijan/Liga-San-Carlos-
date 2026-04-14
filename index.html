@@ -109,7 +109,7 @@
 
     /* ── SECTIONS ── */
     section{padding:clamp(60px,8vw,100px) clamp(24px,8vw,120px);}
-    .section-header{display:flex;align-items:baseline;gap:20px;margin-bottom:40px;}
+    .section-header{display:flex;align-items:baseline;gap:20px;margin-bottom:40px;flex-wrap:wrap;}
     .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:1px;}
     .section-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);padding:4px 10px;border:1px solid var(--red);border-radius:2px;}
     .section-line{flex:1;height:1px;background:var(--border);}
@@ -117,6 +117,10 @@
     /* ── PLAYOFF BRACKET BTN ── */
     .playoff-bracket-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.1);border:1px solid rgba(242,179,78,.3);color:var(--gold);text-decoration:none;transition:all .2s;flex-shrink:0;white-space:nowrap;}
     .playoff-bracket-btn:hover{background:rgba(242,179,78,.18);border-color:rgba(242,179,78,.55);transform:translateY(-1px);}
+
+    /* ── INSTAGRAM BTN ── */
+    .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
+    .ig-gen-btn:hover{background:rgba(242,179,78,.18);border-color:rgba(242,179,78,.55);transform:translateY(-1px);}
 
     /* ── STANDINGS ── */
     .standings-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
@@ -336,9 +340,7 @@
     .filter-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
     .filter-btn:hover:not(.active){border-color:rgba(255,255,255,.2);color:var(--text);}
 
-    /* ══════════════════════════════════════════
-       MODAL LOGIN (reemplaza el modal de contraseña)
-       ══════════════════════════════════════════ */
+    /* ══ MODAL LOGIN ══ */
     #login-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;}
     #login-modal.open{display:flex;}
     .login-box{background:var(--card);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:36px 32px;width:100%;max-width:360px;text-align:center;}
@@ -373,7 +375,6 @@
     .admin-div-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:2px;}
     .admin-div-label.primera{background:rgba(248,8,8,.15);color:var(--red);border:1px solid rgba(248,8,8,.3);}
     .admin-div-label.segunda{background:rgba(48,9,220,.15);color:#8b7fef;border:1px solid rgba(48,9,220,.3);}
-    /* ── BOTÓN LOGOUT ── */
     .admin-logout-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:3px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#F87171;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
     .admin-logout-btn:hover{background:rgba(248,113,113,.18);border-color:rgba(248,113,113,.5);}
     .admin-close{background:none;border:1px solid var(--border);color:var(--muted);font-size:18px;width:36px;height:36px;border-radius:4px;cursor:pointer;transition:all .15s;}
@@ -469,6 +470,19 @@
     .scoring-mvp-text{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;color:var(--gold);flex:1;}
     .scoring-mvp-pts{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
 
+    /* ══ MODAL TABLA INSTAGRAM ══ */
+    #instagram-modal{display:none;position:fixed;inset:0;z-index:1400;background:rgba(0,0,0,.97);backdrop-filter:blur(24px);align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:20px;overflow-y:auto;}
+    #instagram-modal.open{display:flex;}
+    #ig-canvas{width:min(480px,88vw);height:auto;border-radius:10px;display:block;box-shadow:0 8px 60px rgba(0,0,0,.8);}
+    .ig-modal-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;}
+    .ig-dl-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:4px;border:none;cursor:pointer;background:var(--gold);color:#000;transition:all .2s;display:flex;align-items:center;gap:8px;}
+    .ig-dl-btn:hover{background:#e0951f;transform:translateY(-1px);}
+    .ig-dl-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    .ig-close-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 20px;border-radius:4px;border:1px solid var(--border);cursor:pointer;background:none;color:var(--muted);transition:all .2s;}
+    .ig-close-btn:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+    .ig-hint{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-align:center;}
+    .ig-loading{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);text-align:center;padding:60px 0;}
+
     @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
@@ -491,6 +505,7 @@
       .stat-label{font-size:10px;}
       .hero-league-logo img{height:clamp(90px,22vw,130px);}
       .playoff-bracket-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
+      .ig-gen-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
       section{padding:48px 16px;}
       .section-header{flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:center;}
       .section-title{font-size:clamp(28px,8vw,40px);}
@@ -576,6 +591,8 @@
       #login-modal .login-box{padding:28px 20px;}
       .player-score-row{grid-template-columns:1fr 80px;}
       .admin-logout-btn{font-size:10px;padding:5px 10px;}
+      .ig-modal-actions{flex-direction:column;width:100%;}
+      .ig-dl-btn,.ig-close-btn{width:100%;justify-content:center;text-align:center;}
     }
     @media(max-width:380px){
       .hero-title{font-size:clamp(44px,13vw,64px);}
@@ -617,9 +634,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL LOGIN (reemplaza el modal de contraseña)
-     ══════════════════════════════════════════ -->
+<!-- ══ MODAL LOGIN ══ -->
 <div id="login-modal">
   <div class="login-box">
     <div class="login-icon">🔐</div>
@@ -740,6 +755,17 @@
   <div class="share-modal-hint">Descarga y comparte en Instagram, WhatsApp o donde quieras</div>
 </div>
 
+<!-- ══ MODAL TABLA INSTAGRAM ══ -->
+<div id="instagram-modal">
+  <div class="ig-loading" id="ig-loading">Generando tabla...</div>
+  <canvas id="ig-canvas" width="1080" height="1080" style="display:none;"></canvas>
+  <div class="ig-modal-actions" id="ig-actions" style="display:none;">
+    <button class="ig-dl-btn" id="ig-dl-btn" onclick="downloadInstagramTable()">⬇ Descargar 1080×1080</button>
+    <button class="ig-close-btn" onclick="closeInstagramModal()">Cerrar</button>
+  </div>
+  <div class="ig-hint" id="ig-hint" style="display:none;">Lista para publicar en Instagram · 1080 × 1080 px</div>
+</div>
+
 <!-- ══ PANEL ADMIN ══ -->
 <div id="admin-panel">
   <div class="admin-box">
@@ -748,7 +774,6 @@
         <h2>Panel <span>Admin</span></h2>
         <span class="admin-div-label" id="admin-div-label">—</span>
       </div>
-      <!-- Botones logout + cerrar -->
       <div class="admin-top-right">
         <button class="admin-logout-btn" onclick="logoutAdmin()" title="Cerrar sesión">
           <span>⏻</span> Salir
@@ -798,6 +823,13 @@
         <div class="admin-actions">
           <button class="btn btn-outline" onclick="closeAdmin()">Cancelar</button>
           <button class="btn btn-red" onclick="saveResult()">Guardar resultado →</button>
+        </div>
+        <!-- BOTÓN INSTAGRAM EN TAB RESULTADO -->
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+          <p class="section-subtitle" style="margin-bottom:12px;">Generar contenido para redes</p>
+          <button class="btn btn-gold" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="closeAdmin();setTimeout(openInstagramModal,200);">
+            📸 Generar tabla de posiciones para Instagram
+          </button>
         </div>
       </div>
 
@@ -1039,29 +1071,17 @@ const CONFIG = {
 ══════════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
-
-/* UID del único administrador autorizado */
 const ADMIN_UID = 'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c';
-
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* Estado de sesión actual */
 let _currentSession = null;
 
-/* Verifica si la sesión activa corresponde al admin autorizado */
-function isAdmin() {
-  return _currentSession?.user?.id === ADMIN_UID;
-}
+function isAdmin() { return _currentSession?.user?.id === ADMIN_UID; }
 
-/* Escucha cambios de sesión (login / logout / refresh de token) */
 _supabase.auth.onAuthStateChange((event, session) => {
   _currentSession = session;
-  if (event === 'SIGNED_OUT') {
-    closeAdmin();
-  }
+  if (event === 'SIGNED_OUT') closeAdmin();
 });
 
-/* Al cargar la página, recupera la sesión existente (si la hay) */
 (async () => {
   const { data } = await _supabase.auth.getSession();
   _currentSession = data.session;
@@ -1221,6 +1241,7 @@ function renderStandings() {
       <h2 class="section-title">Posiciones</h2>
       <span class="section-tag">J${divCfg().round} · ${league.season}</span>
       <div class="section-line"></div>
+      <button class="ig-gen-btn" onclick="openInstagramModal()">📸 Tabla para Instagram</button>
     </div>
     <div class="standings-wrap">
       <div class="standings-header">
@@ -1278,7 +1299,7 @@ async function showRoster(teamId) {
     return `<div class="roster-row ${topCls}">
       <div class="roster-rank">${i+1}</div>
       <div style="display:flex;align-items:center;gap:0;">
-        <div class="roster-name">${p.name}${numBadge}</div>${posBadge}
+        <a href="player.html?id=${p.id}&div=${activeDivision}" class="roster-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color=''">${p.name}${numBadge}</a>${posBadge}
       </div>
       <div class="roster-cell">${p.games||0}</div>
       <div class="roster-cell pts">${p.points||0}</div>
@@ -1558,6 +1579,7 @@ document.addEventListener('keydown',e=>{
     if (document.getElementById('share-modal').classList.contains('open')) closeShareModal();
     if (document.getElementById('game-detail-modal').classList.contains('open')) closeGameDetail();
     if (document.getElementById('lightbox').classList.contains('open')) closeLightbox();
+    if (document.getElementById('instagram-modal').classList.contains('open')) closeInstagramModal();
   }
 });
 
@@ -1575,8 +1597,7 @@ async function renderScorers() {
       <div class="rank">${i+1}</div>
       <div class="team-info">
         ${t?bigLogo(s.team):''}
-        <div><div class="team-name">${s.name}</div><div style="font-size:12px;color:var(--muted);">${t?.name||s.team}</div></div>
-      </div>
+        <div><a href="player.html?id=${s.id}&div=${activeDivision}" class="team-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color=''">${s.name}</a>      </div>
       <div class="cell">${s.games}</div>
       <div class="cell">${s.points}</div>
       <div class="cell pct">${s.ppg.toFixed(1)}</div>
@@ -1710,20 +1731,9 @@ function renderFooter(){
 /* ══════════════════════════════════════════════════════════════
    AUTH — LOGIN MODAL
 ══════════════════════════════════════════════════════════════ */
-
-/** Abre el modal de login de Supabase Auth */
 function openAdmin() {
-  // Si ya hay sesión válida del admin, abre directo el panel
-  if (isAdmin()) {
-    openAdminPanel();
-    return;
-  }
-  // Si hay sesión pero no es el admin autorizado, rechaza
-  if (_currentSession) {
-    showToast('⚠ Tu cuenta no tiene permisos de administrador');
-    return;
-  }
-  // Sin sesión: muestra el formulario de login
+  if (isAdmin()) { openAdminPanel(); return; }
+  if (_currentSession) { showToast('⚠ Tu cuenta no tiene permisos de administrador'); return; }
   document.getElementById('login-email').value = '';
   document.getElementById('login-pwd').value = '';
   document.getElementById('login-err').textContent = '';
@@ -1732,28 +1742,18 @@ function openAdmin() {
   document.getElementById('login-modal').classList.add('open');
   setTimeout(() => document.getElementById('login-email').focus(), 100);
 }
-/* ══ MODO ADMIN POR URL (?admin) ══ */
+
 (function checkAdminUrlParam() {
   const params = new URLSearchParams(window.location.search);
   if (params.has('admin')) {
-    // Limpia el parámetro de la URL sin recargar la página
     const cleanUrl = window.location.pathname + window.location.hash;
     window.history.replaceState({}, '', cleanUrl);
-    // Espera a que el DOM y la sesión estén listos
-    window.addEventListener('load', () => {
-      setTimeout(openAdmin, 400);
-    });
+    window.addEventListener('load', () => { setTimeout(openAdmin, 400); });
   }
 })();
 
-function closeLoginModal() {
-  document.getElementById('login-modal').classList.remove('open');
-}
-
-function clearLoginError() {
-  document.getElementById('login-err').textContent = '';
-}
-
+function closeLoginModal() { document.getElementById('login-modal').classList.remove('open'); }
+function clearLoginError() { document.getElementById('login-err').textContent = ''; }
 function toggleLoginPwd() {
   const inp = document.getElementById('login-pwd');
   inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -1764,57 +1764,34 @@ async function submitLogin() {
   const pwd   = document.getElementById('login-pwd').value;
   const btn   = document.getElementById('login-submit-btn');
   const errEl = document.getElementById('login-err');
-
-  if (!email || !pwd) {
-    errEl.textContent = 'Completa ambos campos';
-    shakeLoginBox();
-    return;
-  }
-
-  // Estado de carga
-  btn.disabled = true;
-  btn.textContent = 'Verificando...';
-  errEl.textContent = '';
-
+  if (!email || !pwd) { errEl.textContent = 'Completa ambos campos'; shakeLoginBox(); return; }
+  btn.disabled = true; btn.textContent = 'Verificando...'; errEl.textContent = '';
   const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pwd });
-
   if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Entrar →';
+    btn.disabled = false; btn.textContent = 'Entrar →';
     errEl.textContent = 'Correo o contraseña incorrectos';
     shakeLoginBox();
     document.getElementById('login-pwd').value = '';
     document.getElementById('login-pwd').focus();
     return;
   }
-
-  // Login exitoso — verificar UID
   _currentSession = data.session;
-
   if (!isAdmin()) {
-    // Cerrar sesión inmediatamente si no es el admin autorizado
-    await _supabase.auth.signOut();
-    _currentSession = null;
-    btn.disabled = false;
-    btn.textContent = 'Entrar →';
+    await _supabase.auth.signOut(); _currentSession = null;
+    btn.disabled = false; btn.textContent = 'Entrar →';
     errEl.textContent = 'No tienes permisos de administrador';
-    shakeLoginBox();
-    return;
+    shakeLoginBox(); return;
   }
-
-  // Todo OK: cerrar modal y abrir panel
-  closeLoginModal();
-  openAdminPanel();
+  closeLoginModal(); openAdminPanel();
 }
 
 function shakeLoginBox() {
   const box = document.querySelector('.login-box');
   box.classList.remove('login-shake');
-  void box.offsetWidth; // reflow para reiniciar animación
+  void box.offsetWidth;
   box.classList.add('login-shake');
 }
 
-/** Cierra sesión de Supabase y cierra el panel admin */
 async function logoutAdmin() {
   await _supabase.auth.signOut();
   _currentSession = null;
@@ -1826,11 +1803,7 @@ async function logoutAdmin() {
    ADMIN PANEL
 ══════════════════════════════════════════════════════════════ */
 function openAdminPanel() {
-  // Doble chequeo de seguridad antes de mostrar el panel
-  if (!isAdmin()) {
-    showToast('⚠ Acceso denegado');
-    return;
-  }
+  if (!isAdmin()) { showToast('⚠ Acceso denegado'); return; }
   const lbl = document.getElementById('admin-div-label');
   lbl.textContent = activeDivision === 'primera' ? '1° División' : '2° División';
   lbl.className   = `admin-div-label ${activeDivision}`;
@@ -1840,9 +1813,7 @@ function openAdminPanel() {
   document.getElementById('admin-panel').classList.add('open');
 }
 
-function closeAdmin() {
-  document.getElementById('admin-panel').classList.remove('open');
-}
+function closeAdmin() { document.getElementById('admin-panel').classList.remove('open'); }
 
 function saveRound(){
   const val=+document.getElementById('admin-round-input').value;
@@ -2474,6 +2445,302 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GENERADOR TABLA INSTAGRAM
+══════════════════════════════════════════════════════════════ */
+
+async function openInstagramModal() {
+  const modal = document.getElementById('instagram-modal');
+  const canvas = document.getElementById('ig-canvas');
+  const loading = document.getElementById('ig-loading');
+  const actions = document.getElementById('ig-actions');
+  const hint = document.getElementById('ig-hint');
+
+  /* Reset state */
+  canvas.style.display = 'none';
+  actions.style.display = 'none';
+  hint.style.display = 'none';
+  loading.style.display = 'block';
+  loading.textContent = 'Generando tabla...';
+
+  modal.classList.add('open');
+
+  try {
+    await drawInstagramTable();
+    loading.style.display = 'none';
+    canvas.style.display = 'block';
+    actions.style.display = 'flex';
+    hint.style.display = 'block';
+  } catch(err) {
+    loading.textContent = '⚠ Error al generar la imagen';
+    console.error(err);
+  }
+}
+
+function closeInstagramModal() {
+  document.getElementById('instagram-modal').classList.remove('open');
+}
+
+function downloadInstagramTable() {
+  const canvas = document.getElementById('ig-canvas');
+  const btn = document.getElementById('ig-dl-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Preparando...';
+  const link = document.createElement('a');
+  link.download = `tabla-posiciones-lsc-j${divCfg().round}-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = '⬇ Descargar 1080×1080';
+  }, 800);
+}
+
+async function drawInstagramTable() {
+  const canvas = document.getElementById('ig-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+  canvas.width = W;
+  canvas.height = H;
+
+  const standings = computeStandings();
+  const teams = divTeams();
+  const divLabel = activeDivision === 'primera' ? 'PRIMERA DIVISIÓN' : 'SEGUNDA DIVISIÓN';
+
+  /* ── Paleta ── */
+  const BG     = '#08090C';
+  const CARD   = '#111318';
+  const CARD2  = '#161920';
+  const RED    = '#f80808';
+  const BLUE   = '#3009dc';
+  const GOLD   = '#f2b34e';
+  const MUTED  = '#6B7280';
+  const TEXT   = '#E8EAF0';
+  const GREEN  = '#4ADE80';
+  const SCARLET = '#F87171';
+
+  /* ── Fondo base ── */
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Glow de fondo superior-derecha (rojo) ── */
+  const gR = ctx.createRadialGradient(W * 0.9, 0, 0, W * 0.9, 0, W * 0.65);
+  gR.addColorStop(0, 'rgba(248,8,8,0.14)');
+  gR.addColorStop(1, 'transparent');
+  ctx.fillStyle = gR;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Glow inferior-izquierda (azul) ── */
+  const gB = ctx.createRadialGradient(W * 0.1, H, 0, W * 0.1, H, W * 0.55);
+  gB.addColorStop(0, 'rgba(48,9,220,0.12)');
+  gB.addColorStop(1, 'transparent');
+  ctx.fillStyle = gB;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Franja lateral rojo/azul ── */
+  ctx.fillStyle = RED;
+  ctx.fillRect(0, 0, 10, H / 2);
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(0, H / 2, 10, H / 2);
+
+  /* ── Logo de la liga ── */
+  const LOGO_SIZE = 140;
+const LOGO_X = W / 2 - LOGO_SIZE / 2;
+const LOGO_Y = 40;
+  await drawImgSafe(ctx, league.logo, LOGO_X, LOGO_Y, LOGO_SIZE, LOGO_SIZE, null, null);
+
+  /* ── Título principal ── */
+  ctx.textAlign = 'center';
+  ctx.fillStyle = TEXT;
+  ctx.font = '1080 58px "Bebas Neue", "Barlow Condensed", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('TABLA DE POSICIONES', W / 2, 232);
+  /* ── Subtítulo ── */
+  ctx.font = '700 21px "Barlow Condensed", sans-serif';
+  ctx.fillStyle = RED;
+  ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}  ·  JORNADA ${divCfg().round}`, W / 2, 262);
+  /* ── Línea separadora ── */
+  ctx.beginPath();
+  ctx.moveTo(56, 284);
+  ctx.lineTo(W - 56, 284);
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  /* ── Layout columnas ── */
+  const PAD      = 112;
+  const ROW_H    = 64;
+  const START_Y  = 296;
+    const HEADER_H = 36;
+
+  /* Posiciones X de columnas numéricas (centros) */
+  const COL = {
+    rank: PAD + 26,
+    logo: PAD + 66,
+    name: PAD + 130,
+    pj:   W - PAD - 228,
+    pg:   W - PAD - 158,
+    pp:   W - PAD - 88,
+    dif:  W - PAD - 24,
+  };
+
+  /* ── Cabecera de columnas ── */
+  ctx.font = '700 17px "Barlow Condensed", sans-serif';
+  ctx.fillStyle = MUTED;
+  ctx.textAlign = 'center';
+  const HEADER_Y = START_Y + 22;
+  ctx.fillText('PJ',  COL.pj,  HEADER_Y);
+  ctx.fillText('PG',  COL.pg,  HEADER_Y);
+  ctx.fillText('PP',  COL.pp,  HEADER_Y);
+  ctx.fillText('DIF', COL.dif, HEADER_Y);
+
+  /* Línea bajo cabecera */
+  ctx.beginPath();
+  ctx.moveTo(PAD, START_Y + HEADER_H);
+  ctx.lineTo(W - PAD, START_Y + HEADER_H);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  /* ── Filas de equipos ── */
+  const maxRows = Math.min(standings.length, 10);
+
+  for (let i = 0; i < maxRows; i++) {
+    const row = standings[i];
+    const t   = teams[row.teamId];
+    if (!t) continue;
+
+    const rowY = START_Y + HEADER_H + 4 + i * ROW_H;
+
+    /* Fondo alternado */
+    igRoundRect(ctx, PAD, rowY, W - PAD * 2, ROW_H - 4, 8);
+    ctx.fillStyle = i % 2 === 0 ? CARD : CARD2;
+    ctx.fill();
+
+    /* Barra lateral de posición */
+    const barColor = i === 0 ? GOLD : i < league.playoffSpots ? RED : null;
+    if (barColor) {
+      igRoundRect(ctx, PAD, rowY, 4, ROW_H - 4, 2);
+      ctx.fillStyle = barColor;
+      ctx.fill();
+    }
+
+    const midY = rowY + (ROW_H - 4) / 2;
+
+    /* Número posición */
+    ctx.textAlign = 'center';
+    ctx.font = '900 24px "Barlow Condensed", "Bebas Neue", sans-serif';
+    ctx.fillStyle = i === 0 ? GOLD : MUTED;
+    ctx.fillText(`${i + 1}`, COL.rank, midY + 8);
+
+    /* Logo equipo */
+    const lSize = 44;
+    const lx = COL.logo - lSize / 2;
+    const ly = midY - lSize / 2;
+    await drawImgSafe(ctx, t.logo, lx, ly, lSize, lSize, t.color, t.abbr);
+
+    /* Nombre equipo */
+    ctx.textAlign = 'left';
+    ctx.font = '700 24px "Barlow Condensed", sans-serif';
+    ctx.fillStyle = TEXT;
+    const maxNameW = COL.pj - COL.name - 20;
+    ctx.fillText(igClipText(ctx, t.name, maxNameW), COL.name, midY + 8);
+
+    /* Estadísticas */
+    ctx.textAlign = 'center';
+    ctx.font = '600 22px "Barlow Condensed", sans-serif';
+
+    ctx.fillStyle = TEXT;
+    ctx.fillText(`${row.gp}`, COL.pj, midY + 8);
+    ctx.fillText(`${row.w}`,  COL.pg, midY + 8);
+    ctx.fillText(`${row.l}`,  COL.pp, midY + 8);
+
+    /* DIF con color */
+    const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
+    ctx.font = '700 22px "Barlow Condensed", sans-serif';
+    ctx.fillStyle = row.diff > 0 ? GREEN : row.diff < 0 ? SCARLET : MUTED;
+    ctx.fillText(diffStr, COL.dif, midY + 8);
+  }
+
+  /* ── Leyenda ── */
+  const legY = START_Y + HEADER_H + 4 + maxRows * ROW_H + 20;
+  ctx.textAlign = 'left';
+  ctx.font = '700 17px "Barlow Condensed", sans-serif';
+
+  igRoundRect(ctx, PAD, legY + 2, 10, 18, 2);
+  ctx.fillStyle = GOLD; ctx.fill();
+  ctx.fillStyle = MUTED;
+  ctx.fillText('Líder', PAD + 18, legY + 17);
+
+  igRoundRect(ctx, PAD + 100, legY + 2, 10, 18, 2);
+  ctx.fillStyle = RED; ctx.fill();
+  ctx.fillStyle = MUTED;
+  ctx.fillText('Clasifican a Playoffs', PAD + 118, legY + 17);
+
+  /* ── Separador inferior ── */
+  const footY = H - 64;
+  ctx.beginPath();
+  ctx.moveTo(56, footY);
+  ctx.lineTo(W - 56, footY);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  /* ── Watermark ── */
+  ctx.textAlign = 'center';
+  ctx.font = '700 18px "Barlow Condensed", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarlos.cl', W / 2, H - 30);
+}
+
+/* ── Canvas helpers ── */
+function igRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+async function drawImgSafe(ctx, src, x, y, w, h, fallbackColor, fallbackText) {
+  if (!src) { igDrawFallback(ctx, x, y, w, h, fallbackColor, fallbackText); return; }
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { ctx.drawImage(img, x, y, w, h); resolve(); };
+    img.onerror = () => { igDrawFallback(ctx, x, y, w, h, fallbackColor, fallbackText); resolve(); };
+    img.src = src + (src.includes('?') ? '&' : '?') + '_t=' + Date.now();
+  });
+}
+
+function igDrawFallback(ctx, x, y, w, h, color, text) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x + w / 2, y + h / 2, w / 2, 0, Math.PI * 2);
+  ctx.fillStyle = color || '#333';
+  ctx.fill();
+  if (text) {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = `700 ${Math.round(w * 0.30)}px "Barlow Condensed", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(text.slice(0, 4), x + w / 2, y + h / 2 + w * 0.10);
+  }
+  ctx.restore();
+}
+
+function igClipText(ctx, text, maxWidth) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let s = text;
+  while (s.length > 1 && ctx.measureText(s + '…').width > maxWidth) s = s.slice(0, -1);
+  return s + '…';
 }
 </script>
 </body>
