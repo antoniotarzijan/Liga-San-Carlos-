@@ -124,11 +124,9 @@
 
     /* ── STANDINGS ── */
     .standings-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
-    .standings-header{display:grid;grid-template-columns:40px 1fr repeat(6,54px);padding:14px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
-    .standings-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;}
+    .standings-header{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:14px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}    .standings-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;}
     .standings-header span:nth-child(2){text-align:left;}
-    .standings-row{display:grid;grid-template-columns:40px 1fr repeat(6,54px);padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;}
-    .standings-row:last-child{border-bottom:none;}
+    .standings-row{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;}    .standings-row:last-child{border-bottom:none;}
     .standings-row:hover{background:rgba(255,255,255,.03);}
     .standings-row.leader::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
     .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);}
@@ -519,10 +517,10 @@
       .div-sel-sponsors{padding-bottom:0;}
       .div-sel-sponsors-logos .sponsor-logo-wrap{height:38px;}
       .div-sel-sponsors-logos{gap:16px;}
-      .standings-header{grid-template-columns:32px 1fr 40px 40px 56px;padding:10px 12px;gap:0;}
-      .standings-header span:nth-child(6),.standings-header span:nth-child(7),.standings-header span:nth-child(8){display:none;}
-      .standings-row{grid-template-columns:32px 1fr 40px 40px 56px;padding:12px 12px;gap:0;}
-      .standings-row>*:nth-child(6),.standings-row>*:nth-child(7),.standings-row>*:nth-child(8){display:none;}
+      .standings-header{grid-template-columns:28px 1fr 36px 36px 44px 44px;padding:10px 12px;gap:0;}
+.standings-header span:nth-child(4),.standings-header span:nth-child(5),.standings-header span:nth-child(7),.standings-header span:nth-child(8){display:none;}
+.standings-row{grid-template-columns:28px 1fr 36px 36px 44px 44px;padding:12px 12px;gap:0;}
+.standings-row>*:nth-child(4),.standings-row>*:nth-child(5),.standings-row>*:nth-child(7),.standings-row>*:nth-child(8){display:none;}
       .team-logo{width:38px;height:38px;}
       .team-logo img{width:100%;height:100%;}
       .team-name{font-size:13px;line-height:1.2;}
@@ -597,8 +595,7 @@
     @media(max-width:380px){
       .hero-title{font-size:clamp(44px,13vw,64px);}
       .teams-grid{grid-template-columns:repeat(2,1fr);}
-      .standings-header,.standings-row{grid-template-columns:28px 1fr 36px 36px 50px!important;}
-      .album-grid{grid-template-columns:repeat(2,1fr);}
+      .standings-header,.standings-row{grid-template-columns:24px 1fr 32px 44px 44px!important;}      .album-grid{grid-template-columns:repeat(2,1fr);}
       .share-score{font-size:40px;}
     }
   </style>
@@ -1147,27 +1144,99 @@ async function loadState() {
 function computeStandings() {
   const teams = divTeams();
   const rows  = {};
-  Object.keys(teams).forEach(id => { rows[id] = {teamId:id,gp:0,w:0,l:0,diff:0,form:[]}; });
-  STATE.games.filter(g => g.type==='finished').forEach(g => {
-    if (!rows[g.home]||!rows[g.away]) return;
-    const hs=+g.homeScore, as=+g.awayScore;
-    rows[g.home].gp++; rows[g.away].gp++;
-    rows[g.home].diff+=hs-as; rows[g.away].diff+=as-hs;
-    if (hs>as) {
-      rows[g.home].w++; rows[g.away].l++;
-      rows[g.home].form.push('w'); rows[g.away].form.push('l');
+
+  Object.keys(teams).forEach(id => {
+    rows[id] = {
+      teamId:        id,
+      gp:            0,
+      w:             0,
+      l:             0,
+      diff:          0,
+      pointsFor:     0,
+      pointsAgainst: 0,
+      tablePoints:   0,
+      form:          [],
+    };
+  });
+
+  const finishedGames = STATE.games.filter(g => g.type === 'finished');
+
+  finishedGames.forEach(g => {
+    if (!rows[g.home] || !rows[g.away]) return;
+    const hs = +g.homeScore, as = +g.awayScore;
+
+    rows[g.home].gp++;            rows[g.away].gp++;
+    rows[g.home].pointsFor     += hs; rows[g.away].pointsFor     += as;
+    rows[g.home].pointsAgainst += as; rows[g.away].pointsAgainst += hs;
+    rows[g.home].diff          += hs - as; rows[g.away].diff     += as - hs;
+
+    if (hs > as) {
+      rows[g.home].w++;  rows[g.away].l++;
+      rows[g.home].tablePoints += 2; rows[g.away].tablePoints += 1;
+      rows[g.home].form.push('w');   rows[g.away].form.push('l');
     } else {
-      rows[g.away].w++; rows[g.home].l++;
-      rows[g.away].form.push('w'); rows[g.home].form.push('l');
+      rows[g.away].w++;  rows[g.home].l++;
+      rows[g.away].tablePoints += 2; rows[g.home].tablePoints += 1;
+      rows[g.away].form.push('w');   rows[g.home].form.push('l');
     }
   });
-  return Object.values(rows).sort((a,b) => {
-    const ap=a.gp>0?1:0, bp=b.gp>0?1:0;
-    if (bp!==ap) return bp-ap;
-    if (b.w!==a.w) return b.w-a.w;
-    return b.diff-a.diff;
+
+  const allRows = Object.values(rows);
+
+  function breakTie(group) {
+    if (group.length <= 1) return group;
+    const ids       = new Set(group.map(r => r.teamId));
+    const headGames = finishedGames.filter(g => ids.has(g.home) && ids.has(g.away));
+    const mini = {};
+    group.forEach(r => {
+      mini[r.teamId] = { teamId: r.teamId, diff: 0, pf: 0, w: 0, gp: 0 };
+    });
+    headGames.forEach(g => {
+      const hs = +g.homeScore, as = +g.awayScore;
+      mini[g.home].gp++; mini[g.away].gp++;
+      mini[g.home].pf += hs; mini[g.away].pf += as;
+      mini[g.home].diff += hs - as; mini[g.away].diff += as - hs;
+      if (hs > as) { mini[g.home].w++; } else { mini[g.away].w++; }
+    });
+    if (headGames.length === 0) {
+      return group.slice().sort((a, b) =>
+        b.diff - a.diff || b.pointsFor - a.pointsFor
+      );
+    }
+    return group.slice().sort((a, b) => {
+      const ma = mini[a.teamId], mb = mini[b.teamId];
+      if (mb.diff !== ma.diff) return mb.diff - ma.diff;
+      if (mb.w    !== ma.w)    return mb.w    - ma.w;
+      if (b.diff  !== a.diff)  return b.diff  - a.diff;
+      return b.pointsFor - a.pointsFor;
+    });
+  } // ← este } cierra breakTie
+
+  // Ordenar primero por tablePoints (equipos sin partidos al fondo)
+  allRows.sort((a, b) => {
+    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
+    if (bp !== ap) return bp - ap;
+    return b.tablePoints - a.tablePoints;
   });
-}
+
+  // Resolver empates por grupos
+  const result = [];
+  let i = 0;
+  while (i < allRows.length) {
+    const current = allRows[i];
+    let j = i + 1;
+    while (
+      j < allRows.length &&
+      allRows[j].tablePoints === current.tablePoints &&
+      (allRows[j].gp > 0) === (current.gp > 0)
+    ) { j++; }
+    const tiedGroup = allRows.slice(i, j);
+    result.push(...(tiedGroup.length > 1 ? breakTie(tiedGroup) : tiedGroup));
+    i = j;
+  }
+
+  return result;
+} // ← este } cierra computeStandings
 
 const pct = (w,gp) => gp ? (w/gp).toFixed(3).replace(/^0/,'') : '-';
 
@@ -1219,24 +1288,28 @@ function renderHero() {
 }
 
 function renderStandings() {
-  const standings=computeStandings();
-  const rows=standings.map((row,i) => {
-    const t=divTeams()[row.teamId]; if(!t) return '';
-    const pos=i+1;
-    const cls=pos===1?'leader':pos<=league.playoffSpots?'playoff':'';
-    const diffStr=row.diff>0?`+${row.diff}`:row.diff===0?'—':`${row.diff}`;
-    const diffCls=row.diff>0?'diff-pos':row.diff<0?'diff-neg':'';
-    const dots=(row.form||[]).slice(-5).map(r=>`<span class="dot ${r}"></span>`).join('');
+  const standings = computeStandings();
+  const rows = standings.map((row, i) => {
+    const t = divTeams()[row.teamId]; if (!t) return '';
+    const pos = i + 1;
+    const cls = pos === 1 ? 'leader' : pos <= league.playoffSpots ? 'playoff' : '';
+    const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
+    const diffCls = row.diff > 0 ? 'diff-pos' : row.diff < 0 ? 'diff-neg' : '';
+    const dots = (row.form || []).slice(-5).map(r => `<span class="dot ${r}"></span>`).join('');
     return `<div class="standings-row ${cls} reveal">
       <div class="rank">${pos}</div>
       <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
-      <div class="cell">${row.gp}</div><div class="cell">${row.w}</div><div class="cell">${row.l}</div>
-      <div class="cell pct">${pct(row.w,row.gp)}</div>
+      <div class="cell">${row.gp}</div>
+      <div class="cell">${row.w}</div>
+      <div class="cell">${row.l}</div>
+      <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
+      <div class="cell pct">${pct(row.w, row.gp)}</div>
       <div class="cell ${diffCls}">${diffStr}</div>
       <div class="cell"><div class="form-dots">${dots}</div></div>
     </div>`;
   }).join('');
-  document.getElementById('standings-root').innerHTML=`
+
+  document.getElementById('standings-root').innerHTML = `
     <div class="section-header reveal">
       <h2 class="section-title">Posiciones</h2>
       <span class="section-tag">J${divCfg().round} · ${league.season}</span>
@@ -1245,8 +1318,17 @@ function renderStandings() {
     </div>
     <div class="standings-wrap">
       <div class="standings-header">
-        <span>#</span><span>Equipo</span><span>PJ</span><span>G</span><span>P</span><span>%</span><span>+/−</span><span>Forma</span>
-      </div>${rows}
+        <span>#</span>
+        <span>Equipo</span>
+        <span>PJ</span>
+        <span>G</span>
+        <span>P</span>
+        <span style="color:var(--gold);">PTS</span>
+        <span>%</span>
+        <span>+/−</span>
+        <span>Forma</span>
+      </div>
+      ${rows}
     </div>
     <div class="legend reveal">
       <div class="legend-item"><span class="legend-bar" style="background:var(--gold)"></span>Líder</div>
