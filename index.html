@@ -1299,10 +1299,10 @@ function renderStandings() {
     return `<div class="standings-row ${cls} reveal">
       <div class="rank">${pos}</div>
       <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
+      <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
       <div class="cell">${row.gp}</div>
       <div class="cell">${row.w}</div>
       <div class="cell">${row.l}</div>
-      <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
       <div class="cell pct">${pct(row.w, row.gp)}</div>
       <div class="cell ${diffCls}">${diffStr}</div>
       <div class="cell"><div class="form-dots">${dots}</div></div>
@@ -1320,10 +1320,10 @@ function renderStandings() {
       <div class="standings-header">
         <span>#</span>
         <span>Equipo</span>
+        <span style="color:var(--gold);">PTS</span>
         <span>PJ</span>
         <span>G</span>
         <span>P</span>
-        <span style="color:var(--gold);">PTS</span>
         <span>%</span>
         <span>+/−</span>
         <span>Forma</span>
@@ -2585,197 +2585,177 @@ async function drawInstagramTable() {
   const canvas = document.getElementById('ig-canvas');
   const ctx = canvas.getContext('2d');
   const W = 1080, H = 1080;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W; canvas.height = H;
 
   const standings = computeStandings();
   const teams = divTeams();
   const divLabel = activeDivision === 'primera' ? 'PRIMERA DIVISIÓN' : 'SEGUNDA DIVISIÓN';
+  const roundLabel = `JORNADA ${divCfg().round}`;
 
-  /* ── Paleta ── */
-  const BG     = '#08090C';
-  const CARD   = '#111318';
-  const CARD2  = '#161920';
-  const RED    = '#f80808';
-  const BLUE   = '#3009dc';
-  const GOLD   = '#f2b34e';
-  const MUTED  = '#6B7280';
-  const TEXT   = '#E8EAF0';
-  const GREEN  = '#4ADE80';
+  const RED     = '#f80808';
+  const BLUE    = '#3009dc';
+  const GOLD    = '#f2b34e';
+  const MUTED   = '#6B7280';
+  const MUTED2  = '#9CA3AF';
+  const TEXT    = '#E8EAF0';
+  const GREEN   = '#4ADE80';
   const SCARLET = '#F87171';
+  const BG      = '#08090C';
+  const CARD    = '#111318';
+  const CARD2   = '#161920';
+  const PURPLE_BAR = '#3730a3';
 
-  /* ── Fondo base ── */
+  // ── Fondo ──
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
 
-  /* ── Glow de fondo superior-derecha (rojo) ── */
-  const gR = ctx.createRadialGradient(W * 0.9, 0, 0, W * 0.9, 0, W * 0.65);
-  gR.addColorStop(0, 'rgba(248,8,8,0.14)');
-  gR.addColorStop(1, 'transparent');
-  ctx.fillStyle = gR;
-  ctx.fillRect(0, 0, W, H);
+  const gR = ctx.createRadialGradient(W*0.85, 0, 0, W*0.85, 0, W*0.6);
+  gR.addColorStop(0, 'rgba(248,8,8,0.18)'); gR.addColorStop(1, 'transparent');
+  ctx.fillStyle = gR; ctx.fillRect(0, 0, W, H);
 
-  /* ── Glow inferior-izquierda (azul) ── */
-  const gB = ctx.createRadialGradient(W * 0.1, H, 0, W * 0.1, H, W * 0.55);
-  gB.addColorStop(0, 'rgba(48,9,220,0.12)');
-  gB.addColorStop(1, 'transparent');
-  ctx.fillStyle = gB;
-  ctx.fillRect(0, 0, W, H);
+  const gB = ctx.createRadialGradient(W*0.15, H, 0, W*0.15, H, W*0.5);
+  gB.addColorStop(0, 'rgba(48,9,220,0.14)'); gB.addColorStop(1, 'transparent');
+  ctx.fillStyle = gB; ctx.fillRect(0, 0, W, H);
 
-  /* ── Franja lateral rojo/azul ── */
-  ctx.fillStyle = RED;
-  ctx.fillRect(0, 0, 10, H / 2);
-  ctx.fillStyle = BLUE;
-  ctx.fillRect(0, H / 2, 10, H / 2);
+  // Franja lateral rojo/azul
+  ctx.fillStyle = RED;  ctx.fillRect(0, 0, 8, H/2);
+  ctx.fillStyle = BLUE; ctx.fillRect(0, H/2, 8, H/2);
 
-  /* ── Logo de la liga ── */
-  const LOGO_SIZE = 140;
-const LOGO_X = W / 2 - LOGO_SIZE / 2;
-const LOGO_Y = 40;
-  await drawImgSafe(ctx, league.logo, LOGO_X, LOGO_Y, LOGO_SIZE, LOGO_SIZE, null, null);
+  // ── Logo ──
+  const logoSize = 90;
+  const logoX = W/2 - logoSize/2;
+  const logoY = 42;
+  await drawImgSafe(ctx, league.logo, logoX, logoY, logoSize, logoSize, null, null);
 
-  /* ── Título principal ── */
+  // ── Título ──
+  ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'center';
   ctx.fillStyle = TEXT;
-  ctx.font = '1080 58px "Bebas Neue", "Barlow Condensed", sans-serif';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('TABLA DE POSICIONES', W / 2, 232);
-  /* ── Subtítulo ── */
-  ctx.font = '700 21px "Barlow Condensed", sans-serif';
-  ctx.fillStyle = RED;
-  ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}  ·  JORNADA ${divCfg().round}`, W / 2, 262);
-  /* ── Línea separadora ── */
-  ctx.beginPath();
-  ctx.moveTo(56, 284);
-  ctx.lineTo(W - 56, 284);
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
+  ctx.font = '700 62px "Bebas Neue", "Barlow Condensed", sans-serif';
+  ctx.letterSpacing = '5px';
+  ctx.fillText('TABLA DE POSICIONES', W/2, 198);
 
-  /* ── Layout columnas ── */
-  const PAD      = 112;
-  const ROW_H    = 64;
-  const START_Y  = 296;
-    const HEADER_H = 36;
+  // Línea de brillo rojo
+  const gradLine = ctx.createLinearGradient(W/2-180, 0, W/2+180, 0);
+  gradLine.addColorStop(0, 'transparent');
+  gradLine.addColorStop(0.3, RED);
+  gradLine.addColorStop(0.7, RED);
+  gradLine.addColorStop(1, 'transparent');
+  ctx.strokeStyle = gradLine; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(W/2-180, 210); ctx.lineTo(W/2+180, 210); ctx.stroke();
 
-  /* Posiciones X de columnas numéricas (centros) */
-  const COL = {
+  // Subtítulo
+  ctx.font = '700 22px "Barlow Condensed", sans-serif';
+  ctx.fillStyle = RED; ctx.letterSpacing = '2px';
+  ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}  ·  ${roundLabel}`, W/2, 244);
+
+  // Separador
+  ctx.beginPath(); ctx.moveTo(56, 264); ctx.lineTo(W-56, 264);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.stroke();
+
+  // ── Layout ──
+  const PAD    = 56;
+  const ROW_H  = 73;
+  const START_Y = 275;
+  const HDR_H  = 42;
+
+  const C = {
     rank: PAD + 26,
-    logo: PAD + 66,
-    name: PAD + 130,
-    pj:   W - PAD - 228,
-    pg:   W - PAD - 158,
-    pp:   W - PAD - 88,
-    dif:  W - PAD - 24,
-  };
+    logo: PAD + 74,
+    name: PAD + 118,
+    pts:  W - PAD - 340,
+    pj:   W - PAD - 255,
+    pg:   W - PAD - 170,
+    pp:   W - PAD - 85,
+    dif:  W - PAD - 20,
+};
 
-  /* ── Cabecera de columnas ── */
-  ctx.font = '700 17px "Barlow Condensed", sans-serif';
-  ctx.fillStyle = MUTED;
+  // Headers
+  ctx.font = '700 19px "Barlow Condensed", sans-serif';
+  ctx.fillStyle = MUTED2; ctx.letterSpacing = '1px';
+  ctx.textAlign = 'left';
+  ctx.fillText('POS', C.rank - 8, START_Y + 26);
+  ctx.fillText('EQUIPO', C.name, START_Y + 26);
   ctx.textAlign = 'center';
-  const HEADER_Y = START_Y + 22;
-  ctx.fillText('PJ',  COL.pj,  HEADER_Y);
-  ctx.fillText('PG',  COL.pg,  HEADER_Y);
-  ctx.fillText('PP',  COL.pp,  HEADER_Y);
-  ctx.fillText('DIF', COL.dif, HEADER_Y);
+  ctx.fillText('PTS', C.pts, START_Y + 26);
+  ctx.fillText('PJ',  C.pj,  START_Y + 26);
+  ctx.fillText('PG',  C.pg,  START_Y + 26);
+  ctx.fillText('PP',  C.pp,  START_Y + 26);
+  ctx.fillText('DIF', C.dif, START_Y + 26);
 
-  /* Línea bajo cabecera */
-  ctx.beginPath();
-  ctx.moveTo(PAD, START_Y + HEADER_H);
-  ctx.lineTo(W - PAD, START_Y + HEADER_H);
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD, START_Y + HDR_H); ctx.lineTo(W-PAD, START_Y + HDR_H);
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
 
-  /* ── Filas de equipos ── */
+  // ── Filas ──
   const maxRows = Math.min(standings.length, 10);
-
   for (let i = 0; i < maxRows; i++) {
     const row = standings[i];
-    const t   = teams[row.teamId];
-    if (!t) continue;
-
-    const rowY = START_Y + HEADER_H + 4 + i * ROW_H;
-
-    /* Fondo alternado */
-    igRoundRect(ctx, PAD, rowY, W - PAD * 2, ROW_H - 4, 8);
-    ctx.fillStyle = i % 2 === 0 ? CARD : CARD2;
-    ctx.fill();
-
-    /* Barra lateral de posición */
-    const barColor = i === 0 ? GOLD : i < league.playoffSpots ? RED : null;
-    if (barColor) {
-      igRoundRect(ctx, PAD, rowY, 4, ROW_H - 4, 2);
-      ctx.fillStyle = barColor;
-      ctx.fill();
-    }
-
+    const t   = teams[row.teamId]; if (!t) continue;
+    const rowY = START_Y + HDR_H + 4 + i * ROW_H;
     const midY = rowY + (ROW_H - 4) / 2;
 
-    /* Número posición */
-    ctx.textAlign = 'center';
-    ctx.font = '900 24px "Barlow Condensed", "Bebas Neue", sans-serif';
-    ctx.fillStyle = i === 0 ? GOLD : MUTED;
-    ctx.fillText(`${i + 1}`, COL.rank, midY + 8);
+    igRoundRect(ctx, PAD + 14, rowY, W - (PAD+14) - PAD, ROW_H - 5, 6);
+    ctx.fillStyle = i % 2 === 0 ? CARD : CARD2; ctx.fill();
 
-    /* Logo equipo */
-    const lSize = 44;
-    const lx = COL.logo - lSize / 2;
-    const ly = midY - lSize / 2;
-    await drawImgSafe(ctx, t.logo, lx, ly, lSize, lSize, t.color, t.abbr);
+    // Barra lateral
+    const barColor = i === 0 ? GOLD : i < league.playoffSpots ? RED : PURPLE_BAR;
+    igRoundRect(ctx, PAD + 2, rowY + 4, 5, ROW_H - 12, 2.5);
+    ctx.fillStyle = barColor; ctx.fill();
 
-    /* Nombre equipo */
+    // Posición
+    ctx.textAlign = 'center'; ctx.letterSpacing = '0px';
+    ctx.font = `900 ${i === 0 ? 28 : 24}px "Barlow Condensed", sans-serif`;
+    ctx.fillStyle = i === 0 ? GOLD : TEXT;
+    ctx.fillText(`${i + 1}`, C.rank + 4, midY + 9);
+
+    // Logo
+    const lSize = 46;
+    await drawImgSafe(ctx, t.logo, C.logo - lSize/2 + 4, midY - lSize/2, lSize, lSize, t.color, t.abbr);
+
+    // Nombre
     ctx.textAlign = 'left';
+    ctx.font = `700 ${i < 3 ? 26 : 24}px "Barlow Condensed", sans-serif`;
+    ctx.fillStyle = TEXT; ctx.letterSpacing = '0.5px';
+    ctx.fillText(igClipText(ctx, t.name, C.pj - C.name - 24), C.name, midY + 9);
+
+    // Stats
+    ctx.textAlign = 'center'; ctx.letterSpacing = '0px';
+    ctx.font = '600 23px "Barlow Condensed", sans-serif';
+    ctx.fillStyle = TEXT;
     ctx.font = '700 24px "Barlow Condensed", sans-serif';
+    ctx.fillStyle = GOLD;
+    ctx.fillText(`${row.tablePoints}`, C.pts, midY + 9);
+
+    ctx.font = '600 23px "Barlow Condensed", sans-serif';
     ctx.fillStyle = TEXT;
-    const maxNameW = COL.pj - COL.name - 20;
-    ctx.fillText(igClipText(ctx, t.name, maxNameW), COL.name, midY + 8);
+    ctx.fillText(`${row.gp}`, C.pj, midY + 9);
+    ctx.fillText(`${row.w}`,  C.pg, midY + 9);
+    ctx.fillText(`${row.l}`,  C.pp, midY + 9);
 
-    /* Estadísticas */
-    ctx.textAlign = 'center';
-    ctx.font = '600 22px "Barlow Condensed", sans-serif';
-
-    ctx.fillStyle = TEXT;
-    ctx.fillText(`${row.gp}`, COL.pj, midY + 8);
-    ctx.fillText(`${row.w}`,  COL.pg, midY + 8);
-    ctx.fillText(`${row.l}`,  COL.pp, midY + 8);
-
-    /* DIF con color */
-    const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
-    ctx.font = '700 22px "Barlow Condensed", sans-serif';
-    ctx.fillStyle = row.diff > 0 ? GREEN : row.diff < 0 ? SCARLET : MUTED;
-    ctx.fillText(diffStr, COL.dif, midY + 8);
+// DIF con color
+const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '-0' : `${row.diff}`;
+ctx.font = '600 22px "Barlow Condensed", sans-serif';
+ctx.fillStyle = row.diff > 0 ? GREEN : row.diff < 0 ? SCARLET : MUTED;
+ctx.fillText(diffStr, C.dif, midY + 9);
   }
 
-  /* ── Leyenda ── */
-  const legY = START_Y + HEADER_H + 4 + maxRows * ROW_H + 20;
-  ctx.textAlign = 'left';
-  ctx.font = '700 17px "Barlow Condensed", sans-serif';
-
-  igRoundRect(ctx, PAD, legY + 2, 10, 18, 2);
-  ctx.fillStyle = GOLD; ctx.fill();
-  ctx.fillStyle = MUTED;
-  ctx.fillText('Líder', PAD + 18, legY + 17);
-
-  igRoundRect(ctx, PAD + 100, legY + 2, 10, 18, 2);
-  ctx.fillStyle = RED; ctx.fill();
-  ctx.fillStyle = MUTED;
-  ctx.fillText('Clasifican a Playoffs', PAD + 118, legY + 17);
-
-  /* ── Separador inferior ── */
-  const footY = H - 64;
-  ctx.beginPath();
-  ctx.moveTo(56, footY);
-  ctx.lineTo(W - 56, footY);
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  /* ── Watermark ── */
-  ctx.textAlign = 'center';
+  // ── Leyenda ──
+  const legY = START_Y + HDR_H + 4 + maxRows * ROW_H + 22;
+  ctx.letterSpacing = '0px';
   ctx.font = '700 18px "Barlow Condensed", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarlos.cl', W / 2, H - 30);
+  igRoundRect(ctx, PAD + 14, legY + 2, 12, 16, 2); ctx.fillStyle = GOLD; ctx.fill();
+  ctx.textAlign = 'left'; ctx.fillStyle = MUTED2;
+  ctx.fillText('Lider', PAD + 33, legY + 16);
+  igRoundRect(ctx, PAD + 105, legY + 2, 12, 16, 2); ctx.fillStyle = RED; ctx.fill();
+  ctx.fillStyle = MUTED2;
+  ctx.fillText('Clasifican a Playoffs', PAD + 124, legY + 16);
+
+  // ── Footer ──
+  ctx.beginPath(); ctx.moveTo(56, H-58); ctx.lineTo(W-56, H-58);
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.textAlign = 'center'; ctx.font = '700 18px "Barlow Condensed", sans-serif';
+  ctx.letterSpacing = '4px'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W/2, H - 26);
 }
 
 /* ── Canvas helpers ── */
