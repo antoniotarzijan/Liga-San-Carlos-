@@ -1134,6 +1134,11 @@ function rowToGame(row) {
 }
 
 async function loadState() {
+  const {data:cfg}=await _supabase.from('settings').select('*');
+  if(cfg) cfg.forEach(r=>{
+    if(r.key==='round_primera') CONFIG.divisions.primera.round=+r.value;
+    if(r.key==='round_segunda') CONFIG.divisions.segunda.round=+r.value;
+  });
   const { data, error } = await _supabase
     .from(divCfg().dbTable).select('*').order('id',{ascending:true});
   if (error) { console.error(error.message); showToast('⚠ Error al conectar'); return; }
@@ -1898,10 +1903,11 @@ function openAdminPanel() {
 
 function closeAdmin() { document.getElementById('admin-panel').classList.remove('open'); }
 
-function saveRound(){
+async function saveRound(){
   const val=+document.getElementById('admin-round-input').value;
   if(!val||val<1){showToast('⚠ Ingresa un número válido');return;}
   divCfg().round=val;
+  await _supabase.from('settings').upsert({key:`round_${activeDivision}`,value:String(val)});
   renderHero();renderStandings();renderGames();
   showToast(`✓ Jornada actual: J${val}`);
 }
