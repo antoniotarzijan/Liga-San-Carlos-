@@ -1288,7 +1288,7 @@ function renderHero() {
     <div class="hero-stats">
       <div class="stat-item"><div class="stat-num">${Object.keys(divTeams()).length}</div><div class="stat-label">Equipos</div></div>
       <div class="stat-item"><div class="stat-num">${league.totalRounds}</div><div class="stat-label">Jornadas</div></div>
-      <div class="stat-item"><div class="stat-num">J${divCfg().round}</div><div class="stat-label">Jornada actual</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div>
     </div>`;
 }
 
@@ -1317,7 +1317,7 @@ function renderStandings() {
   document.getElementById('standings-root').innerHTML = `
     <div class="section-header reveal">
       <h2 class="section-title">Posiciones</h2>
-      <span class="section-tag">J${divCfg().round} · ${league.season}</span>
+      <span class="section-tag">${league.season}</span>
       <div class="section-line"></div>
       <button class="ig-gen-btn" onclick="openInstagramModal()">📸 Tabla para Instagram</button>
     </div>
@@ -2653,7 +2653,7 @@ async function drawInstagramTable() {
   // Subtítulo
   ctx.font = '700 22px "Barlow Condensed", sans-serif';
   ctx.fillStyle = RED; ctx.letterSpacing = '2px';
-  ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}  ·  ${roundLabel}`, W/2, 244);
+  ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}`, W/2, 244);
 
   // Separador
   ctx.beginPath(); ctx.moveTo(56, 264); ctx.lineTo(W-56, 264);
