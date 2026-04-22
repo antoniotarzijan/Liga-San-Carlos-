@@ -1002,6 +1002,15 @@
     <div id="tab-results" class="admin-pane">
       <p class="section-subtitle">Resultados cargados — haz clic en ✏ para editar</p>
       <div class="game-admin-list" id="results-admin-list"></div>
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+        <p class="section-subtitle" style="margin-bottom:10px;">Herramientas de reparación</p>
+        <button class="btn btn-gold" style="width:100%;" onclick="recalcAllStats()">
+          🔄 Recalcular estadísticas desde cero
+        </button>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+          Resetea PTS y PJ de todos los jugadores y los recalcula solo con los partidos activos.
+        </p>
+      </div>
     </div>
 
     <!-- ── TAB: NÓMINA ── -->
@@ -1961,6 +1970,50 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('edit-player-modal').classList.contains('open')) closeEditPlayerModal();
   }
 });
+
+/* ══ RECALCULAR ESTADÍSTICAS ══ */
+async function recalcAllStats() {
+  if (!confirm('¿Recalcular todas las estadísticas desde cero?\nEsto reseteará PTS y PJ de todos los jugadores y los recalculará solo con los partidos activos.')) return;
+  showToast('⏳ Recalculando...');
+
+  // 1. Resetear todos los jugadores a 0
+  const { error: resetErr } = await _supabase.from(divCfg().playersTable)
+    .update({ points: 0, games: 0 }).gt('id', 0);
+  if (resetErr) { showToast('⚠ Error al resetear: ' + resetErr.message); return; }
+
+  // 2. Obtener IDs de partidos finalizados
+  const finishedIds = STATE.games.filter(g => g.type === 'finished').map(g => g.id);
+  if (finishedIds.length === 0) {
+    showToast('✓ Estadísticas reseteadas (no hay partidos activos)');
+    return;
+  }
+
+  // 3. Obtener todos los game_stats de esos partidos
+  const { data: allStats, error: statsErr } = await _supabase
+    .from('game_stats').select('*')
+    .in('game_id', finishedIds)
+    .eq('division', activeDivision);
+  if (statsErr) { showToast('⚠ Error al leer stats: ' + statsErr.message); return; }
+
+  // 4. Agrupar por player_id — suma puntos y cuenta partidos únicos
+  const totals = {};
+  (allStats || []).forEach(s => {
+    if (!s.player_id) return;
+    if (!totals[s.player_id]) totals[s.player_id] = { points: 0, gameIds: new Set() };
+    totals[s.player_id].points += (s.points || 0);
+    totals[s.player_id].gameIds.add(s.game_id);
+  });
+
+  // 5. Aplicar totales
+  for (const [pid, vals] of Object.entries(totals)) {
+    await _supabase.from(divCfg().playersTable)
+      .update({ points: vals.points, games: vals.gameIds.size })
+      .eq('id', +pid);
+  }
+
+  showToast(`✓ Recalculado: ${Object.keys(totals).length} jugadores actualizados`);
+}
+
 </script>
 </body>
 </html>
