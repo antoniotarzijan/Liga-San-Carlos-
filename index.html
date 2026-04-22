@@ -862,6 +862,16 @@
       <div id="tab-results" class="admin-pane">
         <p class="section-subtitle">Resultados cargados — haz clic en ✏ para editar</p>
         <div class="game-admin-list" id="results-admin-list"></div>
+       <!-- TAB RESULTADOS — al final, antes del </div> -->
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+  <p class="section-subtitle" style="margin-bottom:10px;">Herramientas de reparación</p>
+  <button class="btn btn-gold" style="width:100%;" onclick="recalcAllStats()">
+    🔄 Recalcular estadísticas desde cero
+  </button>
+  <p style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+    Resetea PTS y PJ de todos los jugadores y los recalcula solo con los partidos activos.
+  </p>
+</div> 
       </div>
 
       <!-- TAB NÓMINA -->
@@ -1318,7 +1328,7 @@ function renderStandings() {
     <div class="section-header reveal">
       <h2 class="section-title">Posiciones</h2>
       <span class="section-tag">${league.season}</span>
-      <div class="section-line"></div>
+            <div class="section-line"></div>
       <button class="ig-gen-btn" onclick="openInstagramModal()">📸 Tabla para Instagram</button>
     </div>
     <div class="standings-wrap">
@@ -1906,11 +1916,27 @@ function closeAdmin() { document.getElementById('admin-panel').classList.remove(
 async function saveRound(){
   const val=+document.getElementById('admin-round-input').value;
   if(!val||val<1){showToast('⚠ Ingresa un número válido');return;}
+  
+  console.log('1. Intentando guardar jornada:', val, 'división:', activeDivision);
+  console.log('2. Key a guardar:', `round_${activeDivision}`);
+  
+  const {data, error}=await _supabase.from('settings').upsert(
+    {key:`round_${activeDivision}`,value:String(val)},
+    {onConflict:'key'}
+  ).select();
+  
+  console.log('3. Respuesta Supabase - data:', data, 'error:', error);
+  
+  if(error){
+    showToast('⚠ Error: '+error.message);
+    return;
+  }
+  
   divCfg().round=val;
-  await _supabase.from('settings').upsert({key:`round_${activeDivision}`,value:String(val)});
   renderHero();renderStandings();renderGames();
   showToast(`✓ Jornada actual: J${val}`);
 }
+
 
 function switchTab(id){
   const tabIds=['tab-result','tab-games','tab-results','tab-roster','tab-news','tab-photos','tab-sanctions'];
@@ -2272,10 +2298,34 @@ async function addGame(){
 
 async function deleteGame(id){
   if(!confirm('¿Eliminar este partido?')) return;
-  const {error}=await _supabase.from(divCfg().dbTable).delete().eq('id',id);
-  if(error){showToast('⚠ Error: '+error.message);return;}
-  await loadState();populateAdminSelects();renderAdminLists();
-  showToast('Partido eliminado');
+
+  // Si era un partido terminado, revertir estadísticas de jugadores
+  const game = STATE.games.find(g => g.id === id);
+  if(game && game.type === 'finished'){
+    const {data:stats} = await _supabase.from('game_stats').select('*')
+      .eq('game_id', id).eq('division', activeDivision);
+    if(stats && stats.length > 0){
+      for(const s of stats){
+        if(!s.player_id || !s.points) continue;
+        const {data:p} = await _supabase.from(divCfg().playersTable)
+          .select('points,games').eq('id', s.player_id).single();
+        if(p){
+          await _supabase.from(divCfg().playersTable).update({
+            points: Math.max(0, (p.points||0) - (s.points||0)),
+            games:  Math.max(0, (p.games||0)  - 1),
+          }).eq('id', s.player_id);
+        }
+      }
+      // Borrar game_stats del partido
+      await _supabase.from('game_stats').delete()
+        .eq('game_id', id).eq('division', activeDivision);
+    }
+  }
+
+  const {error} = await _supabase.from(divCfg().dbTable).delete().eq('id', id);
+  if(error){showToast('⚠ Error: '+error.message); return;}
+  await loadState(); populateAdminSelects(); renderAdminLists();
+  showToast('✓ Partido eliminado y estadísticas revertidas');
 }
 
 function openEditModal(id){
@@ -2654,7 +2704,7 @@ async function drawInstagramTable() {
   ctx.font = '700 22px "Barlow Condensed", sans-serif';
   ctx.fillStyle = RED; ctx.letterSpacing = '2px';
   ctx.fillText(`${divLabel}  ·  TEMPORADA ${league.season}`, W/2, 244);
-
+  
   // Separador
   ctx.beginPath(); ctx.moveTo(56, 264); ctx.lineTo(W-56, 264);
   ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.stroke();
@@ -2811,6 +2861,49 @@ function igClipText(ctx, text, maxWidth) {
   while (s.length > 1 && ctx.measureText(s + '…').width > maxWidth) s = s.slice(0, -1);
   return s + '…';
 }
+async function recalcAllStats(){
+  if(!confirm('¿Recalcular todas las estadísticas desde cero?\nEsto reseteará PTS y PJ de todos los jugadores y los recalculará solo con los partidos activos.')) return;
+  showToast('⏳ Recalculando...');
+
+  // 1. Resetear todos los jugadores a 0
+  const {error:resetErr} = await _supabase.from(divCfg().playersTable)
+    .update({points:0, games:0}).gt('id', 0);
+  if(resetErr){ showToast('⚠ Error al resetear: '+resetErr.message); return; }
+
+  // 2. Obtener todos los game_stats de partidos activos de esta división
+  const finishedIds = STATE.games.filter(g=>g.type==='finished').map(g=>g.id);
+  if(finishedIds.length === 0){
+    showToast('✓ Estadísticas reseteadas (no hay partidos activos)');
+    await renderScorers(); return;
+  }
+
+  const {data:allStats, error:statsErr} = await _supabase
+    .from('game_stats').select('*')
+    .in('game_id', finishedIds)
+    .eq('division', activeDivision);
+  if(statsErr){ showToast('⚠ Error al leer stats: '+statsErr.message); return; }
+
+  // 3. Agrupar por player_id
+  // Un jugador cuenta 1 partido por cada game_id único en que aparece
+  const totals = {};
+  (allStats||[]).forEach(s => {
+    if(!s.player_id) return;
+    if(!totals[s.player_id]) totals[s.player_id] = {points:0, gameIds: new Set()};
+    totals[s.player_id].points += (s.points||0);
+    totals[s.player_id].gameIds.add(s.game_id); // ← cuenta aparición = jugó ese partido
+  });
+
+  // 4. Aplicar totales
+  for(const [pid, vals] of Object.entries(totals)){
+    await _supabase.from(divCfg().playersTable)
+      .update({points: vals.points, games: vals.gameIds.size})
+      .eq('id', +pid);
+  }
+
+  await renderScorers();
+  showToast(`✓ Recalculado: ${Object.keys(totals).length} jugadores actualizados`);
+}
+
 </script>
 </body>
 </html>
