@@ -1968,8 +1968,10 @@ function populateAdminSelects(){
 
 function renderAdminLists(){
   const teams=divTeams();
+
   const upList=document.getElementById('upcoming-admin-list');
   const upcoming=STATE.games.filter(g=>g.type==='upcoming'||g.type==='live');
+
   upList.innerHTML=upcoming.length?upcoming.map(g=>{
     const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
     return `<div class="game-admin-item">
@@ -1982,6 +1984,32 @@ function renderAdminLists(){
       </div>
     </div>`;
   }).join(''):'<p style="color:var(--muted);font-size:13px;">No hay partidos próximos.</p>';
+
+  // 🔴 AQUÍ MISMO PEGAS ESTO ↓↓↓
+
+  const tabResults = document.getElementById('tab-results');
+
+  if (!document.getElementById('recalc-stats-btn')) {
+    const div = document.createElement('div');
+    div.style.marginTop = '20px';
+    div.style.paddingTop = '16px';
+    div.style.borderTop = '1px solid var(--border)';
+
+    div.innerHTML = `
+      <p class="section-subtitle" style="margin-bottom:10px;">Herramientas de reparación</p>
+      <button id="recalc-stats-btn" class="btn btn-gold" style="width:100%;">
+        🔄 Recalcular estadísticas desde cero
+      </button>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+        Resetea PTS y PJ de todos los jugadores y los recalcula solo con los partidos activos.
+      </p>
+    `;
+
+    tabResults.appendChild(div);
+
+    document.getElementById('recalc-stats-btn').onclick = recalcAllStats;
+  }
+}
 
   const resList=document.getElementById('results-admin-list');
   const finished=STATE.games.filter(g=>g.type==='finished');
