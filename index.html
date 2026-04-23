@@ -1436,13 +1436,27 @@ function hideRoster() {
 }
 
 /* ══ RENDER GAMES ══ */
+let _showAllFinished = false;
 function renderGames() {
   const teams    = divTeams();
   const finished = STATE.games.filter(g=>g.type==='finished');
   const upcoming = STATE.games.filter(g=>g.type==='upcoming'||g.type==='live');
   let filtered   = activeFilter==='finished'?finished:activeFilter==='upcoming'?upcoming:STATE.games;
 
-  const cards=filtered.map(g => {
+  const INITIAL_SHOW = 4;
+  const finishedVisible = _showAllFinished ? finished : finished.slice(-INITIAL_SHOW);
+
+  let filteredToRender;
+  if (activeFilter === 'upcoming') {
+    filteredToRender = upcoming;
+  } else if (activeFilter === 'finished') {
+    filteredToRender = finishedVisible;
+  } else {
+    const live = STATE.games.filter(g => g.type === 'live');
+    filteredToRender = [...live, ...upcoming, ...finishedVisible];
+  }
+
+  const cards=filteredToRender.map(g => {   
     const home=teams[g.home], away=teams[g.away]; if(!home||!away) return '';
     const rowHome=`<div class="ts-info">${smallLogo(g.home)}<div class="ts-name">${home.name}</div></div>`;
     const rowAway=`<div class="ts-info">${smallLogo(g.away)}<div class="ts-name">${away.name}</div></div>`;
@@ -1503,7 +1517,23 @@ function renderGames() {
       <button class="filter-btn ${activeFilter==='upcoming'?'active':''}" onclick="setFilter('upcoming')">Próximos (${upcoming.length})</button>
       <button class="filter-btn ${activeFilter==='finished'?'active':''}" onclick="setFilter('finished')">Resultados (${finished.length})</button>
     </div>
-    <div class="games-grid">${cards||'<p style="color:var(--muted)">No hay partidos en esta categoría.</p>'}</div>`;
+    <div class="games-grid">${cards||'<p style="color:var(--muted)">No hay partidos en esta categoría.</p>'}</div>
+    ${activeFilter !== 'upcoming' && finished.length > INITIAL_SHOW ? `
+      <div style="text-align:center;margin-top:24px;">
+        ${!_showAllFinished ? `
+          <button onclick="_showAllFinished=true;renderGames();setTimeout(activateReveal,50);"
+            style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
+            onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
+            Ver todos los resultados (${finished.length}) ↓
+          </button>` : `
+          <button onclick="_showAllFinished=false;renderGames();setTimeout(activateReveal,50);setTimeout(()=>document.getElementById('games-root').scrollIntoView({behavior:'smooth'}),100);"
+            style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
+            onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
+            onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
+            Ver menos ↑
+          </button>`}
+      </div>` : ''}`;
 }
 
 function setFilter(f) { activeFilter=f; renderGames(); setTimeout(activateReveal,50); }
