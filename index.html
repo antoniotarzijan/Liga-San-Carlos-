@@ -2316,15 +2316,36 @@ async function saveResult(){
     if(statsErr) console.warn('Error guardando game_stats:',statsErr.message);
   }
 
-  const playersWithActivity=[...homeScores,...awayScores].filter(s=>s.played||s.pts>0);
-  if(playersWithActivity.length>0){
+  const playerIdsInGame = [
+    ...homeScores.filter(s => s.played || s.pts > 0).map(s => s.id),
+    ...awayScores.filter(s => s.played || s.pts > 0).map(s => s.id),
+  ];
+
+  if (playerIdsInGame.length > 0) {
     showToast('⏳ Actualizando estadísticas...');
-    for(const s of playersWithActivity){
-      const newPoints=(s.points||0)+s.pts;
-      const newGames=(s.games||0)+1;
-      const {error:plErr}=await _supabase.from(divCfg().playersTable)
-        .update({points:newPoints,games:newGames}).eq('id',s.id);
-      if(plErr) console.warn(`Error actualizando jugador ${s.name}:`,plErr.message);
+
+    const { data: allPlayerStats } = await _supabase
+      .from('game_stats')
+      .select('player_id, points, game_id')
+      .in('player_id', playerIdsInGame)
+      .eq('division', activeDivision)
+      .eq('played', true);
+
+    const totals = {};
+    (allPlayerStats || []).forEach(s => {
+      if (!totals[s.player_id]) totals[s.player_id] = { points: 0, gameIds: new Set() };
+      totals[s.player_id].points += (s.points || 0);
+      totals[s.player_id].gameIds.add(s.game_id);
+    });
+
+    await _supabase.from(divCfg().playersTable)
+      .update({ points: 0, games: 0 })
+      .in('id', playerIdsInGame);
+
+    for (const [pid, vals] of Object.entries(totals)) {
+      await _supabase.from(divCfg().playersTable)
+        .update({ points: vals.points, games: vals.gameIds.size })
+        .eq('id', +pid);
     }
   }
 
@@ -2919,46 +2940,68 @@ function igClipText(ctx, text, maxWidth) {
   return s + '…';
 }
 async function recalcAllStats(){
-  if(!confirm('¿Recalcular todas las estadísticas desde cero?\nEsto reseteará PTS y PJ de todos los jugadores y los recalculará solo con los partidos activos.')) return;
+  if(!confirm('¿Recalcular todas las estadísticas desde cero?')) return;
   showToast('⏳ Recalculando...');
 
-  // 1. Resetear todos los jugadores a 0
-  const {error:resetErr} = await _supabase.from(divCfg().playersTable)
-    .update({points:0, games:0}).gt('id', 0);
-  if(resetErr){ showToast('⚠ Error al resetear: '+resetErr.message); return; }
+  try {
+    const finishedIds = STATE.games.filter(g => g.type === 'finished').map(g => g.id);
+    if(finishedIds.length === 0){
+      showToast('⚠ No hay partidos finalizados');
+      return;
+    }
 
-  // 2. Obtener todos los game_stats de partidos activos de esta división
-  const finishedIds = STATE.games.filter(g=>g.type==='finished').map(g=>g.id);
-  if(finishedIds.length === 0){
-    showToast('✓ Estadísticas reseteadas (no hay partidos activos)');
-    await renderScorers(); return;
+    const { data: allStats, error: statsErr } = await _supabase
+      .from('game_stats')
+      .select('player_id, points, game_id')
+      .in('game_id', finishedIds)
+      .eq('division', activeDivision)
+      .eq('played', true);
+
+    if(statsErr) throw new Error('Error leyendo stats: ' + statsErr.message);
+
+    const totals = {};
+    (allStats || []).forEach(s => {
+      if(!s.player_id) return;
+      if(!totals[s.player_id]) totals[s.player_id] = { points: 0, gameIds: new Set() };
+      totals[s.player_id].points += (s.points || 0);
+      totals[s.player_id].gameIds.add(s.game_id);
+    });
+
+    if(Object.keys(totals).length === 0){
+      showToast('⚠ No se encontraron estadísticas en game_stats');
+      return;
+    }
+
+    const { data: allPlayers, error: plErr } = await _supabase
+      .from(divCfg().playersTable)
+      .select('id');
+
+    if(plErr) throw new Error('Error leyendo jugadores: ' + plErr.message);
+
+    for(let i = 0; i < allPlayers.length; i += 50){
+      const ids = allPlayers.slice(i, i + 50).map(p => p.id);
+      const { error } = await _supabase
+        .from(divCfg().playersTable)
+        .update({ points: 0, games: 0 })
+        .in('id', ids);
+      if(error) throw new Error('Error en reset: ' + error.message);
+    }
+
+    for(const [pid, vals] of Object.entries(totals)){
+      const { error } = await _supabase
+        .from(divCfg().playersTable)
+        .update({ points: vals.points, games: vals.gameIds.size })
+        .eq('id', +pid);
+      if(error) throw new Error('Error actualizando jugador ' + pid + ': ' + error.message);
+    }
+
+    await renderScorers();
+    showToast(`✓ ${Object.keys(totals).length} jugadores recalculados correctamente`);
+
+  } catch(err) {
+    console.error(err);
+    showToast('⚠ ' + err.message);
   }
-
-  const {data:allStats, error:statsErr} = await _supabase
-    .from('game_stats').select('*')
-    .in('game_id', finishedIds)
-    .eq('division', activeDivision);
-  if(statsErr){ showToast('⚠ Error al leer stats: '+statsErr.message); return; }
-
-  // 3. Agrupar por player_id
-  // Un jugador cuenta 1 partido por cada game_id único en que aparece
-  const totals = {};
-  (allStats||[]).forEach(s => {
-    if(!s.player_id) return;
-    if(!totals[s.player_id]) totals[s.player_id] = {points:0, gameIds: new Set()};
-    totals[s.player_id].points += (s.points||0);
-    totals[s.player_id].gameIds.add(s.game_id); // ← cuenta aparición = jugó ese partido
-  });
-
-  // 4. Aplicar totales
-  for(const [pid, vals] of Object.entries(totals)){
-    await _supabase.from(divCfg().playersTable)
-      .update({points: vals.points, games: vals.gameIds.size})
-      .eq('id', +pid);
-  }
-
-  await renderScorers();
-  showToast(`✓ Recalculado: ${Object.keys(totals).length} jugadores actualizados`);
 }
 
 </script>
