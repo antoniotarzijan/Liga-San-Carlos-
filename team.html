@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equipo — Liga San Carlos</title>
+  <link rel="icon" type="image/png" href="images/logo liga.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red:    #f80808;
+      --blue:   #3009dc;
+      --gold:   #f2b34e;
+      --dark:   #08090C;
+      --dark2:  #111318;
+      --card:   #161920;
+      --text:   #E8EAF0;
+      --muted:  #6B7280;
+      --border: rgba(255,255,255,0.07);
+      --team-color: #1E3A8A;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Barlow', sans-serif; background: var(--dark); color: var(--text); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 clamp(16px,6vw,120px); height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,9,12,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); gap: 12px;
+    }
+    .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; text-decoration: none; color: var(--text); }
+    .nav-logo span { color: var(--red); }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; padding: 7px 14px;
+      border: 1px solid var(--border); border-radius: 3px;
+      transition: all .15s;
+    }
+    .nav-back:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 60vh;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; overflow: hidden;
+      padding-top: 64px;
+    }
+    .hero-bg-img {
+      position: absolute; inset: 0; z-index: 0;
+      background-size: cover; background-position: center top;
+      background-repeat: no-repeat;
+      filter: brightness(0.35) saturate(0.8);
+      transition: opacity .5s;
+    }
+    .hero-bg-img.no-photo {
+      background: linear-gradient(135deg, var(--team-color) 0%, #08090C 70%);
+      filter: none; opacity: 0.6;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(to top, rgba(8,9,12,1) 0%, rgba(8,9,12,0.5) 40%, transparent 70%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: clamp(32px,5vw,60px) clamp(24px,8vw,120px) 48px;
+      display: flex; align-items: flex-end; gap: 32px; flex-wrap: wrap;
+    }
+    .hero-logo-wrap {
+      width: clamp(80px,12vw,130px); height: clamp(80px,12vw,130px);
+      flex-shrink: 0; filter: drop-shadow(0 4px 24px rgba(0,0,0,.7));
+    }
+    .hero-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .hero-logo-placeholder {
+      width: 100%; height: 100%; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: #fff;
+      background: var(--team-color);
+    }
+    .hero-info { flex: 1; min-width: 200px; }
+    .hero-division {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 8px;
+    }
+    .hero-team-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 8vw, 84px);
+      line-height: .92; letter-spacing: 1px;
+      text-shadow: 0 2px 20px rgba(0,0,0,.5);
+    }
+    .hero-abbr {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--muted); margin-top: 8px;
+    }
+    .hero-stats-row {
+      display: flex; gap: 32px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .hero-stat { text-align: left; }
+    .hero-stat-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 36px;
+      line-height: 1; color: var(--gold);
+    }
+    .hero-stat-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-top: 2px;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    /* ── PHOTO UPLOAD BUTTON ── */
+    .hero-photo-btn {
+      position: absolute; top: 80px; right: clamp(16px,4vw,48px); z-index: 10;
+      display: none;
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 3px;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.2);
+      color: var(--muted); cursor: pointer; transition: all .15s;
+      align-items: center; gap: 6px;
+    }
+    .hero-photo-btn:hover { color: var(--text); border-color: rgba(255,255,255,.4); }
+
+    /* ── TABS ── */
+    .tabs-bar {
+      position: sticky; top: 64px; z-index: 50;
+      background: rgba(8,9,12,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; padding: 0 clamp(24px,8vw,120px);
+      overflow-x: auto; gap: 0;
+    }
+    .tab-btn {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 16px 20px; color: var(--muted); background: none; border: none;
+      border-bottom: 2px solid transparent; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--red); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    /* ── MAIN CONTENT ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 0 clamp(24px,8vw,120px); }
+    section { padding: 48px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px,4vw,40px);
+      letter-spacing: 1px; margin-bottom: 24px;
+    }
+    .section-title span { color: var(--red); }
+
+    /* ── STANDING CARD ── */
+    .standing-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 24px 32px;
+      display: flex; align-items: center; gap: 40px;
+      flex-wrap: wrap; margin-bottom: 32px;
+      position: relative; overflow: hidden;
+    }
+    .standing-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      background: var(--team-color);
+    }
+    .standing-stat { text-align: center; }
+    .standing-stat-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+      line-height: 1; color: var(--gold);
+    }
+    .standing-stat-label {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      margin-top: 4px;
+    }
+    .standing-divider { width: 1px; height: 60px; background: var(--border); }
+    .standing-pos {
+      font-family: 'Bebas Neue', sans-serif; font-size: 80px; line-height: 1;
+      color: rgba(255,255,255,.06); position: absolute; right: 24px; top: 50%;
+      transform: translateY(-50%); pointer-events: none;
+    }
+    .form-row { display: flex; gap: 6px; align-items: center; margin-top: 12px; }
+    .form-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .form-dot.w { background: #4ADE80; }
+    .form-dot.l { background: #F87171; }
+
+    /* ── RESULTS ── */
+    .results-list { display: flex; flex-direction: column; gap: 12px; }
+    .result-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden; transition: border-color .15s;
+    }
+    .result-card:hover { border-color: rgba(255,255,255,.15); }
+    .result-card.win { border-left: 3px solid #4ADE80; }
+    .result-card.loss { border-left: 3px solid #F87171; }
+    .result-header {
+      padding: 10px 16px; background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .result-round {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+    }
+    .result-date { font-size: 12px; color: var(--muted); }
+    .result-body { padding: 16px; }
+    .result-teams { display: flex; align-items: center; gap: 16px; }
+    .result-team {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+    }
+    .result-team.away { flex-direction: row-reverse; }
+    .result-team-logo { width: 44px; height: 44px; flex-shrink: 0; }
+    .result-team-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .result-team-name {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px;
+    }
+    .result-team.away .result-team-name { text-align: right; }
+    .result-score-wrap {
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0; padding: 0 8px;
+    }
+    .result-score {
+      font-family: 'Bebas Neue', sans-serif; font-size: 42px; line-height: 1;
+      min-width: 40px; text-align: center;
+    }
+    .result-score.winner { color: var(--text); }
+    .result-score.loser { color: var(--muted); }
+    .result-sep {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 14px; color: var(--muted);
+    }
+    .result-footer {
+      padding: 8px 16px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--muted);
+    }
+    .result-mvp { color: var(--gold); }
+    .result-venue-badge {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 2px;
+    }
+    .result-venue-badge.win { background: rgba(74,222,128,.1); color: #4ADE80; }
+    .result-venue-badge.loss { background: rgba(248,113,113,.1); color: #F87171; }
+    .upcoming-card {
+      background: rgba(242,179,78,.04); border: 1px solid rgba(242,179,78,.2);
+      border-radius: 6px; padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .upcoming-info { flex: 1; }
+    .upcoming-label {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 6px;
+    }
+    .upcoming-matchup {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px;
+    }
+    .upcoming-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── ROSTER TABLE ── */
+    .roster-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden;
+    }
+    .roster-head {
+      display: grid; grid-template-columns: 44px 1fr 70px 70px 70px 70px;
+      padding: 12px 20px; background: rgba(255,255,255,.04);
+      border-bottom: 1px solid var(--border);
+    }
+    .roster-head span {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); text-align: center;
+    }
+    .roster-head span:nth-child(2) { text-align: left; }
+    .roster-row-item {
+      display: grid; grid-template-columns: 44px 1fr 70px 70px 70px 70px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      align-items: center; transition: background .15s; position: relative;
+    }
+    .roster-row-item:last-child { border-bottom: none; }
+    .roster-row-item:hover { background: rgba(255,255,255,.03); }
+    .roster-row-item.top { }
+    .roster-row-item.top::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--gold);
+    }
+    .r-rank {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+      font-size: 16px; color: var(--muted); text-align: center;
+    }
+    .r-name-wrap { display: flex; align-items: center; gap: 8px; }
+    .r-name {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 16px; text-decoration: none; color: inherit;
+      transition: color .15s;
+    }
+    .r-name:hover { color: var(--gold); }
+    .r-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 13px;
+      color: var(--muted); letter-spacing: 1px;
+    }
+    .r-pos {
+      font-size: 11px; color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;
+    }
+    .r-cell {
+      text-align: center; font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 600; font-size: 16px;
+    }
+    .r-cell.pts { color: var(--gold); font-weight: 700; font-size: 18px; }
+    .roster-empty {
+      padding: 48px; text-align: center; color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    /* ── LOADING / EMPTY ── */
+    .loading-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 60vh; flex-direction: column; gap: 16px;
+    }
+    .loading-spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--red);
+      animation: spin .8s linear infinite;
+    }
+    .loading-text {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .error-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 60vh; flex-direction: column; gap: 16px; text-align: center;
+      padding: 40px;
+    }
+    .error-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red);
+    }
+    .error-sub { color: var(--muted); font-size: 14px; }
+
+    /* ── PHOTO MODAL ── */
+    #photo-modal {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.92); backdrop-filter: blur(20px);
+      align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+      padding: 20px;
+    }
+    #photo-modal.open { display: flex; }
+    .photo-modal-box {
+      background: var(--card); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px; padding: 28px 24px; width: 100%; max-width: 440px;
+    }
+    .photo-modal-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 24px; margin-bottom: 6px;
+    }
+    .photo-modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .photo-input {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 4px; padding: 10px 12px; color: var(--text);
+      font-family: 'Barlow', sans-serif; font-size: 14px; outline: none;
+      transition: border-color .15s; margin-bottom: 14px;
+    }
+    .photo-input:focus { border-color: rgba(255,255,255,.25); }
+    .photo-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 4px; border: none; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-red:hover { background: #c8001a; }
+    .btn-outline { background: none; border: 1px solid var(--border); color: var(--muted); }
+    .btn-outline:hover { border-color: rgba(255,255,255,.25); color: var(--text); }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-gold:hover { background: #e0951f; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #4ADE80; color: #000;
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 12px 24px; border-radius: 4px; transition: transform .3s; z-index: 9999;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      main { padding: 0 16px; }
+      .tabs-bar { padding: 0 16px; }
+      .hero-content { padding: 24px 16px 36px; gap: 16px; }
+      .hero-stats-row { gap: 20px; }
+      .hero-stat-num { font-size: 28px; }
+      .standing-card { padding: 20px 16px; gap: 20px; }
+      .standing-stat-num { font-size: 36px; }
+      .standing-pos { font-size: 60px; }
+      .result-team-name { font-size: 13px; }
+      .result-score { font-size: 34px; }
+      .roster-head { grid-template-columns: 36px 1fr 52px 52px 52px; }
+      .roster-head span:nth-child(4) { display: none; }
+      .roster-row-item { grid-template-columns: 36px 1fr 52px 52px 52px; }
+      .roster-row-item > *:nth-child(4) { display: none; }
+      .r-cell { font-size: 13px; }
+      .r-cell.pts { font-size: 15px; }
+    }
+    @media (max-width: 480px) {
+      .result-team-logo { width: 32px; height: 32px; }
+      .result-score { font-size: 28px; min-width: 30px; }
+      .roster-head { grid-template-columns: 30px 1fr 48px 52px; }
+      .roster-head span:nth-child(4), .roster-head span:nth-child(5) { display: none; }
+      .roster-row-item { grid-template-columns: 30px 1fr 48px 52px; }
+      .roster-row-item > *:nth-child(4), .roster-row-item > *:nth-child(5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">LSC<span>·</span>2026</a>
+  <a href="javascript:history.back()" class="nav-back">← Volver</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero-root">
+  <div class="loading-screen" style="padding-top:64px;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando equipo...</div>
+  </div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div id="photo-modal">
+  <div class="photo-modal-box">
+    <div class="photo-modal-title">Foto de equipo</div>
+    <div class="photo-modal-sub">Pega la URL de la imagen que quieres usar como fondo</div>
+    <input type="url" class="photo-input" id="photo-url-input" placeholder="https://..." />
+    <div class="photo-actions">
+      <button class="btn btn-outline" onclick="closePhotoModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveTeamPhoto()">Guardar foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar" id="tabs-bar" style="display:none;">
+  <button class="tab-btn active" onclick="showTab('results')">Partidos</button>
+  <button class="tab-btn" onclick="showTab('roster')">Planilla</button>
+  <button class="tab-btn" onclick="showTab('standing')">Posición</button>
+</div>
+
+<!-- MAIN -->
+<main id="main-root" style="display:none;">
+
+  <!-- TAB: PARTIDOS -->
+  <section id="tab-results">
+    <h2 class="section-title">Partidos <span>·</span> Temporada 2026</h2>
+    <div id="upcoming-list" style="margin-bottom:24px;"></div>
+    <div id="results-list" class="results-list"></div>
+  </section>
+
+  <!-- TAB: PLANILLA -->
+  <section id="tab-roster" style="display:none;">
+    <h2 class="section-title">Planilla <span>·</span> Jugadores</h2>
+    <div class="roster-wrap">
+      <div class="roster-head">
+        <span>#</span>
+        <span>Jugador</span>
+        <span>POS</span>
+        <span>PJ</span>
+        <span>PTS</span>
+        <span>PPG</span>
+      </div>
+      <div id="roster-list"></div>
+    </div>
+  </section>
+
+  <!-- TAB: POSICIÓN -->
+  <section id="tab-standing" style="display:none;">
+    <h2 class="section-title">Posición <span>·</span> Liga</h2>
+    <div id="standing-detail"></div>
+  </section>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* ══ CONFIG ══ */
+const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
+const ADMIN_UID   = 'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c';
+const _supabase   = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const TEAMS = {
+  primera: {
+    EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
+    ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
+    OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
+    INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
+    TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
+    SWD:  { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png' },
+    OWLS: { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png' },
+    SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
+    BAR:  { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png' },
+  },
+  segunda: {
+    T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
+    T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
+    T2C:{ abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png' },
+    T2D:{ abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png' },
+    T2E:{ abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png' },
+    T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png' },
+    T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
+    T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
+    T2I:{ abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png' },
+  },
+};
+
+const DB = {
+  primera: { games:'games', players:'players' },
+  segunda: { games:'games_segunda', players:'players_segunda' },
+};
+
+/* ══ STATE ══ */
+const params   = new URLSearchParams(location.search);
+const teamId   = params.get('id');
+const division = params.get('div') || 'primera';
+const teamData = TEAMS[division]?.[teamId];
+
+let allGames   = [];
+let _isAdmin   = false;
+let _session   = null;
+
+/* ══ AUTH ══ */
+(async () => {
+  const { data } = await _supabase.auth.getSession();
+  _session = data.session;
+  _isAdmin = _session?.user?.id === ADMIN_UID;
+  if (_isAdmin) {
+    document.getElementById('hero-photo-btn') && (document.getElementById('hero-photo-btn').style.display = 'inline-flex');
+  }
+})();
+
+/* ══ INIT ══ */
+if (!teamData || !teamId) {
+  document.getElementById('hero-root').innerHTML = `
+    <div class="error-screen" style="padding-top:64px;">
+      <div class="error-title">Equipo no encontrado</div>
+      <div class="error-sub">Verifica que el enlace sea correcto.</div>
+      <a href="index.html" style="margin-top:16px;color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;font-size:13px;text-transform:uppercase;">← Volver al inicio</a>
+    </div>`;
+} else {
+  init();
+}
+
+async function init() {
+  document.title = `${teamData.name} — Liga San Carlos`;
+  document.documentElement.style.setProperty('--team-color', teamData.color);
+
+  // Cargar todo en paralelo
+  const [gamesRes, playersRes, photoRes] = await Promise.all([
+    _supabase.from(DB[division].games).select('*').order('id', { ascending: true }),
+    _supabase.from(DB[division].players).select('*').eq('team', teamId).order('points', { ascending: false }),
+    _supabase.from('team_photos').select('photo_url').eq('team_id', teamId).eq('division', division).single(),
+  ]);
+
+  allGames = (gamesRes.data || []).map(r => ({
+    id: r.id, type: r.type, round: r.round,
+    date: r.date || 'Por definir',
+    home: r.home, away: r.away,
+    venue: r.venue || 'Colegio Cumbres',
+    homeScore: r.home_score, awayScore: r.away_score,
+    mvp: r.mvp || '',
+  }));
+
+  const players = playersRes.data || [];
+  const photoUrl = photoRes.data?.photo_url || null;
+
+  renderHero(photoUrl);
+  renderResults(players);
+  renderRoster(players);
+  renderStanding();
+
+  document.getElementById('tabs-bar').style.display = 'flex';
+  document.getElementById('main-root').style.display = 'block';
+  setTimeout(activateReveal, 80);
+}
+
+/* ══ STANDINGS CALC ══ */
+function computeStandings() {
+  const teams = TEAMS[division];
+  const rows = {};
+  Object.keys(teams).forEach(id => {
+    rows[id] = { teamId: id, gp: 0, w: 0, l: 0, diff: 0, pf: 0, pa: 0, pts: 0, form: [] };
+  });
+  allGames.filter(g => g.type === 'finished').forEach(g => {
+    if (!rows[g.home] || !rows[g.away]) return;
+    const hs = +g.homeScore, as = +g.awayScore;
+    rows[g.home].gp++; rows[g.away].gp++;
+    rows[g.home].pf += hs; rows[g.away].pf += as;
+    rows[g.home].pa += as; rows[g.away].pa += hs;
+    rows[g.home].diff += hs - as; rows[g.away].diff += as - hs;
+    if (hs > as) {
+      rows[g.home].w++; rows[g.away].l++;
+      rows[g.home].pts += 2; rows[g.away].pts += 1;
+      rows[g.home].form.push('w'); rows[g.away].form.push('l');
+    } else {
+      rows[g.away].w++; rows[g.home].l++;
+      rows[g.away].pts += 2; rows[g.home].pts += 1;
+      rows[g.away].form.push('w'); rows[g.home].form.push('l');
+    }
+  });
+  return Object.values(rows).sort((a, b) => {
+    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
+    if (bp !== ap) return bp - ap;
+    return b.pts - a.pts || b.diff - a.diff || b.pf - a.pf;
+  });
+}
+
+/* ══ RENDER HERO ══ */
+function renderHero(photoUrl) {
+  const t = teamData;
+  const hasBg = !!photoUrl;
+  const bgClass = hasBg ? '' : 'no-photo';
+  const bgStyle = hasBg ? `background-image:url('${photoUrl}')` : '';
+
+  // Calc stats
+  const myGames = allGames.filter(g => (g.home === teamId || g.away === teamId) && g.type === 'finished');
+  const wins = myGames.filter(g => {
+    return (g.home === teamId && +g.homeScore > +g.awayScore) ||
+           (g.away === teamId && +g.awayScore > +g.homeScore);
+  }).length;
+  const losses = myGames.length - wins;
+  const pct = myGames.length ? (wins / myGames.length * 100).toFixed(0) + '%' : '—';
+
+  const adminBtn = `
+    <button class="hero-photo-btn" id="hero-photo-btn" onclick="openPhotoModal()" style="display:${_isAdmin ? 'inline-flex' : 'none'}">
+      📷 Cambiar foto
+    </button>`;
+
+  document.getElementById('hero-root').innerHTML = `
+    <div class="hero-bg-img ${bgClass}" style="${bgStyle}"></div>
+    <div class="hero-overlay"></div>
+    ${adminBtn}
+    <div class="hero-content">
+      <div class="hero-logo-wrap">
+        ${t.logo
+          ? `<img src="${t.logo}" alt="${t.name}" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div class="hero-logo-placeholder" style="background:${t.color};display:${t.logo ? 'none' : 'flex'}">${t.abbr}</div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-division">${division === 'primera' ? 'Primera' : 'Segunda'} División · Liga San Carlos 2026</div>
+        <div class="hero-team-name">${t.name}</div>
+        <div class="hero-abbr">${t.abbr}</div>
+        <div class="hero-stats-row">
+          <div class="hero-stat">
+            <div class="hero-stat-num">${myGames.length}</div>
+            <div class="hero-stat-label">Jugados</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" style="color:#4ADE80">${wins}</div>
+            <div class="hero-stat-label">Ganados</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" style="color:#F87171">${losses}</div>
+            <div class="hero-stat-label">Perdidos</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">${pct}</div>
+            <div class="hero-stat-label">% Victoria</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══ RENDER RESULTS ══ */
+function renderResults(players) {
+  const teams = TEAMS[division];
+  const myGames = allGames.filter(g => g.home === teamId || g.away === teamId);
+  const finished = myGames.filter(g => g.type === 'finished').reverse();
+  const upcoming = myGames.filter(g => g.type === 'upcoming' || g.type === 'live');
+
+  // Próximos
+  const upEl = document.getElementById('upcoming-list');
+  if (upcoming.length) {
+    upEl.innerHTML = upcoming.map(g => {
+      const opp = g.home === teamId ? g.away : g.home;
+      const oppTeam = teams[opp];
+      const isHome = g.home === teamId;
+      return `<div class="upcoming-card reveal">
+        <div class="upcoming-info">
+          <div class="upcoming-label">⏳ Próximo partido · Jornada ${g.round}</div>
+          <div class="upcoming-matchup">${isHome ? `${teamData.name} <span style="color:var(--muted)">vs</span> ${oppTeam?.name||opp}` : `${oppTeam?.name||opp} <span style="color:var(--muted)">vs</span> ${teamData.name}`}</div>
+          <div class="upcoming-meta">📅 ${g.date} &nbsp;·&nbsp; 🏟️ ${g.venue} &nbsp;·&nbsp; ${isHome ? '🏠 Local' : '✈️ Visita'}</div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);">VS</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Resultados
+  const resEl = document.getElementById('results-list');
+  if (!finished.length) {
+    resEl.innerHTML = `<div style="padding:48px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;">Aún no hay resultados</div>`;
+    return;
+  }
+
+  resEl.innerHTML = finished.map(g => {
+    const isHome = g.home === teamId;
+    const opp = isHome ? g.away : g.home;
+    const oppTeam = teams[opp];
+    const myScore = isHome ? +g.homeScore : +g.awayScore;
+    const oppScore = isHome ? +g.awayScore : +g.homeScore;
+    const won = myScore > oppScore;
+    const cls = won ? 'win' : 'loss';
+    const logoHTML = (id) => {
+      const t = teams[id];
+      return t?.logo ? `<img src="${t.logo}" alt="${t?.abbr||id}" onerror="this.style.display='none'">` : '';
+    };
+    return `<div class="result-card ${cls} reveal">
+      <div class="result-header">
+        <span class="result-round">Jornada ${g.round} · ${isHome ? '🏠 Local' : '✈️ Visita'}</span>
+        <span class="result-date">✓ ${g.date}</span>
+      </div>
+      <div class="result-body">
+        <div class="result-teams">
+          <div class="result-team">
+            <div class="result-team-logo">${logoHTML(teamId)}</div>
+            <div class="result-team-name">${teamData.name}</div>
+          </div>
+          <div class="result-score-wrap">
+            <div class="result-score ${won ? 'winner' : 'loser'}">${myScore}</div>
+            <div class="result-sep">—</div>
+            <div class="result-score ${won ? 'loser' : 'winner'}">${oppScore}</div>
+          </div>
+          <div class="result-team away">
+            <div class="result-team-logo">${logoHTML(opp)}</div>
+            <div class="result-team-name">${oppTeam?.name || opp}</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-footer">
+        <span>🏟️ ${g.venue}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${g.mvp ? `<span class="result-mvp">⭐ ${g.mvp}</span>` : ''}
+          <span class="result-venue-badge ${cls}">${won ? 'VICTORIA' : 'DERROTA'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ RENDER ROSTER ══ */
+function renderRoster(players) {
+  const el = document.getElementById('roster-list');
+  if (!players.length) {
+    el.innerHTML = `<div class="roster-empty">No hay jugadores registrados</div>`;
+    return;
+  }
+  el.innerHTML = players.map((p, i) => {
+    const ppg = p.games ? (p.points / p.games).toFixed(1) : '0.0';
+    const isTop = i === 0 && p.points > 0;
+    const num = p.number != null ? `<span class="r-num">#${p.number}</span>` : '';
+    return `<div class="roster-row-item ${isTop ? 'top' : ''} reveal">
+      <div class="r-rank">${i + 1}</div>
+      <div class="r-name-wrap">
+        <a href="player.html?id=${p.id}&div=${division}" class="r-name">${p.name}</a>
+        ${num}
+      </div>
+      <div class="r-cell"><span class="r-pos">${p.position || '—'}</span></div>
+      <div class="r-cell">${p.games || 0}</div>
+      <div class="r-cell pts">${p.points || 0}</div>
+      <div class="r-cell">${ppg}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ RENDER STANDING ══ */
+function renderStanding() {
+  const standings = computeStandings();
+  const pos = standings.findIndex(r => r.teamId === teamId);
+  const row = standings[pos];
+  const el = document.getElementById('standing-detail');
+  if (!row) { el.innerHTML = '<p style="color:var(--muted)">Sin datos</p>'; return; }
+
+  const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '0' : `${row.diff}`;
+  const pct = row.gp ? (row.w / row.gp * 100).toFixed(0) + '%' : '—';
+  const dots = row.form.slice(-8).map(f => `<div class="form-dot ${f}"></div>`).join('');
+
+  el.innerHTML = `
+    <div class="standing-card reveal">
+      <div class="standing-pos">${pos + 1}</div>
+      <div class="standing-stat">
+        <div class="standing-stat-num" style="color:var(--gold)">${pos + 1}°</div>
+        <div class="standing-stat-label">Posición</div>
+      </div>
+      <div class="standing-divider"></div>
+      <div class="standing-stat">
+        <div class="standing-stat-num" style="color:var(--gold)">${row.pts}</div>
+        <div class="standing-stat-label">Puntos</div>
+      </div>
+      <div class="standing-divider"></div>
+      <div class="standing-stat">
+        <div class="standing-stat-num">${row.gp}</div>
+        <div class="standing-stat-label">Jugados</div>
+      </div>
+      <div class="standing-stat">
+        <div class="standing-stat-num" style="color:#4ADE80">${row.w}</div>
+        <div class="standing-stat-label">Ganados</div>
+      </div>
+      <div class="standing-stat">
+        <div class="standing-stat-num" style="color:#F87171">${row.l}</div>
+        <div class="standing-stat-label">Perdidos</div>
+      </div>
+      <div class="standing-divider"></div>
+      <div class="standing-stat">
+        <div class="standing-stat-num">${diffStr}</div>
+        <div class="standing-stat-label">Diferencia</div>
+      </div>
+      <div class="standing-stat">
+        <div class="standing-stat-num">${pct}</div>
+        <div class="standing-stat-label">% Victoria</div>
+        <div class="form-row" style="margin-top:8px;">${dots}</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <a href="index.html#standings-root" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-decoration:none;">
+        Ver tabla completa →
+      </a>
+    </div>`;
+}
+
+/* ══ TABS ══ */
+function showTab(tab) {
+  ['results','roster','standing'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['results','roster','standing'][i] === tab);
+  });
+  setTimeout(activateReveal, 50);
+}
+
+/* ══ PHOTO MODAL (admin only) ══ */
+function openPhotoModal() {
+  document.getElementById('photo-modal').classList.add('open');
+  document.getElementById('photo-url-input').focus();
+}
+function closePhotoModal() {
+  document.getElementById('photo-modal').classList.remove('open');
+}
+async function saveTeamPhoto() {
+  const url = document.getElementById('photo-url-input').value.trim();
+  if (!url) { showToast('⚠ Ingresa una URL'); return; }
+  const { error } = await _supabase.from('team_photos').upsert(
+    { team_id: teamId, division, photo_url: url },
+    { onConflict: 'team_id,division' }
+  );
+  if (error) { showToast('⚠ Error: ' + error.message); return; }
+  closePhotoModal();
+  const bgEl = document.querySelector('.hero-bg-img');
+  if (bgEl) {
+    bgEl.classList.remove('no-photo');
+    bgEl.style.backgroundImage = `url('${url}')`;
+  }
+  showToast('✓ Foto actualizada');
+}
+
+/* ══ UTILS ══ */
+function activateReveal() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => io.observe(el));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePhotoModal();
+});
+</script>
+</body>
+</html>
