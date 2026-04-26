@@ -1357,13 +1357,12 @@ function renderTeams() {
     const logoBlock=t.logo
       ?`<div class="team-card-logo"><img src="${t.logo}" alt="${t.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'team-card-logo-placeholder\' style=\'background:${t.color}\'>${t.abbr}</div>'"></div>`
       :`<div class="team-card-logo-placeholder" style="background:${t.color}">${t.abbr}</div>`;
-    return `<div class="team-card reveal" onclick="showRoster('${id}')" style="--team-color:${t.color};">
-      <style>.team-card[data-id='${id}']::before{background:radial-gradient(ellipse at 50% 0%,${t.color}33,transparent 70%)}</style>
+      return `<div class="team-card reveal" onclick="window.location.href='team.html?id=${id}&div=${activeDivision}'" style="--team-color:${t.color};">      <style>.team-card[data-id='${id}']::before{background:radial-gradient(ellipse at 50% 0%,${t.color}33,transparent 70%)}</style>
       ${logoBlock}
       <div class="team-card-name">${t.name}</div>
       <div class="team-card-abbr">${t.abbr}</div>
-      <div class="team-card-cta">Ver nómina →</div>
-    </div>`;
+      <div class="team-card-cta">Ver equipo →</div>
+          </div>`;
   }).join('');
   document.getElementById('teams-root').innerHTML=`
     <div class="section-header reveal">
@@ -1375,65 +1374,6 @@ function renderTeams() {
     <div class="teams-grid">${cards}</div>`;
 }
 
-async function showRoster(teamId) {
-  const rosterSection=document.getElementById('roster-root');
-  rosterSection.style.display='block';
-  rosterSection.innerHTML=`<div style="text-align:center;padding:60px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;">Cargando nómina...</div>`;
-  rosterSection.scrollIntoView({behavior:'smooth'});
-  const {data,error}=await _supabase.from(divCfg().playersTable).select('*').eq('team',teamId).order('points',{ascending:false});
-  const players=error?[]:(data||[]);
-  const t=divTeams()[teamId]; if(!t) return;
-  const standings=computeStandings();
-  const teamRow=standings.find(r=>r.teamId===teamId)||{gp:0,w:0,l:0};
-  const logoBlock=t.logo
-    ?`<div class="roster-team-logo"><img src="${t.logo}" alt="${t.name}" onerror="this.onerror=null;this.style.display='none'"></div>`
-    :`<div class="roster-team-logo-placeholder" style="background:${t.color}">${t.abbr}</div>`;
-  const rows=players.map((p,i) => {
-    const avg=p.games?(p.points/p.games).toFixed(1):'0.0';
-    const topCls=i===0&&p.points>0?'top-scorer':'';
-    const numBadge=p.number!=null&&p.number!==''?`<span style="font-family:'Bebas Neue';font-size:13px;color:var(--muted);margin-left:6px;">#${p.number}</span>`:'';
-    const posBadge=p.position?`<span style="font-size:11px;color:var(--muted);margin-left:6px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">${p.position}</span>`:'';
-    return `<div class="roster-row ${topCls}">
-      <div class="roster-rank">${i+1}</div>
-      <div style="display:flex;align-items:center;gap:0;">
-        <a href="player.html?id=${p.id}&div=${activeDivision}" class="roster-name" style="text-decoration:none;color:inherit;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='var(--gold)onmouseout="this.style.color='inherit'">${p.name}${numBadge}</a>${posBadge}
-      </div>
-      <div class="roster-cell">${p.games||0}</div>
-      <div class="roster-cell pts">${p.points||0}</div>
-      <div class="roster-cell">${avg}</div>
-    </div>`;
-  }).join('');
-  rosterSection.innerHTML=`
-    <div>
-      <button class="roster-back reveal" onclick="hideRoster()">← Volver a Equipos</button>
-      <div class="roster-team-header reveal" style="border-color:${t.color}33;">
-        <style>.roster-team-header::before{background:${t.color} !important;}</style>
-        ${logoBlock}
-        <div class="roster-team-info">
-          <div class="roster-team-label">Nómina · ${divCfg().label}</div>
-          <div class="roster-team-name">${t.name}</div>
-          <div class="roster-team-stats">
-            <div class="roster-stat"><div class="roster-stat-num">${players.length}</div><div class="roster-stat-label">Jugadores</div></div>
-            <div class="roster-stat"><div class="roster-stat-num">${teamRow.gp}</div><div class="roster-stat-label">PJ</div></div>
-            <div class="roster-stat"><div class="roster-stat-num">${teamRow.w}</div><div class="roster-stat-label">Ganados</div></div>
-            <div class="roster-stat"><div class="roster-stat-num">${teamRow.l}</div><div class="roster-stat-label">Perdidos</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="standings-wrap roster-table-wrap reveal">
-        <div class="roster-table-header">
-          <span>#</span><span>Jugador</span><span>PJ</span><span>PTS</span><span>PPG</span>
-        </div>
-        ${rows||'<div class="roster-empty">Aún no hay jugadores registrados en esta nómina.</div>'}
-      </div>
-    </div>`;
-  setTimeout(activateReveal,50);
-}
-
-function hideRoster() {
-  document.getElementById('roster-root').style.display='none';
-  document.getElementById('teams-root').scrollIntoView({behavior:'smooth'});
-}
 
 /* ══ RENDER GAMES ══ */
 let _showAllFinished = false;
