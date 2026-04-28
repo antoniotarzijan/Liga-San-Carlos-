@@ -286,7 +286,6 @@
     }
     .roster-row-item:last-child { border-bottom: none; }
     .roster-row-item:hover { background: rgba(255,255,255,.03); }
-    .roster-row-item.top { }
     .roster-row-item.top::before {
       content: ''; position: absolute; left: 0; top: 0; bottom: 0;
       width: 3px; background: var(--gold);
@@ -346,7 +345,7 @@
     }
     .error-sub { color: var(--muted); font-size: 14px; }
 
-    /* ── PHOTO MODAL ── */
+    /* ── PHOTO MODAL (admin) ── */
     #photo-modal {
       display: none; position: fixed; inset: 0; z-index: 500;
       background: rgba(0,0,0,.92); backdrop-filter: blur(20px);
@@ -399,7 +398,6 @@
     .reveal.visible { opacity: 1; transform: none; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
@@ -446,7 +444,7 @@
   </div>
 </div>
 
-<!-- PHOTO MODAL -->
+<!-- PHOTO MODAL (solo admin) -->
 <div id="photo-modal">
   <div class="photo-modal-box">
     <div class="photo-modal-title">Foto de equipo</div>
@@ -503,34 +501,42 @@
 <div id="toast"></div>
 
 <script>
-/* ══ CONFIG ══ */
+/* ══════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════ */
 const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
 const ADMIN_UID   = 'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c';
 const _supabase   = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ══════════════════════════════════════════
+   EQUIPOS
+   → Para agregar foto de fondo a un equipo,
+     pega la URL entre las comillas de photo:'...'
+     Si lo dejas vacío ('') se usa el color del equipo.
+══════════════════════════════════════════ */
 const TEAMS = {
   primera: {
-    EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
-    ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
-    OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
-    INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
-    TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
-    SWD:  { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png' },
-    OWLS: { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png' },
-    SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
-    BAR:  { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png' },
+    EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png',      photo:'equipos/exman.jpg' },
+    ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png',      photo:'equipos/anana.jpg' },
+    OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png',     photo:'equipos/ols ds.jpg' },
+    INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png',        photo:'equipos/ing.jpg' },
+    TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png',       photo:'equipos/trop.jpg' },
+    SWD:  { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png',        photo:'equipos/swd.jpg' },
+    OWLS: { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png',       photo:'equipos/owls.jpg' },
+    SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png',    photo:'equipos/salitre.jpg' },
+    BAR:  { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png',      photo:'equipos/barne.jpg' },
   },
   segunda: {
-    T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
-    T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
-    T2C:{ abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png' },
-    T2D:{ abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png' },
-    T2E:{ abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png' },
-    T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png' },
-    T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
-    T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
-    T2I:{ abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png' },
+    T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png',  photo:'equipos/brillante.jpg' },
+    T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png',    photo:'equipos/dynamos.jpg' },
+    T2C:{ abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png',    photo:'equipos/derazzo.jpg' },
+    T2D:{ abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png', photo:'equipos/tabancura.jpg' },
+    T2E:{ abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png',     photo:'equipos/maria.jpg' },
+    T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png',  photo:'equipos/cusquenos.jpg)' },
+    T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png', photo:'equipos/piscoliers.jpg' },
+    T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png',       photo:'' },
+    T2I:{ abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png',    photo:'equipos/bullets.jpg' },
   },
 };
 
@@ -545,18 +551,15 @@ const teamId   = params.get('id');
 const division = params.get('div') || 'primera';
 const teamData = TEAMS[division]?.[teamId];
 
-let allGames   = [];
-let _isAdmin   = false;
-let _session   = null;
+let allGames = [];
+let _isAdmin = false;
+let _session = null;
 
 /* ══ AUTH ══ */
 (async () => {
   const { data } = await _supabase.auth.getSession();
   _session = data.session;
   _isAdmin = _session?.user?.id === ADMIN_UID;
-  if (_isAdmin) {
-    document.getElementById('hero-photo-btn') && (document.getElementById('hero-photo-btn').style.display = 'inline-flex');
-  }
 })();
 
 /* ══ INIT ══ */
@@ -575,7 +578,6 @@ async function init() {
   document.title = `${teamData.name} — Liga San Carlos`;
   document.documentElement.style.setProperty('--team-color', teamData.color);
 
-  // Cargar todo en paralelo
   const [gamesRes, playersRes, photoRes] = await Promise.all([
     _supabase.from(DB[division].games).select('*').order('id', { ascending: true }),
     _supabase.from(DB[division].players).select('*').eq('team', teamId).order('points', { ascending: false }),
@@ -592,7 +594,9 @@ async function init() {
   }));
 
   const players = playersRes.data || [];
-  const photoUrl = photoRes.data?.photo_url || null;
+
+  // Prioridad: foto subida por admin en Supabase → foto en el código → gradiente de color
+  const photoUrl = photoRes.data?.photo_url || teamData.photo || null;
 
   renderHero(photoUrl);
   renderResults(players);
@@ -642,19 +646,18 @@ function renderHero(photoUrl) {
   const bgClass = hasBg ? '' : 'no-photo';
   const bgStyle = hasBg ? `background-image:url('${photoUrl}')` : '';
 
-  // Calc stats
   const myGames = allGames.filter(g => (g.home === teamId || g.away === teamId) && g.type === 'finished');
-  const wins = myGames.filter(g => {
-    return (g.home === teamId && +g.homeScore > +g.awayScore) ||
-           (g.away === teamId && +g.awayScore > +g.homeScore);
-  }).length;
+  const wins = myGames.filter(g =>
+    (g.home === teamId && +g.homeScore > +g.awayScore) ||
+    (g.away === teamId && +g.awayScore > +g.homeScore)
+  ).length;
   const losses = myGames.length - wins;
   const pct = myGames.length ? (wins / myGames.length * 100).toFixed(0) + '%' : '—';
 
-  const adminBtn = `
-    <button class="hero-photo-btn" id="hero-photo-btn" onclick="openPhotoModal()" style="display:${_isAdmin ? 'inline-flex' : 'none'}">
+  const adminBtn = _isAdmin ? `
+    <button class="hero-photo-btn" id="hero-photo-btn" onclick="openPhotoModal()" style="display:inline-flex;">
       📷 Cambiar foto
-    </button>`;
+    </button>` : '';
 
   document.getElementById('hero-root').innerHTML = `
     <div class="hero-bg-img ${bgClass}" style="${bgStyle}"></div>
@@ -700,7 +703,6 @@ function renderResults(players) {
   const finished = myGames.filter(g => g.type === 'finished').reverse();
   const upcoming = myGames.filter(g => g.type === 'upcoming' || g.type === 'live');
 
-  // Próximos
   const upEl = document.getElementById('upcoming-list');
   if (upcoming.length) {
     upEl.innerHTML = upcoming.map(g => {
@@ -710,7 +712,10 @@ function renderResults(players) {
       return `<div class="upcoming-card reveal">
         <div class="upcoming-info">
           <div class="upcoming-label">⏳ Próximo partido · Jornada ${g.round}</div>
-          <div class="upcoming-matchup">${isHome ? `${teamData.name} <span style="color:var(--muted)">vs</span> ${oppTeam?.name||opp}` : `${oppTeam?.name||opp} <span style="color:var(--muted)">vs</span> ${teamData.name}`}</div>
+          <div class="upcoming-matchup">${isHome
+            ? `${teamData.name} <span style="color:var(--muted)">vs</span> ${oppTeam?.name || opp}`
+            : `${oppTeam?.name || opp} <span style="color:var(--muted)">vs</span> ${teamData.name}`
+          }</div>
           <div class="upcoming-meta">📅 ${g.date} &nbsp;·&nbsp; 🏟️ ${g.venue} &nbsp;·&nbsp; ${isHome ? '🏠 Local' : '✈️ Visita'}</div>
         </div>
         <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);">VS</div>
@@ -718,7 +723,6 @@ function renderResults(players) {
     }).join('');
   }
 
-  // Resultados
   const resEl = document.getElementById('results-list');
   if (!finished.length) {
     resEl.innerHTML = `<div style="padding:48px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;">Aún no hay resultados</div>`;
@@ -735,7 +739,7 @@ function renderResults(players) {
     const cls = won ? 'win' : 'loss';
     const logoHTML = (id) => {
       const t = teams[id];
-      return t?.logo ? `<img src="${t.logo}" alt="${t?.abbr||id}" onerror="this.style.display='none'">` : '';
+      return t?.logo ? `<img src="${t.logo}" alt="${t?.abbr || id}" onerror="this.style.display='none'">` : '';
     };
     return `<div class="result-card ${cls} reveal">
       <div class="result-header">
