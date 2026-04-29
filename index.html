@@ -129,8 +129,7 @@
     .standings-row{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;}    .standings-row:last-child{border-bottom:none;}
     .standings-row:hover{background:rgba(255,255,255,.03);}
     .standings-row.leader::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
-    .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);}
-    .rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:var(--muted);text-align:center;}
+    .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#9CA3AF;}    .rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:var(--muted);text-align:center;}
     .leader .rank{color:var(--gold);}
     .team-info{display:flex;align-items:center;gap:12px;}
     .team-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:64px;height:64px;background:transparent;}
@@ -1330,7 +1329,7 @@ function renderStandings() {
     </div>
     <div class="legend reveal">
       <div class="legend-item"><span class="legend-bar" style="background:var(--gold)"></span>Líder</div>
-      <div class="legend-item"><span class="legend-bar" style="background:var(--red)"></span>Clasifican a Playoffs</div>
+      <div class="legend-item"><span class="legend-bar" style="background:#9CA3AF"></span>Clasifican a Playoffs</div>
     </div>`;
 }
 
