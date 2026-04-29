@@ -1198,60 +1198,43 @@ function computeStandings() {
 
   const allRows = Object.values(rows);
 
-  function breakTie(group) {
-    if (group.length <= 1) return group;
-    const ids       = new Set(group.map(r => r.teamId));
-    const headGames = finishedGames.filter(g => ids.has(g.home) && ids.has(g.away));
-    const mini = {};
-    group.forEach(r => {
-      mini[r.teamId] = { teamId: r.teamId, diff: 0, pf: 0, w: 0, gp: 0 };
+  // Precalcular resultado de duelo directo entre cada par
+  function headToHeadResult(idA, idB) {
+    // Retorna +1 si A ganó el duelo, -1 si B ganó, 0 si empate o no jugaron
+    let wA = 0, wB = 0;
+    finishedGames.forEach(g => {
+      if (g.home === idA && g.away === idB) {
+        if (+g.homeScore > +g.awayScore) wA++; else wB++;
+      } else if (g.home === idB && g.away === idA) {
+        if (+g.homeScore > +g.awayScore) wB++; else wA++;
+      }
     });
-    headGames.forEach(g => {
-      const hs = +g.homeScore, as = +g.awayScore;
-      mini[g.home].gp++; mini[g.away].gp++;
-      mini[g.home].pf += hs; mini[g.away].pf += as;
-      mini[g.home].diff += hs - as; mini[g.away].diff += as - hs;
-      if (hs > as) { mini[g.home].w++; } else { mini[g.away].w++; }
-    });
-    if (headGames.length === 0) {
-      return group.slice().sort((a, b) =>
-        b.diff - a.diff || b.pointsFor - a.pointsFor
-      );
-    }
-    return group.slice().sort((a, b) => {
-      const ma = mini[a.teamId], mb = mini[b.teamId];
-      if (mb.diff !== ma.diff) return mb.diff - ma.diff;
-      if (mb.w    !== ma.w)    return mb.w    - ma.w;
-      if (b.diff  !== a.diff)  return b.diff  - a.diff;
-      return b.pointsFor - a.pointsFor;
-    });
-  } // ← este } cierra breakTie
-
-  // Ordenar primero por tablePoints (equipos sin partidos al fondo)
-  allRows.sort((a, b) => {
-    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
-    if (bp !== ap) return bp - ap;
-    return b.tablePoints - a.tablePoints;
-  });
-
-  // Resolver empates por grupos
-  const result = [];
-  let i = 0;
-  while (i < allRows.length) {
-    const current = allRows[i];
-    let j = i + 1;
-    while (
-      j < allRows.length &&
-      allRows[j].tablePoints === current.tablePoints &&
-      (allRows[j].gp > 0) === (current.gp > 0)
-    ) { j++; }
-    const tiedGroup = allRows.slice(i, j);
-    result.push(...(tiedGroup.length > 1 ? breakTie(tiedGroup) : tiedGroup));
-    i = j;
+    if (wA > wB) return 1;
+    if (wB > wA) return -1;
+    return 0;
   }
 
-  return result;
-} // ← este } cierra computeStandings
+  allRows.sort((a, b) => {
+    // Equipos sin partidos van al fondo
+    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
+    if (bp !== ap) return bp - ap;
+
+    // 1° Puntos de tabla
+    if (b.tablePoints !== a.tablePoints) return b.tablePoints - a.tablePoints;
+
+    // 2° Diferencial
+    if (b.diff !== a.diff) return b.diff - a.diff;
+
+    // 3° Duelo directo
+    const h2h = headToHeadResult(a.teamId, b.teamId);
+    if (h2h !== 0) return -h2h; // -h2h porque +1 significa A ganó → A va antes
+
+    // 4° Puntos anotados como último desempate
+    return b.pointsFor - a.pointsFor;
+  });
+
+  return allRows;
+}
 
 const pct = (w,gp) => gp ? (w/gp).toFixed(3).replace(/^0/,'') : '-';
 
