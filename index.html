@@ -2752,7 +2752,7 @@ async function drawInstagramTable() {
     ctx.fillStyle = i % 2 === 0 ? CARD : CARD2; ctx.fill();
 
     // Barra lateral
-    const barColor = i === 0 ? GOLD : i < league.playoffSpots ? RED : PURPLE_BAR;
+    const barColor = i < league.playoffSpots ? GOLD : PURPLE_BAR;
     igRoundRect(ctx, PAD + 2, rowY + 4, 5, ROW_H - 12, 2.5);
     ctx.fillStyle = barColor; ctx.fill();
 
@@ -2797,12 +2797,9 @@ ctx.fillText(diffStr, C.dif, midY + 9);
   const legY = START_Y + HDR_H + 4 + maxRows * ROW_H + 22;
   ctx.letterSpacing = '0px';
   ctx.font = '700 18px "Barlow Condensed", sans-serif';
-  igRoundRect(ctx, PAD + 14, legY + 2, 12, 16, 2); ctx.fillStyle = GOLD; ctx.fill();
-  ctx.textAlign = 'left'; ctx.fillStyle = MUTED2;
-  ctx.fillText('Lider', PAD + 33, legY + 16);
-  igRoundRect(ctx, PAD + 105, legY + 2, 12, 16, 2); ctx.fillStyle = RED; ctx.fill();
-  ctx.fillStyle = MUTED2;
-  ctx.fillText('Clasifican a Playoffs', PAD + 124, legY + 16);
+ igRoundRect(ctx, PAD + 14, legY + 2, 12, 16, 2); ctx.fillStyle = GOLD; ctx.fill();
+ctx.textAlign = 'left'; ctx.fillStyle = MUTED2;
+ctx.fillText('Clasifican a Playoffs (Top 8)', PAD + 33, legY + 16);
 
   // ── Footer ──
   ctx.beginPath(); ctx.moveTo(56, H-58); ctx.lineTo(W-56, H-58);
