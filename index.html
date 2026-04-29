@@ -1293,7 +1293,7 @@ function renderStandings() {
     const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
     const diffCls = row.diff > 0 ? 'diff-pos' : row.diff < 0 ? 'diff-neg' : '';
     const dots = (row.form || []).slice(-5).map(r => `<span class="dot ${r}"></span>`).join('');
-    return `<div class="standings-row ${cls} reveal">
+    return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;">
       <div class="rank">${pos}</div>
       <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
       <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
