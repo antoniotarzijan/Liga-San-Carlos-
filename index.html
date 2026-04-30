@@ -129,8 +129,7 @@
     .standings-row{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;}    .standings-row:last-child{border-bottom:none;}
     .standings-row:hover{background:rgba(255,255,255,.03);}
     .standings-row.leader::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
-    .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
-    .leader .rank{color:var(--gold);}
+    .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}    .leader .rank{color:var(--gold);}
     .team-info{display:flex;align-items:center;gap:12px;}
     .team-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:64px;height:64px;background:transparent;}
     .team-logo img{width:100%;height:100%;object-fit:contain;}
@@ -516,10 +515,10 @@
       .div-sel-sponsors{padding-bottom:0;}
       .div-sel-sponsors-logos .sponsor-logo-wrap{height:38px;}
       .div-sel-sponsors-logos{gap:16px;}
-      .standings-header{grid-template-columns:28px 1fr 36px 36px 44px 44px;padding:10px 12px;gap:0;}
-.standings-header span:nth-child(4),.standings-header span:nth-child(5),.standings-header span:nth-child(7),.standings-header span:nth-child(8){display:none;}
-.standings-row{grid-template-columns:28px 1fr 36px 36px 44px 44px;padding:12px 12px;gap:0;}
-.standings-row>*:nth-child(4),.standings-row>*:nth-child(5),.standings-row>*:nth-child(7),.standings-row>*:nth-child(8){display:none;}
+      .standings-header{grid-template-columns:28px 1fr 44px 44px 44px;padding:10px 12px;gap:0;}
+      .standings-header span:nth-child(4),.standings-header span:nth-child(5),.standings-header span:nth-child(6),.standings-header span:nth-child(7){display:none;}
+      .standings-row{grid-template-columns:28px 1fr 44px 44px 44px;padding:12px 12px;gap:0;}
+.standings-row>*:nth-child(4),.standings-row>*:nth-child(5),.standings-row>*:nth-child(6),.standings-row>*:nth-child(7){display:none;}
       .team-logo{width:38px;height:38px;}
       .team-logo img{width:100%;height:100%;}
       .team-name{font-size:13px;line-height:1.2;}
@@ -554,8 +553,12 @@
       .game-footer{flex-wrap:wrap;gap:6px;font-size:11px;}
       .games-filter{gap:8px;}
       .filter-btn{font-size:11px;padding:7px 14px;letter-spacing:1px;}
-      #scorers-root .standings-header{grid-template-columns:32px 1fr 50px 50px 56px!important;padding:10px 12px;}
-      #scorers-root .standings-row{grid-template-columns:32px 1fr 50px 50px 56px!important;padding:12px 12px;}
+      #scorers-root .standings-header{grid-template-columns:28px 1fr 44px 44px 56px!important;padding:10px 12px;}
+      #scorers-root .standings-row{grid-template-columns:28px 1fr 44px 44px 56px!important;padding:12px 12px;}
+      #scorers-root .standings-header span:nth-child(4),
+      #scorers-root .standings-header span:nth-child(5),
+      #scorers-root .standings-row>*:nth-child(4),
+      #scorers-root .standings-row>*:nth-child(5){display:block!important;}
       #news-root{padding:48px 16px;}
       .news-card-title{font-size:16px;}
       .album-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
@@ -1289,11 +1292,10 @@ function renderStandings() {
     const t = divTeams()[row.teamId]; if (!t) return '';
     const pos = i + 1;
     const cls = pos <= league.playoffSpots ? 'playoff' : '';
-    const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
+        const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
     const diffCls = row.diff > 0 ? 'diff-pos' : row.diff < 0 ? 'diff-neg' : '';
     const dots = (row.form || []).slice(-5).map(r => `<span class="dot ${r}"></span>`).join('');
-    return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;">
-      <div class="rank">${pos}</div>
+    return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;">      <div class="rank">${pos}</div>
       <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
       <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
       <div class="cell">${row.gp}</div>
@@ -2797,7 +2799,7 @@ ctx.fillText(diffStr, C.dif, midY + 9);
   const legY = START_Y + HDR_H + 4 + maxRows * ROW_H + 22;
   ctx.letterSpacing = '0px';
   ctx.font = '700 18px "Barlow Condensed", sans-serif';
- igRoundRect(ctx, PAD + 14, legY + 2, 12, 16, 2); ctx.fillStyle = GOLD; ctx.fill();
+  igRoundRect(ctx, PAD + 14, legY + 2, 12, 16, 2); ctx.fillStyle = GOLD; ctx.fill();
 ctx.textAlign = 'left'; ctx.fillStyle = MUTED2;
 ctx.fillText('Clasifican a Playoffs (Top 8)', PAD + 33, legY + 16);
 
