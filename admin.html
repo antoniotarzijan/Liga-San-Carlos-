@@ -1101,16 +1101,23 @@
     </div>
 
     <!-- ── TAB: FOTOS ── -->
-    <div id="tab-photos" class="admin-pane">
-      <p class="section-subtitle">Agregar foto al álbum</p>
-      <div class="form-group"><label>URL de la imagen</label><input type="text" id="photo-url-input" placeholder="https://..." /></div>
-      <div class="form-group"><label>Descripción (opcional)</label><input type="text" id="photo-caption-input" placeholder="ej: Partido J3 · EX-Man vs Tropics" /></div>
-      <div class="admin-actions" style="margin-top:0;">
-        <button class="btn btn-gold" onclick="addPhoto()">+ Agregar foto</button>
-      </div>
-      <p class="section-subtitle" style="margin-top:24px;">Fotos del álbum</p>
-      <div class="game-admin-list" id="photos-admin-list"></div>
-    </div>
+<div id="tab-photos" class="admin-pane">
+  <p class="section-subtitle">Agregar foto al álbum</p>
+  <div class="form-group">
+    <label>Seleccionar imagen</label>
+    <input type="file" id="photo-file-input" accept="image/*" style="padding:8px;cursor:pointer;" />
+  </div>
+  <div class="form-group">
+    <label>Descripción (opcional)</label>
+    <input type="text" id="photo-caption-input" placeholder="ej: Partido J3 · EX-Man vs Tropics" />
+  </div>
+  <div id="photo-upload-progress" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin-bottom:12px;">⏳ Subiendo imagen...</div>
+  <div class="admin-actions" style="margin-top:0;">
+    <button class="btn btn-gold" id="photo-upload-btn" onclick="addPhoto()">+ Subir y agregar foto</button>
+  </div>
+  <p class="section-subtitle" style="margin-top:24px;">Fotos del álbum</p>
+  <div class="game-admin-list" id="photos-admin-list"></div>
+</div>
 
     <!-- ── TAB: SANCIONES ── -->
     <div id="tab-sanctions" class="admin-pane">
@@ -1875,15 +1882,52 @@ async function deleteNews(id) {
 
 /* ══ PHOTOS ══ */
 async function addPhoto() {
-  const url     = document.getElementById('photo-url-input').value.trim();
-  const caption = document.getElementById('photo-caption-input').value.trim();
-  if (!url) { showToast('⚠ Ingresa la URL de la imagen'); return; }
-  const { error } = await _supabase.from(divCfg().photosTable).insert([{ url, caption: caption || null }]);
-  if (error) { showToast('⚠ Error: ' + error.message); return; }
-  document.getElementById('photo-url-input').value     = '';
+  const fileInput = document.getElementById('photo-file-input');
+  const caption   = document.getElementById('photo-caption-input').value.trim();
+  const btn       = document.getElementById('photo-upload-btn');
+  const progress  = document.getElementById('photo-upload-progress');
+
+  if (!fileInput.files || !fileInput.files[0]) {
+    showToast('⚠ Selecciona una imagen primero'); return;
+  }
+
+  const file     = fileInput.files[0];
+  const ext      = file.name.split('.').pop();
+  const fileName = `foto_${Date.now()}.${ext}`;
+
+  btn.disabled = true;
+  progress.style.display = 'block';
+
+  const { error: uploadErr } = await _supabase.storage
+    .from('galeria')
+    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+  if (uploadErr) {
+    showToast('⚠ Error al subir: ' + uploadErr.message);
+    btn.disabled = false;
+    progress.style.display = 'none';
+    return;
+  }
+
+  const { data: urlData } = _supabase.storage
+    .from('galeria')
+    .getPublicUrl(fileName);
+
+  const publicUrl = urlData.publicUrl;
+
+  const { error } = await _supabase
+    .from(divCfg().photosTable)
+    .insert([{ url: publicUrl, caption: caption || null }]);
+
+  btn.disabled = false;
+  progress.style.display = 'none';
+
+  if (error) { showToast('⚠ Error al guardar: ' + error.message); return; }
+
+  fileInput.value = '';
   document.getElementById('photo-caption-input').value = '';
   await renderPhotosAdminList();
-  showToast('✓ Foto agregada');
+  showToast('✓ Foto subida y agregada a la galería');
 }
 
 async function renderPhotosAdminList() {
