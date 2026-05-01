@@ -1105,8 +1105,7 @@
   <p class="section-subtitle">Agregar foto al álbum</p>
   <div class="form-group">
     <label>Seleccionar imagen</label>
-    <input type="file" id="photo-file-input" accept="image/*" style="padding:8px;cursor:pointer;" />
-  </div>
+    <input type="file" id="photo-file-input" accept="image/*" multiple style="padding:8px;cursor:pointer;" />  </div>
   <div class="form-group">
     <label>Descripción (opcional)</label>
     <input type="text" id="photo-caption-input" placeholder="ej: Partido J3 · EX-Man vs Tropics" />
@@ -1887,47 +1886,49 @@ async function addPhoto() {
   const btn       = document.getElementById('photo-upload-btn');
   const progress  = document.getElementById('photo-upload-progress');
 
-  if (!fileInput.files || !fileInput.files[0]) {
-    showToast('⚠ Selecciona una imagen primero'); return;
+  if (!fileInput.files || !fileInput.files.length) {
+    showToast('⚠ Selecciona al menos una imagen'); return;
   }
 
-  const file     = fileInput.files[0];
-  const ext      = file.name.split('.').pop();
-  const fileName = `foto_${Date.now()}.${ext}`;
-
+  const files = Array.from(fileInput.files);
   btn.disabled = true;
   progress.style.display = 'block';
 
-  const { error: uploadErr } = await _supabase.storage
-    .from('galeria')
-    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+  let subidas = 0;
+  let errores = 0;
 
-  if (uploadErr) {
-    showToast('⚠ Error al subir: ' + uploadErr.message);
-    btn.disabled = false;
-    progress.style.display = 'none';
-    return;
+  for (let i = 0; i < files.length; i++) {
+    const file     = files[i];
+    const ext      = file.name.split('.').pop();
+    const fileName = `foto_${Date.now()}_${i}.${ext}`;
+    progress.textContent = `⏳ Subiendo imagen ${i + 1} de ${files.length}...`;
+
+    const { error: uploadErr } = await _supabase.storage
+      .from('galeria')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadErr) { errores++; continue; }
+
+    const { data: urlData } = _supabase.storage
+      .from('galeria')
+      .getPublicUrl(fileName);
+
+    const { error: dbErr } = await _supabase
+      .from(divCfg().photosTable)
+      .insert([{ url: urlData.publicUrl, caption: caption || null }]);
+
+    if (dbErr) errores++;
+    else subidas++;
   }
-
-  const { data: urlData } = _supabase.storage
-    .from('galeria')
-    .getPublicUrl(fileName);
-
-  const publicUrl = urlData.publicUrl;
-
-  const { error } = await _supabase
-    .from(divCfg().photosTable)
-    .insert([{ url: publicUrl, caption: caption || null }]);
 
   btn.disabled = false;
   progress.style.display = 'none';
-
-  if (error) { showToast('⚠ Error al guardar: ' + error.message); return; }
-
   fileInput.value = '';
   document.getElementById('photo-caption-input').value = '';
   await renderPhotosAdminList();
-  showToast('✓ Foto subida y agregada a la galería');
+
+  if (errores === 0) showToast(`✓ ${subidas} foto${subidas > 1 ? 's' : ''} subida${subidas > 1 ? 's' : ''} correctamente`);
+  else showToast(`✓ ${subidas} subidas · ⚠ ${errores} con error`);
 }
 
 async function renderPhotosAdminList() {
