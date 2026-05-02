@@ -600,6 +600,23 @@
       .standings-header,.standings-row{grid-template-columns:24px 1fr 32px 44px 44px!important;}      .album-grid{grid-template-columns:repeat(2,1fr);}
       .share-score{font-size:40px;}
     }
+    /* ── CARRUSEL GALERÍA ── */
+.carousel-wrapper{position:relative;display:flex;align-items:center;gap:0;}
+.carousel-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 0;flex:1;}
+.carousel-track::-webkit-scrollbar{display:none;}
+.carousel-item{flex-shrink:0;width:280px;height:210px;border-radius:6px;overflow:hidden;cursor:pointer;position:relative;scroll-snap-align:start;background:var(--dark);}
+.carousel-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.carousel-item:hover img{transform:scale(1.05);}
+.carousel-item .album-item-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center;}
+.carousel-item:hover .album-item-overlay{opacity:1;}
+.carousel-btn{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;z-index:2;}
+.carousel-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);}
+.carousel-btn-left{margin-right:10px;}
+.carousel-btn-right{margin-left:10px;}
+@media(max-width:768px){
+  .carousel-item{width:220px;height:165px;}
+  .carousel-btn{width:36px;height:36px;font-size:20px;}
+}
   </style>
 </head>
 <body>
@@ -695,6 +712,14 @@
 
 <!-- ══ LIGHTBOX FOTOS ══ -->
 <div id="lightbox">
+  <div style="position:absolute;top:20px;right:24px;z-index:2;">
+    <button onclick="downloadCurrentPhoto()"
+      style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border-radius:4px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.25);color:#ffffff;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px);display:flex;align-items:center;gap:6px;"
+      onmouseover="this.style.background='rgba(0,0,0,0.8)';this.style.borderColor='rgba(255,255,255,0.5)'" 
+      onmouseout="this.style.background='rgba(0,0,0,0.55)';this.style.borderColor='rgba(255,255,255,0.25)'">
+      ⬇ Descargar
+    </button>
+  </div>
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt="">
   <div class="lb-caption" id="lightbox-caption"></div>
@@ -1720,20 +1745,48 @@ async function renderPhotos() {
   const {data,error}=await _supabase.from(divCfg().photosTable).select('*').order('id',{ascending:false});
   const photos=error?[]:(data||[]);
   lbPhotos=photos;
-  const items=photos.map((p,i)=>`
-    <div class="album-item reveal" onclick="openLightbox(${i})">
+
+  if (!photos.length) {
+    document.getElementById('photos-root').innerHTML=`
+      <div class="section-header reveal">
+        <h2 class="section-title">Galería</h2>
+        <span class="section-tag">Álbum ${league.season}</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="album-empty">Aún no hay fotos en el álbum.</div>`;
+    return;
+  }
+
+  const items = photos.map((p,i) => `
+    <div class="carousel-item" onclick="openLightbox(${i})">
       <img src="${p.url}" alt="${p.caption||''}" onerror="this.onerror=null;this.src='images/logo liga.png'">
       <div class="album-item-overlay"><div class="album-item-overlay-icon">⤢</div></div>
     </div>`).join('');
+
   document.getElementById('photos-root').innerHTML=`
     <div class="section-header reveal">
       <h2 class="section-title">Galería</h2>
       <span class="section-tag">Álbum ${league.season}</span>
       <div class="section-line"></div>
     </div>
-    ${items?`<div class="album-grid">${items}</div>`:'<div class="album-empty">Aún no hay fotos en el álbum.</div>'}`;
+    <div class="carousel-wrapper reveal">
+      <button class="carousel-btn carousel-btn-left" onclick="carouselScroll(-1)">‹</button>
+      <div class="carousel-track" id="carousel-track">${items}</div>
+      <button class="carousel-btn carousel-btn-right" onclick="carouselScroll(1)">›</button>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button onclick="openLightbox(0)" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:9px 20px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(255,255,255,.2)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+        Ver todas (${photos.length}) →
+      </button>
+    </div>`;
 }
 
+function carouselScroll(dir) {
+  const track = document.getElementById('carousel-track');
+  if (!track) return;
+  const itemWidth = track.querySelector('.carousel-item')?.offsetWidth + 16 || 300;
+  track.scrollBy({ left: dir * itemWidth * 2, behavior: 'smooth' });
+}
 function openLightbox(idx){if(!lbPhotos.length)return;lbIndex=idx;updateLightbox();document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 function lbPrev(){lbIndex=(lbIndex-1+lbPhotos.length)%lbPhotos.length;updateLightbox();}
@@ -1744,7 +1797,23 @@ function updateLightbox(){
   document.getElementById('lightbox-caption').textContent=p.caption||'';
   document.getElementById('lb-counter').textContent=`${lbIndex+1} / ${lbPhotos.length}`;
 }
-
+async function downloadCurrentPhoto(){
+  const p = lbPhotos[lbIndex];
+  if(!p) return;
+  try {
+    const response = await fetch(p.url);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const ext = p.url.split('.').pop().split('?')[0] || 'jpg';
+    a.download = `foto-lsc-${lbIndex+1}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(err) {
+    showToast('⚠ No se pudo descargar la foto');
+  }
+}
 /* ══ SANCIONES ══ */
 async function renderSanctions() {
   const {data,error}=await _supabase.from(divCfg().sanctionsTable).select('*').order('id',{ascending:false});
