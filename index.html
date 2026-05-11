@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://w.behold.so/widget.js" type="module"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -267,35 +268,6 @@
     #game-detail-content{background:#0E1117;border-radius:12px;width:100%;max-width:500px;overflow:hidden;border:1px solid rgba(255,255,255,.08);margin:auto;}
     .gd-close-btn{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;width:40px;height:40px;border-radius:50%;cursor:pointer;z-index:1101;display:flex;align-items:center;justify-content:center;transition:background .15s;}
     .gd-close-btn:hover{background:rgba(255,255,255,.2);}
-
-    /* ── NOTICIAS ── */
-    #news-root{background:linear-gradient(180deg,var(--dark) 0%,var(--dark2) 100%);}
-    .news-grid{display:flex;flex-direction:column;gap:16px;}
-    .news-card{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:transform .2s,border-color .2s;}
-    .news-card:hover{border-color:rgba(255,255,255,.15);}
-    .news-card-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
-    .news-card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1.25;margin-bottom:10px;}
-    .news-card-body-text{font-size:14px;color:var(--muted);line-height:1.65;}
-
-    /* ── FOTOS / ÁLBUM ── */
-    #photos-root{background:var(--dark2);}
-    .album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-    .album-item{position:relative;border-radius:4px;overflow:hidden;cursor:pointer;aspect-ratio:4/3;background:var(--dark);}
-    .album-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
-    .album-item:hover img{transform:scale(1.05);}
-    .album-item-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center;}
-    .album-item:hover .album-item-overlay{opacity:1;}
-    .album-item-overlay-icon{font-size:28px;color:#fff;}
-    .album-empty{padding:60px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;text-transform:uppercase;}
-    #lightbox{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.95);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-    #lightbox.open{display:flex;}
-    #lightbox-img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px;}
-    .lightbox-controls{display:flex;align-items:center;gap:20px;}
-    .lb-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:22px;width:48px;height:48px;border-radius:50%;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;}
-    .lb-btn:hover{background:rgba(255,255,255,.2);}
-    .lb-counter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;color:var(--muted);min-width:60px;text-align:center;}
-    .lb-close{position:absolute;top:20px;right:24px;background:none;border:1px solid rgba(255,255,255,.2);color:var(--muted);font-size:20px;width:40px;height:40px;border-radius:4px;cursor:pointer;}
-    .lb-caption{font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--muted);letter-spacing:1px;max-width:600px;text-align:center;}
 
     /* ── SANCIONES ── */
     #sanctions-root{background:linear-gradient(180deg,var(--dark2) 0%,var(--dark) 100%);}
@@ -559,9 +531,6 @@
       #scorers-root .standings-header span:nth-child(5),
       #scorers-root .standings-row>*:nth-child(4),
       #scorers-root .standings-row>*:nth-child(5){display:block!important;}
-      #news-root{padding:48px 16px;}
-      .news-card-title{font-size:16px;}
-      .album-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
       .sanction-card{padding:16px;}
       .sanction-player{font-size:16px;}
       .sponsors-banner{padding:32px 16px;}
@@ -600,23 +569,7 @@
       .standings-header,.standings-row{grid-template-columns:24px 1fr 32px 44px 44px!important;}      .album-grid{grid-template-columns:repeat(2,1fr);}
       .share-score{font-size:40px;}
     }
-    /* ── CARRUSEL GALERÍA ── */
-.carousel-wrapper{position:relative;display:flex;align-items:center;gap:0;}
-.carousel-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 0;flex:1;}
-.carousel-track::-webkit-scrollbar{display:none;}
-.carousel-item{flex-shrink:0;width:280px;height:210px;border-radius:6px;overflow:hidden;cursor:pointer;position:relative;scroll-snap-align:start;background:var(--dark);}
-.carousel-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
-.carousel-item:hover img{transform:scale(1.05);}
-.carousel-item .album-item-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center;}
-.carousel-item:hover .album-item-overlay{opacity:1;}
-.carousel-btn{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;z-index:2;}
-.carousel-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);}
-.carousel-btn-left{margin-right:10px;}
-.carousel-btn-right{margin-left:10px;}
-@media(max-width:768px){
-  .carousel-item{width:220px;height:165px;}
-  .carousel-btn{width:36px;height:36px;font-size:20px;}
-}
+    
   </style>
 </head>
 <body>
@@ -707,26 +660,6 @@
       <button class="btn btn-outline" onclick="closeEditPlayerModal()">Cancelar</button>
       <button class="btn btn-gold" onclick="saveEditPlayer()">Guardar cambios</button>
     </div>
-  </div>
-</div>
-
-<!-- ══ LIGHTBOX FOTOS ══ -->
-<div id="lightbox">
-  <div style="position:absolute;top:20px;left:24px;z-index:2;">
-    <button onclick="downloadCurrentPhoto()"
-      style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border-radius:4px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.25);color:#ffffff;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px);display:flex;align-items:center;gap:6px;"
-      onmouseover="this.style.background='rgba(0,0,0,0.8)';this.style.borderColor='rgba(255,255,255,0.5)'" 
-      onmouseout="this.style.background='rgba(0,0,0,0.55)';this.style.borderColor='rgba(255,255,255,0.25)'">
-      ⬇ Descargar
-    </button>
-  </div>
-  <button class="lb-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="" alt="">
-  <div class="lb-caption" id="lightbox-caption"></div>
-  <div class="lightbox-controls">
-    <button class="lb-btn" onclick="lbPrev()">←</button>
-    <div class="lb-counter" id="lb-counter">1 / 1</div>
-    <button class="lb-btn" onclick="lbNext()">→</button>
   </div>
 </div>
 
@@ -950,44 +883,6 @@
         <div class="game-admin-list" id="players-admin-list"></div>
       </div>
 
-      <!-- TAB NOTICIAS -->
-      <div id="tab-news" class="admin-pane">
-        <p class="section-subtitle">Publicar noticia</p>
-        <div class="form-group"><label>Título</label><input type="text" id="news-title-input" placeholder="ej: EX-Manquehue golea en la fecha 3" /></div>
-        <div class="form-group"><label>URL de imagen (opcional)</label><input type="text" id="news-img-input" placeholder="https://..." /></div>
-        <div class="form-group"><label>Contenido</label><textarea id="news-body-input" placeholder="Escribe el contenido de la noticia aquí..." style="min-height:120px;"></textarea></div>
-        <div class="form-row">
-          <div class="form-group"><label>Categoría</label>
-            <select id="news-cat-input">
-              <option value="Resultados">Resultados</option>
-              <option value="Crónica">Crónica</option>
-              <option value="Convocatoria">Convocatoria</option>
-              <option value="Playoff">Playoff</option>
-              <option value="General">General</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Fecha</label><input type="text" id="news-date-input" placeholder="ej: Jue 3 Abr 2026" /></div>
-        </div>
-        <div class="admin-actions" style="margin-top:0;"><button class="btn btn-gold" onclick="addNews()">+ Publicar noticia</button></div>
-        <p class="section-subtitle" style="margin-top:24px;">Noticias publicadas</p>
-        <div class="game-admin-list" id="news-admin-list"></div>
-      </div>
-
-      <!-- TAB FOTOS -->
-      <!-- TAB FOTOS -->
-<div id="tab-photos" class="admin-pane">
-  <p class="section-subtitle">Agregar foto al álbum</p>
-  <div class="form-group">
-    <label>Seleccionar imagen</label>
-    <input type="file" id="photo-file-input" accept="image/*" style="padding:8px;cursor:pointer;" />
-  </div>
-  <div class="form-group"><label>Descripción (opcional)</label><input type="text" id="photo-caption-input" placeholder="ej: Partido J3 · EX-Man vs Tropics" /></div>
-  <div id="photo-upload-progress" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin-bottom:12px;">⏳ Subiendo imagen...</div>
-  <div class="admin-actions" style="margin-top:0;"><button class="btn btn-gold" id="photo-upload-btn" onclick="addPhoto()">+ Subir y agregar foto</button></div>
-        <p class="section-subtitle" style="margin-top:24px;">Fotos del álbum</p>
-        <div class="game-admin-list" id="photos-admin-list"></div>
-      </div>
-
       <!-- TAB SANCIONES -->
       <div id="tab-sanctions" class="admin-pane">
         <p class="section-subtitle">Registrar sanción</p>
@@ -1028,8 +923,6 @@
     <a href="#teams-root">Equipos</a>
     <a href="#games-root">Partidos</a>
     <a href="#scorers-root">Anotadores</a>
-    <a href="#news-root">Noticias</a>
-    <a href="#photos-root">Fotos</a>
     <a href="#sanctions-root">Sanciones</a>
   </div>
   <div class="nav-right">
@@ -1044,8 +937,7 @@
   <section id="roster-root"></section>
   <section id="games-root" class="games-section"></section>
   <section id="scorers-root"></section>
-  <section id="news-root"></section>
-  <section id="photos-root"></section>
+  <section id="instagram-root"></section>
   <section id="sanctions-root"></section>
   <div class="sponsors-banner" id="sponsors-banner">
     <div class="sponsors-banner-label">Auspicios</div>
@@ -1278,11 +1170,13 @@ const smallLogo = id => { const t=divTeams()[id]; if(!t) return ''; return `<div
 
 async function render() {
   renderHero(); renderStandings(); renderTeams(); renderGames();
-  await renderScorers(); await renderNews(); await renderPhotos();
+  await renderScorers(); 
+  renderInstagram();
   await renderSanctions(); renderFooter();
   document.getElementById('nav-abbr').innerHTML = `${league.abbr}<span>·</span>${league.season}`;
   setTimeout(activateReveal, 50);
 }
+
 
 function renderHero() {
   const words=league.name.split(' ');
@@ -2971,6 +2865,27 @@ function igClipText(ctx, text, maxWidth) {
   while (s.length > 1 && ctx.measureText(s + '…').width > maxWidth) s = s.slice(0, -1);
   return s + '…';
 }
+function renderInstagram() {
+  document.getElementById('instagram-root').innerHTML = `
+    <div class="section-header reveal">
+      <h2 class="section-title">Instagram</h2>
+      <span class="section-tag">@ligasancarloscc</span>
+      <div class="section-line"></div>
+      <a href="https://instagram.com/ligasancarloscc" target="_blank" class="playoff-bracket-btn">
+        Ver perfil →
+      </a>
+    </div>
+    <div class="reveal">
+      <behold-widget feed-id="mU08zcQfrLQwXJuGex2f"></behold-widget>
+    </div>`;
+
+  // Cargar el script de Behold
+  const s = document.createElement('script');
+  s.type = 'module';
+  s.src = 'https://w.behold.so/widget.js';
+  document.head.append(s);
+}
+
 async function recalcAllStats(){
   if(!confirm('¿Recalcular todas las estadísticas desde cero?')) return;
   showToast('⏳ Recalculando...');
