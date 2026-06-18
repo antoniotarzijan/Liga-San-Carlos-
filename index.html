@@ -116,8 +116,130 @@
     .section-line{flex:1;height:1px;background:var(--border);}
 
     /* ── PLAYOFF BRACKET BTN ── */
-    .playoff-bracket-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.1);border:1px solid rgba(242,179,78,.3);color:var(--gold);text-decoration:none;transition:all .2s;flex-shrink:0;white-space:nowrap;}
-    .playoff-bracket-btn:hover{background:rgba(242,179,78,.18);border-color:rgba(242,179,78,.55);transform:translateY(-1px);}
+   /* ══ PLAYOFF HERO CTA ══ */
+.playoff-hero-cta {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  margin-top: 28px;
+  width: min(480px, 90vw);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  animation: fadeUp .6s .35s ease both;
+  transition: transform .22s, box-shadow .22s;
+  z-index: 1;
+}
+.playoff-hero-cta:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 0 48px rgba(242,179,78,.35), 0 0 80px rgba(242,179,78,.12);
+}
+.playoff-hero-cta-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #f2b34e, #f80808, #f2b34e, #3009dc, #f2b34e);
+  background-size: 300% 300%;
+  animation: playoffGradient 3.5s ease infinite;
+  z-index: 0;
+}
+.playoff-hero-cta-inner {
+  position: relative;
+  z-index: 1;
+  background: #0f1015;
+  border-radius: 9px;
+  margin: 2px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.playoff-hero-cta-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.playoff-hero-cta-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.playoff-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  animation: pulse 1.4s ease infinite;
+}
+.playoff-hero-cta-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 5vw, 38px);
+  letter-spacing: 3px;
+  color: #fff;
+  line-height: 1;
+}
+.playoff-hero-cta-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+  transition: color .15s;
+}
+.playoff-hero-cta:hover .playoff-hero-cta-sub {
+  color: var(--gold);
+}
+.playoff-hero-cta-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-width: 180px;
+  justify-content: flex-end;
+  align-items: center;
+}
+.playoff-hero-cta-logos img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  padding: 2px;
+  transition: transform .2s;
+}
+.playoff-hero-cta:hover .playoff-hero-cta-logos img {
+  transform: scale(1.12);
+}
+.playoff-hero-cta-logos-label {
+  width: 100%;
+  text-align: right;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+@keyframes playoffGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (max-width: 768px) {
+  .playoff-hero-cta { width: min(380px, 92vw); }
+  .playoff-hero-cta-inner { padding: 14px 16px; }
+  .playoff-hero-cta-logos { max-width: 130px; gap: 5px; }
+  .playoff-hero-cta-logos img { width: 26px; height: 26px; }
+}
 
     /* ── INSTAGRAM BTN ── */
     .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
@@ -1179,11 +1301,24 @@ async function render() {
 
 
 function renderHero() {
-  const words=league.name.split(' ');
-  const titleHTML=words.map((w,i)=>i===1?`<span class="accent">${w}</span>`:w).join(' ');
-  const logoHTML=league.logo?`<div class="hero-league-logo"><img src="${league.logo}" alt="${league.name}"></div>`:'';
-  const divLabel=activeDivision==='primera'?'Primera División':'Segunda División';
-  document.getElementById('hero-root').innerHTML=`
+  const words = league.name.split(' ');
+  const titleHTML = words.map((w, i) => i === 1 ? `<span class="accent">${w}</span>` : w).join(' ');
+  const logoHTML = league.logo ? `<div class="hero-league-logo"><img src="${league.logo}" alt="${league.name}"></div>` : '';
+  const divLabel = activeDivision === 'primera' ? 'Primera División' : 'Segunda División';
+
+  // Top 8 clasificados para mostrar logos
+  const standings = computeStandings();
+  const top8 = standings.slice(0, 8);
+  const teams = divTeams();
+
+  const logosHTML = top8.map(row => {
+    const t = teams[row.teamId]; if (!t) return '';
+    return t.logo
+      ? `<img src="${t.logo}" alt="${t.abbr}" title="${t.name}" onerror="this.onerror=null;this.style.display='none'">`
+      : `<div style="width:28px;height:28px;border-radius:50%;background:${t.color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:9px;color:#fff;">${t.abbr.slice(0,3)}</div>`;
+  }).join('');
+
+  document.getElementById('hero-root').innerHTML = `
     <div class="hero-bg"></div><div class="hero-flag"></div>
     <svg class="hero-court" viewBox="0 0 400 400">
       <circle cx="200" cy="200" r="180"/><circle cx="200" cy="200" r="60"/>
@@ -1201,12 +1336,31 @@ function renderHero() {
     <div class="hero-badges">
       <div class="badge badge-primary" onclick="document.getElementById('teams-root').scrollIntoView({behavior:'smooth'})">Equipos</div>
       <div class="badge badge-outline" onclick="showDivisionSelector()">Cambiar División ↗</div>
-      <a href="playoff.html" class="playoff-bracket-btn">🏆 Bracket Playoffs</a>
     </div>
+
+    <!-- ══ PLAYOFF CTA ══ -->
+    <a href="playoff.html" class="playoff-hero-cta">
+      <div class="playoff-hero-cta-glow"></div>
+      <div class="playoff-hero-cta-inner">
+        <div class="playoff-hero-cta-left">
+          <div class="playoff-hero-cta-eyebrow">
+            <span class="playoff-live-dot"></span>
+            EN CURSO · ${league.season}
+          </div>
+          <div class="playoff-hero-cta-title">🏆 PLAYOFFS</div>
+          <div class="playoff-hero-cta-sub">Ver bracket completo →</div>
+        </div>
+        <div class="playoff-hero-cta-logos">
+          ${logosHTML}
+          <div class="playoff-hero-cta-logos-label">Top 8 clasificados</div>
+        </div>
+      </div>
+    </a>
+
     <div class="hero-stats">
       <div class="stat-item"><div class="stat-num">${Object.keys(divTeams()).length}</div><div class="stat-label">Equipos</div></div>
       <div class="stat-item"><div class="stat-num">${league.totalRounds}</div><div class="stat-label">Jornadas</div></div>
-      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div></div>
     </div>`;
 }
 
