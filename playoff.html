@@ -213,6 +213,8 @@
       gap: 0;
       overflow-x: auto;
       padding-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
     }
     .bracket-col {
       display: flex;
@@ -314,6 +316,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0;
     }
     .team-row.winner .team-name-bracket { color: var(--text); }
     .team-row.loser  .team-name-bracket { color: var(--muted); }
@@ -441,7 +444,7 @@
       padding:7px 0; border-bottom:1px solid var(--border);
     }
     .team-score-row:last-child { border-bottom:none; }
-    .ts-info { display:flex; align-items:center; gap:9px; }
+    .ts-info { display:flex; align-items:center; gap:9px; min-width:0; flex:1; }
     .ts-logo-sm {
       width:34px; height:34px; flex-shrink:0;
       display:flex; align-items:center; justify-content:center;
@@ -450,6 +453,9 @@
     .ts-name {
       font-family:'Barlow Condensed',sans-serif; font-weight:700;
       font-size:14px; letter-spacing:.3px;
+      min-width:0;
+      white-space:normal;
+      overflow-wrap:break-word;
     }
     .ts-score-pl {
       font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1;
@@ -649,9 +655,61 @@
 
     /* ── RESPONSIVE ── */
     @media(max-width:700px) {
-      .bracket-col { min-width:130px; }
-      .team-name-bracket { font-size:11px; }
-      .team-score-bracket { font-size:18px; width:30px; }
+      /* El bracket completo pasa a un scroll horizontal "tipo carrusel" con
+         columnas más anchas (220px) para que el nombre completo del equipo
+         entre sin truncarse. Se quita la grilla de 9 columnas y se usa flex
+         con anchos fijos, manteniendo el orden QF-SF-FINAL-SF-QF. */
+      .bracket-page { padding: 30px 0 50px; }
+
+      .bracket-rounds-header,
+      .bracket-wrap {
+        display: flex !important;
+        grid-template-columns: none !important;
+        width: max-content;
+        min-width: 100%;
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      .bracket-legend { margin-left:14px; margin-right:14px; }
+
+      .round-label {
+        width: 220px;
+        min-width: 220px;
+        flex: none;
+      }
+      .connector-col {
+        width: 16px;
+        min-width: 16px;
+      }
+      .bracket-rounds-header > div:empty {
+        width: 16px;
+        min-width: 16px;
+        flex: none;
+      }
+      .bracket-col {
+        width: 220px;
+        min-width: 220px;
+        flex: none;
+        scroll-snap-align: start;
+      }
+
+      .matchup { margin: 0 2px; }
+      .team-seed { width: 18px; font-size: 10px; }
+      .team-logo-sm { width: 22px; height: 22px; margin: 0 5px; }
+      .team-name-bracket {
+        font-size: 12px;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.15;
+        padding: 4px 6px 4px 0;
+        word-break: break-word;
+      }
+      .team-score-bracket { width: 26px; font-size: 17px; }
+      .winner-check { width:14px; height:14px; margin-right:4px; }
+
+      .champion-card { min-width: 190px; }
+
       .padmin-grid { grid-template-columns:1fr; }
       .nav-logo { font-size:17px; }
       .games-grid { grid-template-columns:1fr; }
@@ -1010,7 +1068,7 @@ function renderMatchup(m, cls = '') {
     return `<div class="team-row ${rowCls}">
       <div class="team-seed">${seed || '·'}</div>
       ${teamId ? teamLogoSmall(teamId) : '<div style="width:28px;height:28px;margin:0 6px;"></div>'}
-      <div class="team-name-bracket">${name}</div>
+      <div class="team-name-bracket" title="${name}">${name}</div>
       ${check}
       <div class="team-score-bracket">${scoreVal}</div>
     </div>`;
