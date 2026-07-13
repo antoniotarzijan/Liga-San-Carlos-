@@ -118,6 +118,28 @@
     .toggle-clock.play{background:var(--green);color:#000;}
     .toggle-clock.pause{background:var(--gold);color:#000;}
 
+    /* ── PUNTOS/FALTAS POR JUGADOR ── */
+    .roster-toggle{width:100%;padding:14px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
+    .roster-wrap[hidden]{display:none;}
+    .roster-block{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+    .roster-block-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
+    .roster-block-logo{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .roster-block-logo img{width:100%;height:100%;object-fit:contain;}
+    .roster-block-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;flex:1;}
+    .roster-block-empty{padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+    .roster-player-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
+    .roster-player-row:last-child{border-bottom:none;}
+    .roster-player-info{flex:1;min-width:110px;}
+    .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
+    .roster-player-tally{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+    .roster-player-tally b{color:var(--gold);}
+    .roster-player-tally .fo{color:#F87171;}
+    .roster-pt-btns{display:flex;gap:4px;}
+    .roster-pt-btn{min-width:34px;min-height:34px;border-radius:5px;border:none;font-family:'Bebas Neue',sans-serif;font-size:14px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);}
+    .roster-pt-btn.plus{background:var(--gold);color:#000;}
+    .roster-pt-btn.minus{background:rgba(248,113,113,.15);color:#F87171;}
+    .roster-foul-btn{min-width:34px;min-height:34px;border-radius:5px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;cursor:pointer;background:rgba(248,113,113,.12);color:#F87171;}
+
     .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:20px;}
 
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;padding:12px 22px;border-radius:6px;transition:transform .3s;z-index:999;white-space:nowrap;}
@@ -197,6 +219,7 @@
         <div class="tp-name" id="home-name">—</div>
         <div class="tp-score" id="home-score">0</div>
         <button class="tp-edit" onclick="editScore('home')">✎ editar marcador</button>
+        <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
         <div class="tp-btns">
           <button class="score-btn minus" onclick="adjustScore('home',-1)">−1</button>
           <button class="score-btn plus" onclick="adjustScore('home',1)">+1</button>
@@ -209,12 +232,31 @@
         <div class="tp-name" id="away-name">—</div>
         <div class="tp-score" id="away-score">0</div>
         <button class="tp-edit" onclick="editScore('away')">✎ editar marcador</button>
+        <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
         <div class="tp-btns">
           <button class="score-btn minus" onclick="adjustScore('away',-1)">−1</button>
           <button class="score-btn plus" onclick="adjustScore('away',1)">+1</button>
           <button class="score-btn plus" onclick="adjustScore('away',2)">+2</button>
           <button class="score-btn plus" onclick="adjustScore('away',3)">+3</button>
         </div>
+      </div>
+    </div>
+
+    <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
+    <div class="roster-wrap" id="roster-wrap" hidden>
+      <div class="roster-block" id="roster-block-home">
+        <div class="roster-block-head">
+          <div class="roster-block-logo" id="roster-logo-home"></div>
+          <div class="roster-block-name" id="roster-name-home">Local</div>
+        </div>
+        <div id="roster-list-home"></div>
+      </div>
+      <div class="roster-block" id="roster-block-away">
+        <div class="roster-block-head">
+          <div class="roster-block-logo" id="roster-logo-away"></div>
+          <div class="roster-block-name" id="roster-name-away">Visita</div>
+        </div>
+        <div id="roster-list-away"></div>
       </div>
     </div>
 
@@ -236,6 +278,7 @@
       <button class="toggle-clock play" id="toggle-clock-btn" onclick="toggleClock()">▶ Iniciar cronómetro</button>
     </div>
 
+    <div class="section-lbl" style="margin-top:0;">Faltas de equipo (cuarto actual)</div>
     <div class="fouls-row">
       <div class="fouls-box" id="home-fouls-box">
         <div>
@@ -272,7 +315,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label:'Primera División', dbTable:'games',
+      label:'Primera División', dbTable:'games', playersTable:'players',
       teams: {
         EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
@@ -286,7 +329,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label:'Segunda División', dbTable:'games_segunda',
+      label:'Segunda División', dbTable:'games_segunda', playersTable:'players_segunda',
       teams: {
         T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
         T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
@@ -375,6 +418,9 @@ let activeDivision = 'primera';
 let currentGame = null;       // fila cruda + campos derivados
 let chosenPeriodMinutes = 10;
 let tickerInterval = null;
+let rosterHome = [];
+let rosterAway = [];
+let playerStats = {};         // playerId -> { points, fouls }
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
@@ -431,6 +477,9 @@ function setView(id){
 async function goToList(){
   stopTicker();
   currentGame = null;
+  rosterHome = []; rosterAway = []; playerStats = {};
+  const rosterWrap = document.getElementById('roster-wrap');
+  if (rosterWrap) rosterWrap.hidden = true;
   setView('view-list');
   updateDivPill();
   const { data, error } = await _supabase.from(divCfg().dbTable).select('*')
@@ -519,8 +568,111 @@ function openBoard(){
   document.getElementById('away-logo').innerHTML = teamLogoHTML(currentGame.away);
   document.getElementById('home-name').textContent = home?.name || currentGame.home;
   document.getElementById('away-name').textContent = away?.name || currentGame.away;
+  document.getElementById('roster-logo-home').innerHTML = teamLogoHTML(currentGame.home);
+  document.getElementById('roster-logo-away').innerHTML = teamLogoHTML(currentGame.away);
+  document.getElementById('roster-name-home').textContent = home?.name || currentGame.home;
+  document.getElementById('roster-name-away').textContent = away?.name || currentGame.away;
   renderBoard();
   startTicker();
+  loadRosterAndStats();
+}
+
+function toggleRoster(){
+  const wrap = document.getElementById('roster-wrap');
+  wrap.hidden = !wrap.hidden;
+  document.getElementById('roster-toggle-btn').textContent =
+    wrap.hidden ? '🏀 Puntos y faltas por jugador ▾' : '🏀 Puntos y faltas por jugador ▴';
+}
+
+/* ══ PUNTOS Y FALTAS POR JUGADOR ══ */
+async function loadRosterAndStats(){
+  const [homeRes, awayRes, statsRes] = await Promise.all([
+    _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.home).order('name'),
+    _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.away).order('name'),
+    _supabase.from('game_stats').select('*').eq('game_id', currentGame.id).eq('division', activeDivision),
+  ]);
+  rosterHome = homeRes.data || [];
+  rosterAway = awayRes.data || [];
+  playerStats = {};
+  (statsRes.data || []).forEach(row => {
+    playerStats[row.player_id] = { points: row.points || 0, fouls: row.fouls || 0 };
+  });
+  renderRosterUI();
+}
+
+function renderRosterUI(){
+  renderRosterSide('home', rosterHome, 'roster-list-home');
+  renderRosterSide('away', rosterAway, 'roster-list-away');
+}
+
+function renderRosterSide(side, players, containerId){
+  const container = document.getElementById(containerId);
+  if (!players.length){
+    container.innerHTML = '<div class="roster-block-empty">No hay jugadores registrados para este equipo.</div>';
+    return;
+  }
+  container.innerHTML = players.map(p => {
+    const st = playerStats[p.id] || { points: 0, fouls: 0 };
+    const numBadge = p.number != null ? ` #${p.number}` : '';
+    return `<div class="roster-player-row">
+      <div class="roster-player-info">
+        <div class="roster-player-name">${p.name}${numBadge}</div>
+        <div class="roster-player-tally"><b>${st.points}</b> pts · <span class="fo">${st.fouls}</span> faltas</div>
+      </div>
+      <div class="roster-pt-btns">
+        <button class="roster-pt-btn minus" onclick="addPlayerPoints('${side}','${p.id}',-1)">−1</button>
+        <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',1)">+1</button>
+        <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',2)">+2</button>
+        <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',3)">+3</button>
+      </div>
+      <button class="roster-foul-btn" onclick="addPlayerFoul('${side}','${p.id}',1)">🟨 Falta</button>
+    </div>`;
+  }).join('');
+}
+
+function findPlayer(side, playerId){
+  const list = side === 'home' ? rosterHome : rosterAway;
+  return list.find(p => String(p.id) === String(playerId));
+}
+
+async function persistPlayerStat(side, player, points, fouls){
+  const payload = {
+    game_id: currentGame.id, player_id: player.id,
+    player_name: player.name, player_number: player.number ?? null,
+    team: side === 'home' ? currentGame.home : currentGame.away,
+    points, fouls, played: true, division: activeDivision,
+  };
+  const { error } = await _supabase.from('game_stats').upsert(payload, { onConflict: 'game_id,player_id' });
+  if (error) showToast('⚠ Error al guardar jugador: ' + error.message, true);
+}
+
+async function addPlayerPoints(side, playerId, delta){
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  const st = playerStats[player.id] || { points: 0, fouls: 0 };
+  const newPoints = Math.max(0, st.points + delta);
+  const appliedDelta = newPoints - st.points;
+  playerStats[player.id] = { points: newPoints, fouls: st.fouls };
+
+  const scoreKey = side === 'home' ? 'homeScore' : 'awayScore';
+  currentGame[scoreKey] = Math.max(0, currentGame[scoreKey] + appliedDelta);
+
+  renderRosterUI();
+  renderBoard();
+  await Promise.all([
+    persistPlayerStat(side, player, newPoints, st.fouls),
+    persist({ [side === 'home' ? 'home_score' : 'away_score']: currentGame[scoreKey] }),
+  ]);
+}
+
+async function addPlayerFoul(side, playerId, delta){
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  const st = playerStats[player.id] || { points: 0, fouls: 0 };
+  const newFouls = Math.max(0, st.fouls + delta);
+  playerStats[player.id] = { points: st.points, fouls: newFouls };
+  renderRosterUI();
+  await persistPlayerStat(side, player, st.points, newFouls);
 }
 
 function renderBoard(){
@@ -667,13 +819,35 @@ function editClock(){
 
 /* ── FINALIZAR ── */
 async function finishGame(){
-  if (!confirm('¿Finalizar este partido? El marcador quedará guardado como resultado final.\n\nPodrás agregar puntos por jugador y el MVP desde el Panel Admin.')) return;
+  if (!confirm('¿Finalizar este partido? El marcador y los puntos por jugador quedarán guardados como resultado final.')) return;
   stopTicker();
+
+  let mvpName = null, topPts = 0;
+  const playersWithActivity = [];
+  [...rosterHome, ...rosterAway].forEach(p => {
+    const st = playerStats[p.id];
+    if (!st || (st.points === 0 && st.fouls === 0)) return;
+    playersWithActivity.push({ player: p, points: st.points });
+    if (st.points > topPts) { topPts = st.points; mvpName = p.name; }
+  });
+
   const { error } = await _supabase.from(divCfg().dbTable).update({
-    type: 'finished', clock_running: false,
+    type: 'finished', clock_running: false, mvp: mvpName || null,
   }).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
-  showToast('✓ Partido finalizado');
+
+  if (playersWithActivity.length){
+    showToast('⏳ Actualizando estadísticas de jugadores...');
+    for (const { player, points } of playersWithActivity){
+      const newPoints = (player.points || 0) + points;
+      const newGames  = (player.games || 0) + 1;
+      const { error: plErr } = await _supabase.from(divCfg().playersTable)
+        .update({ points: newPoints, games: newGames }).eq('id', player.id);
+      if (plErr) console.warn(`Error actualizando jugador ${player.name}:`, plErr.message);
+    }
+  }
+
+  showToast(`✓ Partido finalizado${mvpName ? ' · MVP: ' + mvpName : ''}`);
   goToList();
 }
 </script>
