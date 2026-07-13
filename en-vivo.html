@@ -63,6 +63,21 @@
     .lg-fouls-item b{color:var(--text);font-size:13px;}
     .lg-fouls-item.bonus b{color:var(--red);}
 
+    .lg-players{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);}
+    .lg-players-col{padding:14px 18px;}
+    .lg-players-col:first-child{border-right:1px solid var(--border);}
+    .lg-players-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .lg-player-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;}
+    .lg-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--text);}
+    .lg-player-stats{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);white-space:nowrap;margin-left:8px;}
+    .lg-player-stats b{color:var(--gold);}
+    .lg-player-stats .fo{color:#F87171;}
+    .lg-players-empty{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;}
+    @media(max-width:520px){
+      .lg-players{grid-template-columns:1fr;}
+      .lg-players-col:first-child{border-right:none;border-bottom:1px solid var(--border);}
+    }
+
     .empty-state{text-align:center;padding:80px 20px;color:var(--muted);}
     .empty-icon{font-size:44px;margin-bottom:16px;}
     .empty-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--text);margin-bottom:8px;}
@@ -105,7 +120,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label:'Primera División', dbTable:'games',
+      label:'Primera División', dbTable:'games', playersTable:'players',
       teams: {
         EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
@@ -119,7 +134,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label:'Segunda División', dbTable:'games_segunda',
+      label:'Segunda División', dbTable:'games_segunda', playersTable:'players_segunda',
       teams: {
         T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
         T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
@@ -171,6 +186,14 @@ async function fetchLive(){
   const { data, error } = await _supabase.from(divCfg().dbTable).select('*').eq('type','live').order('round',{ascending:true});
   if (error){ console.error(error.message); return; }
   liveGames = (data || []).map(rowToLive);
+
+  if (liveGames.length){
+    const statsResults = await Promise.all(liveGames.map(g =>
+      _supabase.from('game_stats').select('*').eq('game_id', g.id).eq('division', activeDivision)
+    ));
+    liveGames.forEach((g, i) => { g.stats = statsResults[i].data || []; });
+  }
+
   renderLive();
 }
 
@@ -195,6 +218,17 @@ function remainingSeconds(g){
 }
 function quarterLabel(q){
   return q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+}
+
+function playerStatsHTML(stats, teamId){
+  const rows = (stats || []).filter(s => s.team === teamId && (s.points > 0 || s.fouls > 0))
+    .sort((a,b) => b.points - a.points);
+  if (!rows.length) return `<div class="lg-players-empty">Sin puntos aún</div>`;
+  return rows.map(s => `
+    <div class="lg-player-row">
+      <span class="lg-player-name">${s.player_name}${s.player_number != null ? ' #' + s.player_number : ''}</span>
+      <span class="lg-player-stats"><b>${s.points}</b> pts · <span class="fo">${s.fouls || 0}</span> f</span>
+    </div>`).join('');
 }
 
 function renderLive(){
@@ -241,6 +275,16 @@ function renderLive(){
       <div class="lg-fouls">
         <div class="lg-fouls-item ${g.homeFouls>=5?'bonus':''}">Faltas ${home?.name||g.home}: <b>${g.homeFouls}</b></div>
         <div class="lg-fouls-item ${g.awayFouls>=5?'bonus':''}">Faltas ${away?.name||g.away}: <b>${g.awayFouls}</b></div>
+      </div>
+      <div class="lg-players">
+        <div class="lg-players-col">
+          <div class="lg-players-title">${home?.name || g.home}</div>
+          ${playerStatsHTML(g.stats, g.home)}
+        </div>
+        <div class="lg-players-col">
+          <div class="lg-players-title">${away?.name || g.away}</div>
+          ${playerStatsHTML(g.stats, g.away)}
+        </div>
       </div>
     </div>`;
   }).join('');
