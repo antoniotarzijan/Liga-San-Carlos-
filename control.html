@@ -84,6 +84,13 @@
     .board-round{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
     .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
 
+    /* ── PESTAÑAS DE ROL (personal de mesa) ── */
+    .role-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+    .role-tabs::-webkit-scrollbar{display:none;}
+    .role-tab{flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;white-space:nowrap;}
+    .role-tab.active{background:var(--gold);border-color:var(--gold);color:#000;}
+    .role-section[hidden]{display:none;}
+
     .teams-board{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
     .team-panel{background:var(--card);border:1px solid var(--border);border-top:4px solid var(--tc,var(--red));border-radius:10px;padding:16px 12px;text-align:center;}
     .tp-logo{width:44px;height:44px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;}
@@ -117,6 +124,44 @@
     .toggle-clock{width:100%;padding:16px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
     .toggle-clock.play{background:var(--green);color:#000;}
     .toggle-clock.pause{background:var(--gold);color:#000;}
+
+    /* ── POSESIÓN ALTERNA ── */
+    .poss-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+    .poss-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;}
+    .poss-team{flex:1;text-align:center;padding:10px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);}
+    .poss-team.active{color:var(--gold);border-color:rgba(242,179,78,.5);background:rgba(242,179,78,.08);}
+    .poss-toggle{width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:16px;cursor:pointer;flex-shrink:0;}
+
+    /* ── CRONÓMETRO DE POSESIÓN (24s) ── */
+    .shot-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;}
+    .shot-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(46px,12vw,58px);letter-spacing:2px;line-height:1;margin:6px 0;color:var(--text);}
+    .shot-display.running{color:#FB923C;}
+    .shot-display.warn{color:var(--red);}
+    .shot-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+    .shot-reset-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;}
+    .shot-toggle{width:100%;padding:14px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;}
+    .shot-toggle.play{background:#FB923C;color:#000;}
+    .shot-toggle.pause{background:rgba(255,255,255,.1);color:var(--text);}
+
+    /* ── BOCINA ── */
+    .buzzer-btn{width:100%;padding:16px;border-radius:8px;border:2px solid var(--red);background:rgba(248,8,8,.1);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
+    .buzzer-btn:active{background:rgba(248,8,8,.3);}
+
+    /* ── TIMEOUTS ── */
+    .timeouts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+
+    /* ── BONUS BADGE ── */
+    .bonus-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;background:var(--red);color:#fff;padding:2px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;}
+
+    /* ── SUSTITUCIONES ── */
+    .subs-wrap[hidden]{display:none;}
+    .subs-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+    .subs-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+    .subs-select{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);font-size:14px;}
+    .subs-reg-btn{width:100%;padding:12px;border-radius:6px;border:none;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+    .subs-log{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+    .subs-log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;justify-content:space-between;gap:8px;}
+    .subs-log-empty{padding:10px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;}
 
     /* ── PUNTOS/FALTAS POR JUGADOR ── */
     .roster-toggle{width:100%;padding:14px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
@@ -213,92 +258,177 @@
       <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
     </div>
 
-    <div class="teams-board">
-      <div class="team-panel" id="home-panel">
-        <div class="tp-logo" id="home-logo"></div>
-        <div class="tp-name" id="home-name">—</div>
-        <div class="tp-score" id="home-score">0</div>
-        <button class="tp-edit" onclick="editScore('home')">✎ editar marcador</button>
-        <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
-        <div class="tp-btns">
-          <button class="score-btn minus" onclick="adjustScore('home',-1)">−1</button>
-          <button class="score-btn plus" onclick="adjustScore('home',1)">+1</button>
-          <button class="score-btn plus" onclick="adjustScore('home',2)">+2</button>
-          <button class="score-btn plus" onclick="adjustScore('home',3)">+3</button>
+    <div class="role-tabs" id="role-tabs">
+      <button class="role-tab active" data-role="todos" onclick="setRole('todos')">👁 Todo</button>
+      <button class="role-tab" data-role="anotador" onclick="setRole('anotador')">🖊 Anotador</button>
+      <button class="role-tab" data-role="cronometrista" onclick="setRole('cronometrista')">⏱ Cronometrista</button>
+      <button class="role-tab" data-role="operador24" onclick="setRole('operador24')">⏲ Operador 24s</button>
+    </div>
+
+    <button class="buzzer-btn" onclick="playBuzzer(1000,300)">🔊 Bocina manual</button>
+
+    <!-- MARCADOR -->
+    <div class="role-section" data-role-section="anotador">
+      <div class="teams-board">
+        <div class="team-panel" id="home-panel">
+          <div class="tp-logo" id="home-logo"></div>
+          <div class="tp-name" id="home-name">—</div>
+          <div class="tp-score" id="home-score">0</div>
+          <button class="tp-edit" onclick="editScore('home')">✎ editar marcador</button>
+          <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
+          <div class="tp-btns">
+            <button class="score-btn minus" onclick="adjustScore('home',-1)">−1</button>
+            <button class="score-btn plus" onclick="adjustScore('home',1)">+1</button>
+            <button class="score-btn plus" onclick="adjustScore('home',2)">+2</button>
+            <button class="score-btn plus" onclick="adjustScore('home',3)">+3</button>
+          </div>
         </div>
-      </div>
-      <div class="team-panel" id="away-panel">
-        <div class="tp-logo" id="away-logo"></div>
-        <div class="tp-name" id="away-name">—</div>
-        <div class="tp-score" id="away-score">0</div>
-        <button class="tp-edit" onclick="editScore('away')">✎ editar marcador</button>
-        <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
-        <div class="tp-btns">
-          <button class="score-btn minus" onclick="adjustScore('away',-1)">−1</button>
-          <button class="score-btn plus" onclick="adjustScore('away',1)">+1</button>
-          <button class="score-btn plus" onclick="adjustScore('away',2)">+2</button>
-          <button class="score-btn plus" onclick="adjustScore('away',3)">+3</button>
+        <div class="team-panel" id="away-panel">
+          <div class="tp-logo" id="away-logo"></div>
+          <div class="tp-name" id="away-name">—</div>
+          <div class="tp-score" id="away-score">0</div>
+          <button class="tp-edit" onclick="editScore('away')">✎ editar marcador</button>
+          <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
+          <div class="tp-btns">
+            <button class="score-btn minus" onclick="adjustScore('away',-1)">−1</button>
+            <button class="score-btn plus" onclick="adjustScore('away',1)">+1</button>
+            <button class="score-btn plus" onclick="adjustScore('away',2)">+2</button>
+            <button class="score-btn plus" onclick="adjustScore('away',3)">+3</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
-    <div class="roster-wrap" id="roster-wrap" hidden>
-      <div class="roster-block" id="roster-block-home">
-        <div class="roster-block-head">
-          <div class="roster-block-logo" id="roster-logo-home"></div>
-          <div class="roster-block-name" id="roster-name-home">Local</div>
+    <!-- PUNTOS Y FALTAS POR JUGADOR -->
+    <div class="role-section" data-role-section="anotador">
+      <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
+      <div class="roster-wrap" id="roster-wrap" hidden>
+        <div class="roster-block" id="roster-block-home">
+          <div class="roster-block-head">
+            <div class="roster-block-logo" id="roster-logo-home"></div>
+            <div class="roster-block-name" id="roster-name-home">Local</div>
+          </div>
+          <div id="roster-list-home"></div>
         </div>
-        <div id="roster-list-home"></div>
-      </div>
-      <div class="roster-block" id="roster-block-away">
-        <div class="roster-block-head">
-          <div class="roster-block-logo" id="roster-logo-away"></div>
-          <div class="roster-block-name" id="roster-name-away">Visita</div>
+        <div class="roster-block" id="roster-block-away">
+          <div class="roster-block-head">
+            <div class="roster-block-logo" id="roster-logo-away"></div>
+            <div class="roster-block-name" id="roster-name-away">Visita</div>
+          </div>
+          <div id="roster-list-away"></div>
         </div>
-        <div id="roster-list-away"></div>
       </div>
     </div>
 
-    <div class="clock-card">
-      <div class="quarter-row">
-        <button class="quarter-nav" onclick="changeQuarter(-1)">◀</button>
-        <div class="quarter-label" id="quarter-label">CUARTO 1</div>
-        <button class="quarter-nav" onclick="changeQuarter(1)">▶</button>
+    <!-- CRONÓMETRO DE JUEGO + CUARTOS + POSESIÓN ALTERNA -->
+    <div class="role-section" data-role-section="cronometrista">
+      <div class="clock-card">
+        <div class="quarter-row">
+          <button class="quarter-nav" onclick="changeQuarter(-1)">◀</button>
+          <div class="quarter-label" id="quarter-label">CUARTO 1</div>
+          <button class="quarter-nav" onclick="changeQuarter(1)">▶</button>
+        </div>
+        <div class="clock-display" id="clock-display">10:00</div>
+        <button class="clock-edit" onclick="editClock()">✎ editar tiempo</button>
+        <div class="clock-adjust">
+          <button class="adj-btn" onclick="adjustClock(-60)">−1:00</button>
+          <button class="adj-btn" onclick="adjustClock(-10)">−0:10</button>
+          <button class="adj-btn" onclick="adjustClock(10)">+0:10</button>
+          <button class="adj-btn" onclick="adjustClock(60)">+1:00</button>
+          <button class="adj-btn" onclick="resetClock()">↺ Reiniciar</button>
+        </div>
+        <button class="toggle-clock play" id="toggle-clock-btn" onclick="toggleClock()">▶ Iniciar cronómetro</button>
       </div>
-      <div class="clock-display" id="clock-display">10:00</div>
-      <button class="clock-edit" onclick="editClock()">✎ editar tiempo</button>
-      <div class="clock-adjust">
-        <button class="adj-btn" onclick="adjustClock(-60)">−1:00</button>
-        <button class="adj-btn" onclick="adjustClock(-10)">−0:10</button>
-        <button class="adj-btn" onclick="adjustClock(10)">+0:10</button>
-        <button class="adj-btn" onclick="adjustClock(60)">+1:00</button>
-        <button class="adj-btn" onclick="resetClock()">↺ Reiniciar</button>
+
+      <div class="poss-card">
+        <div class="fouls-label">Posesión alterna</div>
+        <div class="poss-row">
+          <div class="poss-team" id="poss-home-label">◀ Local</div>
+          <button class="poss-toggle" onclick="togglePossession()">🔁</button>
+          <div class="poss-team" id="poss-away-label">Visita ▶</div>
+        </div>
       </div>
-      <button class="toggle-clock play" id="toggle-clock-btn" onclick="toggleClock()">▶ Iniciar cronómetro</button>
     </div>
 
-    <div class="section-lbl" style="margin-top:0;">Faltas de equipo (cuarto actual)</div>
-    <div class="fouls-row">
-      <div class="fouls-box" id="home-fouls-box">
-        <div>
-          <div class="fouls-label">Faltas local</div>
-          <div class="fouls-num" id="home-fouls-num">0</div>
+    <!-- CRONÓMETRO DE POSESIÓN (24s) -->
+    <div class="role-section" data-role-section="operador24">
+      <div class="shot-card">
+        <div class="fouls-label">Cronómetro de posesión</div>
+        <div class="shot-display" id="shot-display">24</div>
+        <div class="shot-btns">
+          <button class="shot-reset-btn" onclick="resetShotClock(24)">↺ 24</button>
+          <button class="shot-reset-btn" onclick="resetShotClock(14)">↺ 14</button>
         </div>
-        <div class="fouls-btns">
-          <button class="fouls-btn" onclick="adjustFouls('home',-1)">−</button>
-          <button class="fouls-btn" onclick="adjustFouls('home',1)">+</button>
+        <button class="shot-toggle play" id="shot-toggle-btn" onclick="toggleShotClock()">▶ Iniciar 24s</button>
+      </div>
+    </div>
+
+    <!-- FALTAS Y TIMEOUTS -->
+    <div class="role-section" data-role-section="anotador">
+      <div class="section-lbl" style="margin-top:0;">Faltas de equipo (cuarto actual)</div>
+      <div class="fouls-row">
+        <div class="fouls-box" id="home-fouls-box">
+          <div>
+            <div class="fouls-label">Faltas local</div>
+            <div class="fouls-num" id="home-fouls-num">0</div>
+          </div>
+          <div class="fouls-btns">
+            <button class="fouls-btn" onclick="adjustFouls('home',-1)">−</button>
+            <button class="fouls-btn" onclick="adjustFouls('home',1)">+</button>
+          </div>
+        </div>
+        <div class="fouls-box" id="away-fouls-box">
+          <div>
+            <div class="fouls-label">Faltas visita</div>
+            <div class="fouls-num" id="away-fouls-num">0</div>
+          </div>
+          <div class="fouls-btns">
+            <button class="fouls-btn" onclick="adjustFouls('away',-1)">−</button>
+            <button class="fouls-btn" onclick="adjustFouls('away',1)">+</button>
+          </div>
         </div>
       </div>
-      <div class="fouls-box" id="away-fouls-box">
-        <div>
-          <div class="fouls-label">Faltas visita</div>
-          <div class="fouls-num" id="away-fouls-num">0</div>
+
+      <div class="section-lbl">Tiempos fuera</div>
+      <div class="timeouts-row">
+        <div class="fouls-box">
+          <div>
+            <div class="fouls-label">Timeouts local</div>
+            <div class="fouls-num" id="home-timeouts-num">0</div>
+          </div>
+          <div class="fouls-btns">
+            <button class="fouls-btn" onclick="adjustTimeouts('home',-1)">−</button>
+            <button class="fouls-btn" onclick="adjustTimeouts('home',1)">+</button>
+          </div>
         </div>
-        <div class="fouls-btns">
-          <button class="fouls-btn" onclick="adjustFouls('away',-1)">−</button>
-          <button class="fouls-btn" onclick="adjustFouls('away',1)">+</button>
+        <div class="fouls-box">
+          <div>
+            <div class="fouls-label">Timeouts visita</div>
+            <div class="fouls-num" id="away-timeouts-num">0</div>
+          </div>
+          <div class="fouls-btns">
+            <button class="fouls-btn" onclick="adjustTimeouts('away',-1)">−</button>
+            <button class="fouls-btn" onclick="adjustTimeouts('away',1)">+</button>
+          </div>
         </div>
+      </div>
+
+      <button class="roster-toggle" id="subs-toggle-btn" onclick="toggleSubs()">🔄 Sustituciones ▾</button>
+      <div class="subs-wrap" id="subs-wrap" hidden>
+        <div class="subs-form">
+          <div class="subs-form-row">
+            <select class="subs-select" id="sub-team-select" onchange="renderSubOptions()">
+              <option value="home">Equipo local</option>
+              <option value="away">Equipo visita</option>
+            </select>
+          </div>
+          <div class="subs-form-row">
+            <select class="subs-select" id="sub-out-select"></select>
+            <select class="subs-select" id="sub-in-select"></select>
+          </div>
+          <button class="subs-reg-btn" onclick="registerSubstitution()">Sale ↔ Entra: registrar cambio</button>
+        </div>
+        <div class="subs-log" id="subs-log"></div>
       </div>
     </div>
 
@@ -421,6 +551,7 @@ let tickerInterval = null;
 let rosterHome = [];
 let rosterAway = [];
 let playerStats = {};         // playerId -> { points, fouls }
+let subsLog = [];
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
@@ -454,6 +585,11 @@ function rowToLive(row){
     clockRunning: !!row.clock_running,
     clockStartedAt: row.clock_started_at,
     homeFouls: row.home_fouls || 0, awayFouls: row.away_fouls || 0,
+    shotClockSeconds: row.shot_clock_seconds ?? 24,
+    shotClockRunning: !!row.shot_clock_running,
+    shotClockStartedAt: row.shot_clock_started_at,
+    possessionArrow: row.possession_arrow || 'home',
+    homeTimeouts: row.home_timeouts || 0, awayTimeouts: row.away_timeouts || 0,
   };
 }
 
@@ -477,9 +613,11 @@ function setView(id){
 async function goToList(){
   stopTicker();
   currentGame = null;
-  rosterHome = []; rosterAway = []; playerStats = {};
+  rosterHome = []; rosterAway = []; playerStats = {}; subsLog = [];
   const rosterWrap = document.getElementById('roster-wrap');
   if (rosterWrap) rosterWrap.hidden = true;
+  const subsWrap = document.getElementById('subs-wrap');
+  if (subsWrap) subsWrap.hidden = true;
   setView('view-list');
   updateDivPill();
   const { data, error } = await _supabase.from(divCfg().dbTable).select('*')
@@ -543,12 +681,16 @@ async function startGame(){
     period_length_seconds: seconds, clock_seconds: seconds,
     clock_running: false, clock_started_at: null,
     home_score: 0, away_score: 0, home_fouls: 0, away_fouls: 0,
+    shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
+    possession_arrow: 'home', home_timeouts: 0, away_timeouts: 0,
   };
   const { error } = await _supabase.from(divCfg().dbTable).update(payload).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
   Object.assign(currentGame, {
     type:'live', quarter:1, periodLen:seconds, clockSeconds:seconds,
     clockRunning:false, clockStartedAt:null, homeScore:0, awayScore:0, homeFouls:0, awayFouls:0,
+    shotClockSeconds:24, shotClockRunning:false, shotClockStartedAt:null,
+    possessionArrow:'home', homeTimeouts:0, awayTimeouts:0,
   });
   showToast('🔴 Partido iniciado en vivo');
   openBoard();
@@ -572,9 +714,13 @@ function openBoard(){
   document.getElementById('roster-logo-away').innerHTML = teamLogoHTML(currentGame.away);
   document.getElementById('roster-name-home').textContent = home?.name || currentGame.home;
   document.getElementById('roster-name-away').textContent = away?.name || currentGame.away;
+  document.getElementById('poss-home-label').textContent = `◀ ${home?.name || currentGame.home}`;
+  document.getElementById('poss-away-label').textContent = `${away?.name || currentGame.away} ▶`;
+  setRole('todos');
   renderBoard();
   startTicker();
   loadRosterAndStats();
+  loadSubstitutions();
 }
 
 function toggleRoster(){
@@ -582,6 +728,35 @@ function toggleRoster(){
   wrap.hidden = !wrap.hidden;
   document.getElementById('roster-toggle-btn').textContent =
     wrap.hidden ? '🏀 Puntos y faltas por jugador ▾' : '🏀 Puntos y faltas por jugador ▴';
+}
+
+/* ══ PERSONAL DE MESA (roles) ══ */
+function setRole(role){
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.toggle('active', t.dataset.role === role));
+  document.querySelectorAll('.role-section').forEach(s => {
+    s.hidden = !(role === 'todos' || s.dataset.roleSection === role);
+  });
+}
+
+/* ══ BOCINA ══ */
+let _audioCtx = null;
+function ensureAudioCtx(){
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+function playBuzzer(durationMs, freq){
+  try{
+    const ctx = ensureAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.value = freq || 300;
+    gain.gain.value = 0.35;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    setTimeout(() => { try{ osc.stop(); }catch(e){} }, durationMs || 1000);
+  } catch(e){ console.warn('Audio no disponible', e); }
 }
 
 /* ══ PUNTOS Y FALTAS POR JUGADOR ══ */
@@ -679,16 +854,24 @@ function renderBoard(){
   if (!currentGame) return;
   document.getElementById('home-score').textContent = currentGame.homeScore;
   document.getElementById('away-score').textContent = currentGame.awayScore;
-  document.getElementById('home-fouls-num').textContent = currentGame.homeFouls;
-  document.getElementById('away-fouls-num').textContent = currentGame.awayFouls;
+  document.getElementById('home-fouls-num').innerHTML = currentGame.homeFouls + (currentGame.homeFouls >= 5 ? ' <span class="bonus-badge">BONUS</span>' : '');
+  document.getElementById('away-fouls-num').innerHTML = currentGame.awayFouls + (currentGame.awayFouls >= 5 ? ' <span class="bonus-badge">BONUS</span>' : '');
   document.getElementById('home-fouls-box').classList.toggle('bonus', currentGame.homeFouls >= 5);
   document.getElementById('away-fouls-box').classList.toggle('bonus', currentGame.awayFouls >= 5);
+  document.getElementById('home-timeouts-num').textContent = currentGame.homeTimeouts;
+  document.getElementById('away-timeouts-num').textContent = currentGame.awayTimeouts;
+  document.getElementById('poss-home-label').classList.toggle('active', currentGame.possessionArrow === 'home');
+  document.getElementById('poss-away-label').classList.toggle('active', currentGame.possessionArrow === 'away');
   const q = currentGame.quarter;
   document.getElementById('quarter-label').textContent = q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
   const btn = document.getElementById('toggle-clock-btn');
   btn.textContent = currentGame.clockRunning ? '⏸ Pausar cronómetro' : '▶ Iniciar cronómetro';
   btn.className = 'toggle-clock ' + (currentGame.clockRunning ? 'pause' : 'play');
+  const shotBtn = document.getElementById('shot-toggle-btn');
+  shotBtn.textContent = currentGame.shotClockRunning ? '⏸ Pausar 24s' : '▶ Iniciar 24s';
+  shotBtn.className = 'shot-toggle ' + (currentGame.shotClockRunning ? 'pause' : 'play');
   renderClock();
+  renderShotClock();
 }
 
 function remainingSeconds(){
@@ -711,10 +894,57 @@ function renderClock(){
 }
 function startTicker(){
   stopTicker();
-  tickerInterval = setInterval(renderClock, 250);
+  tickerInterval = setInterval(() => { renderClock(); renderShotClock(); }, 250);
 }
 function stopTicker(){
   if (tickerInterval){ clearInterval(tickerInterval); tickerInterval = null; }
+}
+
+/* ── CRONÓMETRO DE POSESIÓN (24s) ── */
+function remainingShotSeconds(){
+  if (!currentGame.shotClockRunning || !currentGame.shotClockStartedAt) return currentGame.shotClockSeconds;
+  const elapsed = (Date.now() - new Date(currentGame.shotClockStartedAt).getTime()) / 1000;
+  return Math.max(0, currentGame.shotClockSeconds - elapsed);
+}
+function renderShotClock(){
+  const disp = document.getElementById('shot-display');
+  if (!disp) return;
+  const remaining = remainingShotSeconds();
+  disp.textContent = Math.ceil(remaining);
+  disp.classList.toggle('running', currentGame.shotClockRunning);
+  disp.classList.toggle('warn', remaining <= 5 && remaining > 0);
+  if (currentGame.shotClockRunning && remaining <= 0) autoStopShotClock();
+}
+async function toggleShotClock(){
+  ensureAudioCtx();
+  if (currentGame.shotClockRunning){
+    currentGame.shotClockSeconds = remainingShotSeconds();
+    currentGame.shotClockRunning = false;
+    currentGame.shotClockStartedAt = null;
+    renderBoard();
+    await persist({ shot_clock_seconds: Math.round(currentGame.shotClockSeconds), shot_clock_running: false, shot_clock_started_at: null });
+  } else {
+    if (currentGame.shotClockSeconds <= 0){ showToast('⚠ El cronómetro de posesión está en 0', true); return; }
+    currentGame.shotClockStartedAt = new Date().toISOString();
+    currentGame.shotClockRunning = true;
+    renderBoard();
+    await persist({ shot_clock_running: true, shot_clock_started_at: currentGame.shotClockStartedAt });
+  }
+}
+async function resetShotClock(seconds){
+  currentGame.shotClockSeconds = seconds;
+  currentGame.shotClockRunning = false;
+  currentGame.shotClockStartedAt = null;
+  renderBoard();
+  await persist({ shot_clock_seconds: seconds, shot_clock_running: false, shot_clock_started_at: null });
+}
+async function autoStopShotClock(){
+  currentGame.shotClockSeconds = 0;
+  currentGame.shotClockRunning = false;
+  currentGame.shotClockStartedAt = null;
+  renderBoard();
+  await persist({ shot_clock_seconds: 0, shot_clock_running: false, shot_clock_started_at: null });
+  playBuzzer(900, 520);
 }
 
 async function persist(fields){
@@ -759,17 +989,22 @@ async function changeQuarter(delta){
   currentGame.clockStartedAt = null;
   currentGame.homeFouls = 0;
   currentGame.awayFouls = 0;
+  currentGame.shotClockSeconds = 24;
+  currentGame.shotClockRunning = false;
+  currentGame.shotClockStartedAt = null;
   renderBoard();
   await persist({
     quarter: next, clock_seconds: currentGame.periodLen,
     clock_running: false, clock_started_at: null,
     home_fouls: 0, away_fouls: 0,
+    shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
   });
   showToast('✓ Cuarto actualizado');
 }
 
 /* ── CRONÓMETRO ── */
 async function toggleClock(){
+  ensureAudioCtx();
   if (currentGame.clockRunning){
     currentGame.clockSeconds = remainingSeconds();
     currentGame.clockRunning = false;
@@ -791,6 +1026,23 @@ async function autoStopClock(){
   renderBoard();
   await persist({ clock_seconds: 0, clock_running: false, clock_started_at: null });
   showToast('⏱ Fin del tiempo');
+  playBuzzer(1500, 180);
+}
+
+/* ── POSESIÓN ALTERNA ── */
+async function togglePossession(){
+  currentGame.possessionArrow = currentGame.possessionArrow === 'home' ? 'away' : 'home';
+  renderBoard();
+  await persist({ possession_arrow: currentGame.possessionArrow });
+}
+
+/* ── TIMEOUTS ── */
+async function adjustTimeouts(side, delta){
+  const key = side === 'home' ? 'homeTimeouts' : 'awayTimeouts';
+  currentGame[key] = Math.max(0, currentGame[key] + delta);
+  renderBoard();
+  await persist({ [side === 'home' ? 'home_timeouts' : 'away_timeouts']: currentGame[key] });
+  if (delta > 0) playBuzzer(500, 400);
 }
 async function adjustClock(deltaSeconds){
   if (currentGame.clockRunning){ showToast('⚠ Pausa el cronómetro para ajustarlo', true); return; }
@@ -817,6 +1069,57 @@ function editClock(){
   persist({ clock_seconds: secs });
 }
 
+/* ── SUSTITUCIONES ── */
+function toggleSubs(){
+  const wrap = document.getElementById('subs-wrap');
+  wrap.hidden = !wrap.hidden;
+  document.getElementById('subs-toggle-btn').textContent =
+    wrap.hidden ? '🔄 Sustituciones ▾' : '🔄 Sustituciones ▴';
+  if (!wrap.hidden) renderSubOptions();
+}
+function renderSubOptions(){
+  const side = document.getElementById('sub-team-select').value;
+  const players = side === 'home' ? rosterHome : rosterAway;
+  const opts = players.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
+  document.getElementById('sub-out-select').innerHTML = opts || '<option value="">— Sin jugadores —</option>';
+  document.getElementById('sub-in-select').innerHTML = opts || '<option value="">— Sin jugadores —</option>';
+}
+async function loadSubstitutions(){
+  const { data, error } = await _supabase.from('substitutions').select('*')
+    .eq('game_id', currentGame.id).eq('division', activeDivision)
+    .order('created_at', { ascending: false }).limit(8);
+  subsLog = error ? [] : (data || []);
+  renderSubsLog();
+}
+function renderSubsLog(){
+  const el = document.getElementById('subs-log');
+  if (!el) return;
+  if (!subsLog.length){ el.innerHTML = '<div class="subs-log-empty">Sin sustituciones registradas.</div>'; return; }
+  const teams = divTeams();
+  el.innerHTML = subsLog.map(s => {
+    const teamName = teams[s.team]?.name || s.team;
+    return `<div class="subs-log-item"><span>C${s.quarter} · ${teamName}</span><span>🔻 ${s.player_out_name || '—'} · 🔺 ${s.player_in_name || '—'}</span></div>`;
+  }).join('');
+}
+async function registerSubstitution(){
+  const side = document.getElementById('sub-team-select').value;
+  const outId = document.getElementById('sub-out-select').value;
+  const inId = document.getElementById('sub-in-select').value;
+  if (!outId || !inId){ showToast('⚠ Selecciona ambos jugadores', true); return; }
+  if (outId === inId){ showToast('⚠ Selecciona jugadores distintos', true); return; }
+  const playerOut = findPlayer(side, outId), playerIn = findPlayer(side, inId);
+  const payload = {
+    game_id: currentGame.id, division: activeDivision,
+    team: side === 'home' ? currentGame.home : currentGame.away,
+    quarter: currentGame.quarter,
+    player_out_name: playerOut?.name || null, player_in_name: playerIn?.name || null,
+  };
+  const { error } = await _supabase.from('substitutions').insert(payload);
+  if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+  showToast('✓ Sustitución registrada');
+  loadSubstitutions();
+}
+
 /* ── FINALIZAR ── */
 async function finishGame(){
   if (!confirm('¿Finalizar este partido? El marcador y los puntos por jugador quedarán guardados como resultado final.')) return;
@@ -832,7 +1135,7 @@ async function finishGame(){
   });
 
   const { error } = await _supabase.from(divCfg().dbTable).update({
-    type: 'finished', clock_running: false, mvp: mvpName || null,
+    type: 'finished', clock_running: false, shot_clock_running: false, mvp: mvpName || null,
   }).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
 
