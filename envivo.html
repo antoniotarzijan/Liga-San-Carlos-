@@ -58,10 +58,34 @@
     .lg-clock.paused{color:var(--muted);}
     .lg-vs{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);}
 
+    .lg-shot{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#FB923C;border:1px solid rgba(251,146,60,.4);border-radius:20px;padding:2px 10px;margin-top:2px;}
+    .lg-shot.warn{color:var(--red);border-color:rgba(248,8,8,.5);}
+    .lg-poss{font-size:10px;letter-spacing:1px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;margin-top:4px;}
+    .lg-poss b{color:var(--gold);}
+
     .lg-fouls{display:flex;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:rgba(255,255,255,.02);}
     .lg-fouls-item{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
     .lg-fouls-item b{color:var(--text);font-size:13px;}
     .lg-fouls-item.bonus b{color:var(--red);}
+
+    .lg-timeouts{display:flex;justify-content:space-between;padding:10px 20px;border-top:1px solid var(--border);}
+    .lg-timeouts-item{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+    .lg-timeouts-item b{color:var(--text);font-size:13px;}
+
+    .lg-players{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);}
+    .lg-players-col{padding:14px 18px;}
+    .lg-players-col:first-child{border-right:1px solid var(--border);}
+    .lg-players-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .lg-player-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;}
+    .lg-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--text);}
+    .lg-player-stats{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);white-space:nowrap;margin-left:8px;}
+    .lg-player-stats b{color:var(--gold);}
+    .lg-player-stats .fo{color:#F87171;}
+    .lg-players-empty{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;}
+    @media(max-width:520px){
+      .lg-players{grid-template-columns:1fr;}
+      .lg-players-col:first-child{border-right:none;border-bottom:1px solid var(--border);}
+    }
 
     .empty-state{text-align:center;padding:80px 20px;color:var(--muted);}
     .empty-icon{font-size:44px;margin-bottom:16px;}
@@ -105,7 +129,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label:'Primera División', dbTable:'games',
+      label:'Primera División', dbTable:'games', playersTable:'players',
       teams: {
         EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
@@ -119,7 +143,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label:'Segunda División', dbTable:'games_segunda',
+      label:'Segunda División', dbTable:'games_segunda', playersTable:'players_segunda',
       teams: {
         T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
         T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
@@ -164,6 +188,11 @@ function rowToLive(row){
     clockRunning: !!row.clock_running,
     clockStartedAt: row.clock_started_at,
     homeFouls: row.home_fouls || 0, awayFouls: row.away_fouls || 0,
+    shotClockSeconds: row.shot_clock_seconds ?? 24,
+    shotClockRunning: !!row.shot_clock_running,
+    shotClockStartedAt: row.shot_clock_started_at,
+    possessionArrow: row.possession_arrow || 'home',
+    homeTimeouts: row.home_timeouts || 0, awayTimeouts: row.away_timeouts || 0,
   };
 }
 
@@ -171,6 +200,14 @@ async function fetchLive(){
   const { data, error } = await _supabase.from(divCfg().dbTable).select('*').eq('type','live').order('round',{ascending:true});
   if (error){ console.error(error.message); return; }
   liveGames = (data || []).map(rowToLive);
+
+  if (liveGames.length){
+    const statsResults = await Promise.all(liveGames.map(g =>
+      _supabase.from('game_stats').select('*').eq('game_id', g.id).eq('division', activeDivision)
+    ));
+    liveGames.forEach((g, i) => { g.stats = statsResults[i].data || []; });
+  }
+
   renderLive();
 }
 
@@ -193,8 +230,24 @@ function remainingSeconds(g){
   const elapsed = (Date.now() - new Date(g.clockStartedAt).getTime()) / 1000;
   return Math.max(0, g.clockSeconds - elapsed);
 }
+function remainingShot(g){
+  if (!g.shotClockRunning || !g.shotClockStartedAt) return g.shotClockSeconds;
+  const elapsed = (Date.now() - new Date(g.shotClockStartedAt).getTime()) / 1000;
+  return Math.max(0, g.shotClockSeconds - elapsed);
+}
 function quarterLabel(q){
   return q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+}
+
+function playerStatsHTML(stats, teamId){
+  const rows = (stats || []).filter(s => s.team === teamId && (s.points > 0 || s.fouls > 0))
+    .sort((a,b) => b.points - a.points);
+  if (!rows.length) return `<div class="lg-players-empty">Sin puntos aún</div>`;
+  return rows.map(s => `
+    <div class="lg-player-row">
+      <span class="lg-player-name">${s.player_name}${s.player_number != null ? ' #' + s.player_number : ''}</span>
+      <span class="lg-player-stats"><b>${s.points}</b> pts · <span class="fo">${s.fouls || 0}</span> f</span>
+    </div>`).join('');
 }
 
 function renderLive(){
@@ -229,7 +282,9 @@ function renderLive(){
           <div class="lg-center">
             <div class="lg-quarter">${quarterLabel(g.quarter)}</div>
             <div class="lg-clock ${g.clockRunning?'':'paused'}" data-clock-seconds="${g.clockSeconds}" data-clock-running="${g.clockRunning}" data-clock-started="${g.clockStartedAt||''}">${fmtClock(remaining)}</div>
+            <div class="lg-shot ${remainingShot(g)<=5?'warn':''}" data-shot-seconds="${g.shotClockSeconds}" data-shot-running="${g.shotClockRunning}" data-shot-started="${g.shotClockStartedAt||''}">⏲ ${Math.ceil(remainingShot(g))}</div>
             <div class="lg-vs">VS</div>
+            <div class="lg-poss">Posesión: <b>${g.possessionArrow === 'home' ? (home?.name||g.home) : (away?.name||g.away)}</b></div>
           </div>
           <div class="lg-team">
             <div class="lg-team-logo">${teamLogoHTML(g.away)}</div>
@@ -242,11 +297,25 @@ function renderLive(){
         <div class="lg-fouls-item ${g.homeFouls>=5?'bonus':''}">Faltas ${home?.name||g.home}: <b>${g.homeFouls}</b></div>
         <div class="lg-fouls-item ${g.awayFouls>=5?'bonus':''}">Faltas ${away?.name||g.away}: <b>${g.awayFouls}</b></div>
       </div>
+      <div class="lg-timeouts">
+        <div class="lg-timeouts-item">Timeouts ${home?.name||g.home}: <b>${g.homeTimeouts}</b></div>
+        <div class="lg-timeouts-item">Timeouts ${away?.name||g.away}: <b>${g.awayTimeouts}</b></div>
+      </div>
+      <div class="lg-players">
+        <div class="lg-players-col">
+          <div class="lg-players-title">${home?.name || g.home}</div>
+          ${playerStatsHTML(g.stats, g.home)}
+        </div>
+        <div class="lg-players-col">
+          <div class="lg-players-title">${away?.name || g.away}</div>
+          ${playerStatsHTML(g.stats, g.away)}
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
-/* Tick del cronómetro en pantalla, entre cada refresco de datos */
+/* Tick de los cronómetros en pantalla, entre cada refresco de datos */
 function tickClocks(){
   document.querySelectorAll('.lg-clock').forEach(el => {
     const running = el.dataset.clockRunning === 'true';
@@ -255,6 +324,16 @@ function tickClocks(){
     if (!running || !started) return;
     const elapsed = (Date.now() - new Date(started).getTime()) / 1000;
     el.textContent = fmtClock(Math.max(0, seconds - elapsed));
+  });
+  document.querySelectorAll('.lg-shot').forEach(el => {
+    const running = el.dataset.shotRunning === 'true';
+    const seconds = parseFloat(el.dataset.shotSeconds);
+    const started = el.dataset.shotStarted;
+    if (!running || !started) return;
+    const elapsed = (Date.now() - new Date(started).getTime()) / 1000;
+    const remaining = Math.max(0, seconds - elapsed);
+    el.textContent = `⏲ ${Math.ceil(remaining)}`;
+    el.classList.toggle('warn', remaining <= 5);
   });
 }
 
