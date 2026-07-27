@@ -51,11 +51,11 @@
     .pill.segunda{color:#8b7fef;border-color:rgba(48,9,220,.3);background:rgba(48,9,220,.1);}
     .logout-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:6px 10px;border-radius:3px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#F87171;cursor:pointer;}
 
-    .view{flex:1;padding:16px;max-width:720px;width:100%;margin:0 auto;}
+    .view{flex:1;padding:12px;max-width:720px;width:100%;margin:0 auto;}
     .view[hidden]{display:none;}
 
     /* ── LISTA DE PARTIDOS ── */
-    .section-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+    .section-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:12px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--border);}
     .section-lbl:first-child{margin-top:4px;}
     .game-pick{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
     .game-pick:hover{border-color:rgba(255,255,255,.25);}
@@ -80,109 +80,109 @@
     .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;margin-bottom:16px;padding:8px 0;}
 
     /* ── TABLERO DE CONTROL ── */
-    .board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .board-round{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
-    .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
+    .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
 
     /* ── ENCABEZADO COMPACTO (siempre visible) ── */
-    .compact-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
+    .compact-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:8px;}
     .compact-scores{display:grid;grid-template-columns:1fr auto auto auto 1fr;align-items:center;gap:6px;}
     .compact-team{display:flex;align-items:center;gap:6px;min-width:0;}
     .compact-team.away{flex-direction:row-reverse;text-align:right;}
     .compact-logo{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
     .compact-logo img{width:100%;height:100%;object-fit:contain;}
     .compact-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .compact-score-num{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;min-width:30px;text-align:center;}
-    .compact-dash{color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:18px;}
-    .compact-clock-row{display:flex;align-items:center;justify-content:center;gap:0;margin-top:8px;}
+    .compact-score-num{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;min-width:28px;text-align:center;}
+    .compact-dash{color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:16px;}
+    .compact-clock-row{display:flex;align-items:center;justify-content:center;gap:0;margin-top:5px;}
     .compact-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-right:10px;}
     .compact-clock-combo{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-    .compact-clock{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;padding:4px 14px;background:rgba(255,255,255,.04);color:var(--green);}
+    .compact-clock{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;padding:2px 12px;background:rgba(255,255,255,.04);color:var(--green);}
     .compact-clock.paused{color:var(--text);}
-    .compact-shot{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;padding:4px 12px;background:rgba(251,146,60,.12);color:#FB923C;border-left:2px solid var(--border);}
+    .compact-shot{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;padding:2px 10px;background:rgba(251,146,60,.12);color:#FB923C;border-left:2px solid var(--border);}
     .compact-shot.warn{color:var(--red);background:rgba(248,8,8,.12);}
 
     /* ── PESTAÑAS DE ROL (personal de mesa) ── */
-    .role-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+    .role-tabs{display:flex;gap:5px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
     .role-tabs::-webkit-scrollbar{display:none;}
-    .role-tab{flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;white-space:nowrap;}
+    .role-tab{flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:7px 12px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;white-space:nowrap;}
     .role-tab.active{background:var(--gold);border-color:var(--gold);color:#000;}
     .role-section[hidden]{display:none;}
 
-    .clock-shot-row{display:flex;gap:10px;align-items:stretch;}
+    .clock-shot-row{display:flex;gap:8px;align-items:stretch;margin-bottom:8px;}
     .clock-shot-row .role-section{flex:1;min-width:0;}
     .clock-shot-row .clock-card,
     .clock-shot-row .shot-card{margin-bottom:0;height:100%;}
 
-    .fouls-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-    .fouls-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .fouls-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+    .fouls-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
     .fouls-box.bonus{border-color:rgba(248,8,8,.5);background:rgba(248,8,8,.06);}
     .fouls-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
-    .fouls-num{font-family:'Bebas Neue',sans-serif;font-size:28px;}
-    .fouls-btns{display:flex;gap:6px;}
-    .fouls-btn{width:34px;height:34px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:16px;cursor:pointer;}
+    .fouls-num{font-family:'Bebas Neue',sans-serif;font-size:24px;}
+    .fouls-btns{display:flex;gap:5px;}
+    .fouls-btn{width:30px;height:30px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:15px;cursor:pointer;}
 
-    .clock-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px;}
-    .quarter-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
-    .quarter-nav{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-size:14px;}
-    .quarter-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);min-width:110px;}
-    .clock-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,7vw,36px);letter-spacing:1px;line-height:1;margin-bottom:2px;}
+    .clock-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;margin-bottom:8px;}
+    .quarter-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
+    .quarter-nav{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-size:13px;}
+    .quarter-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);min-width:96px;}
+    .clock-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,32px);letter-spacing:1px;line-height:1;margin-bottom:2px;}
     .clock-display.running{color:var(--green);}
-    .clock-edit{font-size:9px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-decoration:underline;margin-bottom:8px;}
-    .clock-adjust{display:flex;gap:5px;justify-content:center;margin-bottom:8px;flex-wrap:wrap;}
-    .adj-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:6px 10px;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;}
-    .toggle-clock{width:100%;padding:11px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .clock-edit{font-size:9px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-decoration:underline;margin-bottom:4px;}
+    .clock-adjust{display:flex;gap:4px;justify-content:center;margin-bottom:5px;flex-wrap:wrap;}
+    .adj-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;}
+    .toggle-clock{width:100%;padding:8px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
     .toggle-clock.play{background:var(--green);color:#000;}
     .toggle-clock.pause{background:var(--gold);color:#000;}
 
     /* ── POSESIÓN ALTERNA ── */
-    .poss-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
-    .poss-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
-    .poss-team{flex:1;text-align:center;padding:7px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);}
+    .poss-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:8px;}
+    .poss-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;}
+    .poss-team{flex:1;text-align:center;padding:5px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);}
     .poss-team.active{color:var(--gold);border-color:rgba(242,179,78,.5);background:rgba(242,179,78,.08);}
-    .poss-toggle{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:14px;cursor:pointer;flex-shrink:0;}
+    .poss-toggle{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:13px;cursor:pointer;flex-shrink:0;}
 
     /* ── CRONÓMETRO DE POSESIÓN (24s) ── */
-    .shot-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px;}
-    .shot-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,7vw,36px);letter-spacing:1px;line-height:1;margin:4px 0;color:var(--text);}
+    .shot-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;margin-bottom:8px;}
+    .shot-display{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6vw,32px);letter-spacing:1px;line-height:1;margin:2px 0;color:var(--text);}
     .shot-display.running{color:#FB923C;}
     .shot-display.warn{color:var(--red);}
-    .shot-btns{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
-    .shot-reset-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;}
-    .shot-toggle{width:100%;padding:10px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:6px;}
+    .shot-btns{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:4px;}
+    .shot-reset-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;}
+    .shot-toggle{width:100%;padding:8px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
     .shot-toggle.play{background:#FB923C;color:#000;}
     .shot-toggle.pause{background:rgba(255,255,255,.1);color:var(--text);}
 
     /* ── BOCINA ── */
-    .buzzer-btn{width:100%;padding:16px;border-radius:8px;border:2px solid var(--red);background:rgba(248,8,8,.1);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
+    .buzzer-btn{width:100%;padding:10px;border-radius:8px;border:2px solid var(--red);background:rgba(248,8,8,.1);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
     .buzzer-btn:active{background:rgba(248,8,8,.3);}
 
     /* ── TIMEOUTS ── */
-    .timeouts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .timeouts-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 
     /* ── BONUS BADGE ── */
     .bonus-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;background:var(--red);color:#fff;padding:2px 6px;border-radius:3px;margin-left:6px;vertical-align:middle;}
 
     /* ── SUSTITUCIONES ── */
     .subs-wrap[hidden]{display:none;}
-    .subs-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+    .subs-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;}
     .subs-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-    .subs-select{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);font-size:14px;}
-    .subs-reg-btn{width:100%;padding:12px;border-radius:6px;border:none;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
-    .subs-log{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
-    .subs-log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;justify-content:space-between;gap:8px;}
-    .subs-log-empty{padding:10px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;}
+    .subs-select{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:14px;}
+    .subs-reg-btn{width:100%;padding:10px;border-radius:6px;border:none;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+    .subs-log{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
+    .subs-log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;justify-content:space-between;gap:8px;}
+    .subs-log-empty{padding:8px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;}
 
     /* ── PUNTOS/FALTAS POR JUGADOR ── */
-    .roster-toggle{width:100%;padding:14px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
+    .roster-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
     .roster-wrap[hidden]{display:none;}
-    .roster-block{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
-    .roster-block-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
-    .roster-block-logo{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .roster-block{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;}
+    .roster-block-head{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
+    .roster-block-logo{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
     .roster-block-logo img{width:100%;height:100%;object-fit:contain;}
     .roster-block-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;flex:1;}
-    .roster-block-empty{padding:16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
-    .roster-player-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
+    .roster-block-empty{padding:12px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+    .roster-player-row{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
     .roster-player-row:last-child{border-bottom:none;}
     .roster-player-info{flex:1;min-width:110px;}
     .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
@@ -195,7 +195,7 @@
     .roster-pt-btn.minus{background:rgba(248,113,113,.15);color:#F87171;}
     .roster-foul-btn{min-width:34px;min-height:34px;border-radius:5px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;cursor:pointer;background:rgba(248,113,113,.12);color:#F87171;}
 
-    .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:20px;}
+    .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:12px;margin-top:4px;}
 
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;padding:12px 22px;border-radius:6px;transition:transform .3s;z-index:999;white-space:nowrap;}
     .toast.show{transform:translateX(-50%) translateY(0);}
@@ -297,27 +297,6 @@
 
     <button class="buzzer-btn" onclick="playBuzzer(1000,300)">🔊 Bocina manual</button>
 
-    <!-- PUNTOS Y FALTAS POR JUGADOR -->
-    <div class="role-section" data-role-section="anotador">
-      <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
-      <div class="roster-wrap" id="roster-wrap" hidden>
-        <div class="roster-block" id="roster-block-home">
-          <div class="roster-block-head">
-            <div class="roster-block-logo" id="roster-logo-home"></div>
-            <div class="roster-block-name" id="roster-name-home">Local</div>
-          </div>
-          <div id="roster-list-home"></div>
-        </div>
-        <div class="roster-block" id="roster-block-away">
-          <div class="roster-block-head">
-            <div class="roster-block-logo" id="roster-logo-away"></div>
-            <div class="roster-block-name" id="roster-name-away">Visita</div>
-          </div>
-          <div id="roster-list-away"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- CRONÓMETRO DE JUEGO + CRONÓMETRO DE POSESIÓN (uno al lado del otro) -->
     <div class="clock-shot-row">
       <div class="role-section" data-role-section="cronometrista">
@@ -360,6 +339,27 @@
           <div class="poss-team" id="poss-home-label">◀ Local</div>
           <button class="poss-toggle" onclick="togglePossession()">🔁</button>
           <div class="poss-team" id="poss-away-label">Visita ▶</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUNTOS Y FALTAS POR JUGADOR -->
+    <div class="role-section" data-role-section="anotador">
+      <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
+      <div class="roster-wrap" id="roster-wrap" hidden>
+        <div class="roster-block" id="roster-block-home">
+          <div class="roster-block-head">
+            <div class="roster-block-logo" id="roster-logo-home"></div>
+            <div class="roster-block-name" id="roster-name-home">Local</div>
+          </div>
+          <div id="roster-list-home"></div>
+        </div>
+        <div class="roster-block" id="roster-block-away">
+          <div class="roster-block-head">
+            <div class="roster-block-logo" id="roster-logo-away"></div>
+            <div class="roster-block-name" id="roster-name-away">Visita</div>
+          </div>
+          <div id="roster-list-away"></div>
         </div>
       </div>
     </div>
