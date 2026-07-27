@@ -109,18 +109,10 @@
     .role-tab.active{background:var(--gold);border-color:var(--gold);color:#000;}
     .role-section[hidden]{display:none;}
 
-    .teams-board{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-    .team-panel{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--tc,var(--red));border-radius:8px;padding:10px 10px;text-align:center;}
-    .tp-logo{width:30px;height:30px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;}
-    .tp-logo img{width:100%;height:100%;object-fit:contain;}
-    .tp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;min-height:auto;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
-    .tp-score{display:none;}
-    .tp-edit{font-size:9px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-decoration:underline;margin-bottom:6px;}
-    .tp-btns{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
-    .score-btn{flex:1;min-width:38px;min-height:38px;border-radius:6px;border:none;font-family:'Bebas Neue',sans-serif;font-size:15px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);transition:transform .08s;}
-    .score-btn:active{transform:scale(.92);}
-    .score-btn.plus{background:var(--gold);color:#000;}
-    .score-btn.minus{background:rgba(248,113,113,.15);color:#F87171;flex:0 0 38px;}
+    .clock-shot-row{display:flex;gap:10px;align-items:stretch;}
+    .clock-shot-row .role-section{flex:1;min-width:0;}
+    .clock-shot-row .clock-card,
+    .clock-shot-row .shot-card{margin-bottom:0;height:100%;}
 
     .fouls-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
     .fouls-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -209,9 +201,6 @@
     .toast.show{transform:translateX(-50%) translateY(0);}
     .toast.err{background:#F87171;}
 
-    @media(min-width:600px){
-      .teams-board{grid-template-columns:1fr 1fr;}
-    }
   </style>
 </head>
 <body>
@@ -308,38 +297,6 @@
 
     <button class="buzzer-btn" onclick="playBuzzer(1000,300)">🔊 Bocina manual</button>
 
-    <!-- MARCADOR -->
-    <div class="role-section" data-role-section="anotador">
-      <div class="teams-board">
-        <div class="team-panel" id="home-panel">
-          <div class="tp-logo" id="home-logo"></div>
-          <div class="tp-name" id="home-name">—</div>
-          <div class="tp-score" id="home-score">0</div>
-          <button class="tp-edit" onclick="editScore('home')">✎ editar marcador</button>
-          <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
-          <div class="tp-btns">
-            <button class="score-btn minus" onclick="adjustScore('home',-1)">−1</button>
-            <button class="score-btn plus" onclick="adjustScore('home',1)">+1</button>
-            <button class="score-btn plus" onclick="adjustScore('home',2)">+2</button>
-            <button class="score-btn plus" onclick="adjustScore('home',3)">+3</button>
-          </div>
-        </div>
-        <div class="team-panel" id="away-panel">
-          <div class="tp-logo" id="away-logo"></div>
-          <div class="tp-name" id="away-name">—</div>
-          <div class="tp-score" id="away-score">0</div>
-          <button class="tp-edit" onclick="editScore('away')">✎ editar marcador</button>
-          <div class="fouls-label" style="margin-bottom:4px;">Ajuste sin jugador</div>
-          <div class="tp-btns">
-            <button class="score-btn minus" onclick="adjustScore('away',-1)">−1</button>
-            <button class="score-btn plus" onclick="adjustScore('away',1)">+1</button>
-            <button class="score-btn plus" onclick="adjustScore('away',2)">+2</button>
-            <button class="score-btn plus" onclick="adjustScore('away',3)">+3</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- PUNTOS Y FALTAS POR JUGADOR -->
     <div class="role-section" data-role-section="anotador">
       <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
@@ -361,26 +318,42 @@
       </div>
     </div>
 
-    <!-- CRONÓMETRO DE JUEGO + CUARTOS + POSESIÓN ALTERNA -->
-    <div class="role-section" data-role-section="cronometrista">
-      <div class="clock-card">
-        <div class="quarter-row">
-          <button class="quarter-nav" onclick="changeQuarter(-1)">◀</button>
-          <div class="quarter-label" id="quarter-label">CUARTO 1</div>
-          <button class="quarter-nav" onclick="changeQuarter(1)">▶</button>
+    <!-- CRONÓMETRO DE JUEGO + CRONÓMETRO DE POSESIÓN (uno al lado del otro) -->
+    <div class="clock-shot-row">
+      <div class="role-section" data-role-section="cronometrista">
+        <div class="clock-card">
+          <div class="quarter-row">
+            <button class="quarter-nav" onclick="changeQuarter(-1)">◀</button>
+            <div class="quarter-label" id="quarter-label">CUARTO 1</div>
+            <button class="quarter-nav" onclick="changeQuarter(1)">▶</button>
+          </div>
+          <div class="clock-display" id="clock-display">10:00</div>
+          <button class="clock-edit" onclick="editClock()">✎ editar tiempo</button>
+          <div class="clock-adjust">
+            <button class="adj-btn" onclick="adjustClock(-60)">−1:00</button>
+            <button class="adj-btn" onclick="adjustClock(-10)">−0:10</button>
+            <button class="adj-btn" onclick="adjustClock(10)">+0:10</button>
+            <button class="adj-btn" onclick="adjustClock(60)">+1:00</button>
+            <button class="adj-btn" onclick="resetClock()">↺</button>
+          </div>
+          <button class="toggle-clock play" id="toggle-clock-btn" onclick="toggleClock()">▶ Iniciar</button>
         </div>
-        <div class="clock-display" id="clock-display">10:00</div>
-        <button class="clock-edit" onclick="editClock()">✎ editar tiempo</button>
-        <div class="clock-adjust">
-          <button class="adj-btn" onclick="adjustClock(-60)">−1:00</button>
-          <button class="adj-btn" onclick="adjustClock(-10)">−0:10</button>
-          <button class="adj-btn" onclick="adjustClock(10)">+0:10</button>
-          <button class="adj-btn" onclick="adjustClock(60)">+1:00</button>
-          <button class="adj-btn" onclick="resetClock()">↺ Reiniciar</button>
-        </div>
-        <button class="toggle-clock play" id="toggle-clock-btn" onclick="toggleClock()">▶ Iniciar cronómetro</button>
       </div>
 
+      <div class="role-section" data-role-section="operador24">
+        <div class="shot-card">
+          <div class="fouls-label">Posesión (24s)</div>
+          <div class="shot-display" id="shot-display">24</div>
+          <div class="shot-btns">
+            <button class="shot-reset-btn" onclick="resetShotClock(24)">↺24</button>
+            <button class="shot-reset-btn" onclick="resetShotClock(14)">↺14</button>
+          </div>
+          <button class="shot-toggle play" id="shot-toggle-btn" onclick="toggleShotClock()">▶ Iniciar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-section" data-role-section="cronometrista">
       <div class="poss-card">
         <div class="fouls-label">Posesión alterna</div>
         <div class="poss-row">
@@ -388,19 +361,6 @@
           <button class="poss-toggle" onclick="togglePossession()">🔁</button>
           <div class="poss-team" id="poss-away-label">Visita ▶</div>
         </div>
-      </div>
-    </div>
-
-    <!-- CRONÓMETRO DE POSESIÓN (24s) -->
-    <div class="role-section" data-role-section="operador24">
-      <div class="shot-card">
-        <div class="fouls-label">Cronómetro de posesión</div>
-        <div class="shot-display" id="shot-display">24</div>
-        <div class="shot-btns">
-          <button class="shot-reset-btn" onclick="resetShotClock(24)">↺ 24</button>
-          <button class="shot-reset-btn" onclick="resetShotClock(14)">↺ 14</button>
-        </div>
-        <button class="shot-toggle play" id="shot-toggle-btn" onclick="toggleShotClock()">▶ Iniciar 24s</button>
       </div>
     </div>
 
@@ -745,12 +705,6 @@ function openBoard(){
   const teams = divTeams();
   const home = teams[currentGame.home], away = teams[currentGame.away];
   document.getElementById('board-round').textContent = `Jornada ${currentGame.round}`;
-  document.getElementById('home-panel').style.setProperty('--tc', home?.color || '#f80808');
-  document.getElementById('away-panel').style.setProperty('--tc', away?.color || '#3009dc');
-  document.getElementById('home-logo').innerHTML = teamLogoHTML(currentGame.home);
-  document.getElementById('away-logo').innerHTML = teamLogoHTML(currentGame.away);
-  document.getElementById('home-name').textContent = home?.name || currentGame.home;
-  document.getElementById('away-name').textContent = away?.name || currentGame.away;
   document.getElementById('roster-logo-home').innerHTML = teamLogoHTML(currentGame.home);
   document.getElementById('roster-logo-away').innerHTML = teamLogoHTML(currentGame.away);
   document.getElementById('roster-name-home').textContent = home?.name || currentGame.home;
@@ -897,8 +851,6 @@ async function addPlayerFoul(side, playerId, delta){
 
 function renderBoard(){
   if (!currentGame) return;
-  document.getElementById('home-score').textContent = currentGame.homeScore;
-  document.getElementById('away-score').textContent = currentGame.awayScore;
   document.getElementById('chome-score').textContent = currentGame.homeScore;
   document.getElementById('caway-score').textContent = currentGame.awayScore;
   document.getElementById('home-fouls-num').innerHTML = currentGame.homeFouls + (currentGame.homeFouls >= 5 ? ' <span class="bonus-badge">BONUS</span>' : '');
@@ -1005,24 +957,6 @@ async function autoStopShotClock(){
 async function persist(fields){
   const { error } = await _supabase.from(divCfg().dbTable).update(fields).eq('id', currentGame.id);
   if (error) showToast('⚠ Error al guardar: ' + error.message, true);
-}
-
-/* ── MARCADOR ── */
-async function adjustScore(side, delta){
-  const key = side === 'home' ? 'homeScore' : 'awayScore';
-  currentGame[key] = Math.max(0, currentGame[key] + delta);
-  renderBoard();
-  await persist({ [side === 'home' ? 'home_score' : 'away_score']: currentGame[key] });
-}
-function editScore(side){
-  const key = side === 'home' ? 'homeScore' : 'awayScore';
-  const val = prompt('Nuevo marcador:', currentGame[key]);
-  if (val === null) return;
-  const n = parseInt(val);
-  if (isNaN(n) || n < 0) { showToast('⚠ Número inválido', true); return; }
-  currentGame[key] = n;
-  renderBoard();
-  persist({ [side === 'home' ? 'home_score' : 'away_score']: n });
 }
 
 /* ── FALTAS ── */
