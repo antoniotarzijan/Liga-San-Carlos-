@@ -84,6 +84,24 @@
     .board-round{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
     .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
 
+    /* ── ENCABEZADO COMPACTO (siempre visible) ── */
+    .compact-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
+    .compact-scores{display:grid;grid-template-columns:1fr auto auto auto 1fr;align-items:center;gap:6px;}
+    .compact-team{display:flex;align-items:center;gap:6px;min-width:0;}
+    .compact-team.away{flex-direction:row-reverse;text-align:right;}
+    .compact-logo{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .compact-logo img{width:100%;height:100%;object-fit:contain;}
+    .compact-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .compact-score-num{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;min-width:30px;text-align:center;}
+    .compact-dash{color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:18px;}
+    .compact-clock-row{display:flex;align-items:center;justify-content:center;gap:0;margin-top:8px;}
+    .compact-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-right:10px;}
+    .compact-clock-combo{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .compact-clock{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;padding:4px 14px;background:rgba(255,255,255,.04);color:var(--green);}
+    .compact-clock.paused{color:var(--text);}
+    .compact-shot{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;padding:4px 12px;background:rgba(251,146,60,.12);color:#FB923C;border-left:2px solid var(--border);}
+    .compact-shot.warn{color:var(--red);background:rgba(248,8,8,.12);}
+
     /* ── PESTAÑAS DE ROL (personal de mesa) ── */
     .role-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
     .role-tabs::-webkit-scrollbar{display:none;}
@@ -96,7 +114,7 @@
     .tp-logo{width:44px;height:44px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;}
     .tp-logo img{width:100%;height:100%;object-fit:contain;}
     .tp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;min-height:34px;display:flex;align-items:center;justify-content:center;}
-    .tp-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,14vw,72px);line-height:1;color:var(--text);margin:6px 0;}
+    .tp-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,9vw,48px);line-height:1;color:var(--text);margin:6px 0;}
     .tp-edit{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-decoration:underline;margin-bottom:10px;}
     .tp-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
     .score-btn{flex:1;min-width:44px;min-height:48px;border-radius:6px;border:none;font-family:'Bebas Neue',sans-serif;font-size:18px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);transition:transform .08s;}
@@ -256,6 +274,29 @@
     <div class="board-top">
       <div class="board-round" id="board-round">Jornada —</div>
       <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
+    </div>
+
+    <div class="compact-header">
+      <div class="compact-scores">
+        <div class="compact-team">
+          <div class="compact-logo" id="chome-logo"></div>
+          <div class="compact-name" id="chome-name">Local</div>
+        </div>
+        <div class="compact-score-num" id="chome-score">0</div>
+        <div class="compact-dash">–</div>
+        <div class="compact-score-num" id="caway-score">0</div>
+        <div class="compact-team away">
+          <div class="compact-logo" id="caway-logo"></div>
+          <div class="compact-name" id="caway-name">Visita</div>
+        </div>
+      </div>
+      <div class="compact-clock-row">
+        <div class="compact-quarter" id="compact-quarter-label">C1</div>
+        <div class="compact-clock-combo">
+          <div class="compact-clock" id="compact-clock-display">10:00</div>
+          <div class="compact-shot" id="compact-shot-display">24</div>
+        </div>
+      </div>
     </div>
 
     <div class="role-tabs" id="role-tabs">
@@ -716,6 +757,10 @@ function openBoard(){
   document.getElementById('roster-name-away').textContent = away?.name || currentGame.away;
   document.getElementById('poss-home-label').textContent = `◀ ${home?.name || currentGame.home}`;
   document.getElementById('poss-away-label').textContent = `${away?.name || currentGame.away} ▶`;
+  document.getElementById('chome-logo').innerHTML = teamLogoHTML(currentGame.home);
+  document.getElementById('caway-logo').innerHTML = teamLogoHTML(currentGame.away);
+  document.getElementById('chome-name').textContent = home?.abbr || currentGame.home;
+  document.getElementById('caway-name').textContent = away?.abbr || currentGame.away;
   setRole('todos');
   renderBoard();
   startTicker();
@@ -854,6 +899,8 @@ function renderBoard(){
   if (!currentGame) return;
   document.getElementById('home-score').textContent = currentGame.homeScore;
   document.getElementById('away-score').textContent = currentGame.awayScore;
+  document.getElementById('chome-score').textContent = currentGame.homeScore;
+  document.getElementById('caway-score').textContent = currentGame.awayScore;
   document.getElementById('home-fouls-num').innerHTML = currentGame.homeFouls + (currentGame.homeFouls >= 5 ? ' <span class="bonus-badge">BONUS</span>' : '');
   document.getElementById('away-fouls-num').innerHTML = currentGame.awayFouls + (currentGame.awayFouls >= 5 ? ' <span class="bonus-badge">BONUS</span>' : '');
   document.getElementById('home-fouls-box').classList.toggle('bonus', currentGame.homeFouls >= 5);
@@ -863,7 +910,9 @@ function renderBoard(){
   document.getElementById('poss-home-label').classList.toggle('active', currentGame.possessionArrow === 'home');
   document.getElementById('poss-away-label').classList.toggle('active', currentGame.possessionArrow === 'away');
   const q = currentGame.quarter;
-  document.getElementById('quarter-label').textContent = q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+  const qLabel = q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+  document.getElementById('quarter-label').textContent = qLabel;
+  document.getElementById('compact-quarter-label').textContent = q <= 4 ? `C${q}` : (q === 5 ? 'OT' : `OT${q-4}`);
   const btn = document.getElementById('toggle-clock-btn');
   btn.textContent = currentGame.clockRunning ? '⏸ Pausar cronómetro' : '▶ Iniciar cronómetro';
   btn.className = 'toggle-clock ' + (currentGame.clockRunning ? 'pause' : 'play');
@@ -890,6 +939,9 @@ function renderClock(){
   const remaining = remainingSeconds();
   disp.textContent = fmtClock(remaining);
   disp.classList.toggle('running', currentGame.clockRunning);
+  const compact = document.getElementById('compact-clock-display');
+  compact.textContent = fmtClock(remaining);
+  compact.classList.toggle('paused', !currentGame.clockRunning);
   if (currentGame.clockRunning && remaining <= 0) autoStopClock();
 }
 function startTicker(){
@@ -913,6 +965,9 @@ function renderShotClock(){
   disp.textContent = Math.ceil(remaining);
   disp.classList.toggle('running', currentGame.shotClockRunning);
   disp.classList.toggle('warn', remaining <= 5 && remaining > 0);
+  const compact = document.getElementById('compact-shot-display');
+  compact.textContent = Math.ceil(remaining);
+  compact.classList.toggle('warn', remaining <= 5 && remaining > 0);
   if (currentGame.shotClockRunning && remaining <= 0) autoStopShotClock();
 }
 async function toggleShotClock(){
