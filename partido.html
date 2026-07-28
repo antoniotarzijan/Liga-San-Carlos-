@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partido · Liga San Carlos</title>
+  <link rel="icon" type="image/png" href="images/logo liga.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --red:#f80808; --blue:#3009dc; --gold:#f2b34e;
+      --dark:#08090C; --dark2:#111318; --card:#161920;
+      --text:#E8EAF0; --muted:#6B7280; --border:rgba(255,255,255,0.07);
+      --green:#4ADE80;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Barlow',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");background-size:180px;pointer-events:none;opacity:0.6;}
+    main{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 clamp(16px,4vw,32px) 60px;}
+
+    nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 clamp(16px,4vw,32px);background:rgba(8,9,12,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-logo img{height:30px;}
+    .nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;color:var(--text);}
+    .nav-logo-text span{color:var(--red);}
+    .nav-back{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:8px 14px;border:1px solid var(--border);border-radius:4px;}
+    .nav-back:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+
+    .loading{padding:80px 20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:14px;}
+    .empty-state{text-align:center;padding:80px 20px;color:var(--muted);}
+    .empty-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--text);margin-bottom:8px;}
+    .empty-cta{display:inline-block;margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;background:var(--red);color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none;}
+
+    /* ── HERO ── */
+    .hero-bar{padding:28px 0 0;}
+    .hero-eyebrow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;text-align:center;}
+    .status-badge{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:3px;}
+    .status-badge.live{color:var(--red);background:rgba(248,8,8,.1);border:1px solid rgba(248,8,8,.3);}
+    .status-badge.finished{color:var(--green);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+    .score-hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(10px,3vw,32px);padding:20px 0 24px;}
+    .hero-team{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
+    .hero-team-logo{width:clamp(56px,10vw,84px);height:clamp(56px,10vw,84px);display:flex;align-items:center;justify-content:center;}
+    .hero-team-logo img{width:100%;height:100%;object-fit:contain;}
+    .hero-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(14px,2vw,18px);}
+    .hero-team-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+    .hero-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,12vw,96px);line-height:1;}
+    .hero-score.winner{color:var(--text);}
+    .hero-score.loser{color:var(--muted);}
+    .hero-center{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .hero-vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);}
+    .hero-meta{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;}
+    .hero-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+    .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:0 auto 24px;max-width:360px;}
+    .hero-mvp-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+    .hero-mvp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--gold);}
+
+    /* ── TOP PERFORMERS ── */
+    .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .performers-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+    .performer-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+    .performer-rank{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+    .performer-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .performer-pts{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);}
+
+    /* ── BOX SCORE ── */
+    .boxscore-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .boxscore-team{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .boxscore-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+    .boxscore-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+    .boxscore-team-total{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
+    .boxscore-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);gap:8px;}
+    .boxscore-row:last-child{border-bottom:none;}
+    .boxscore-player{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+    .boxscore-num{font-size:11px;color:var(--muted);min-width:24px;text-align:center;flex-shrink:0;}
+    .boxscore-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .court-badge{font-size:9px;color:#F87171;display:flex;align-items:center;gap:3px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;}
+    .court-dot{width:5px;height:5px;border-radius:50%;background:#F87171;}
+    .leader-badge{font-size:9px;background:rgba(242,179,78,.15);color:var(--gold);padding:2px 6px;border-radius:3px;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0;}
+    .boxscore-stats{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
+    .boxscore-fouls{font-size:11px;color:#F87171;}
+    .boxscore-pts{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
+    .boxscore-empty{padding:20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+
+    @media(max-width:640px){
+      .boxscore-grid{grid-template-columns:1fr;}
+      .score-hero{grid-template-columns:1fr;gap:16px;}
+      .hero-center{order:2;}
+      .hero-team:nth-child(1){order:1;}
+      .hero-team:nth-child(3){order:3;}
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="images/logo liga.png" alt="LSC" onerror="this.style.display='none'">
+    <span class="nav-logo-text">Liga <span>San Carlos</span></span>
+  </a>
+  <a href="index.html" class="nav-back">← Sitio</a>
+</nav>
+
+<main>
+  <div id="root"><div class="loading">Cargando partido...</div></div>
+</main>
+
+<script>
+const CONFIG = {
+  divisions: {
+    primera: {
+      label:'Primera División', dbTable:'games',
+      teams: {
+        EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
+        ANANA:{ abbr:'AÑAÑA',  name:'Añaña',                  color:'#7C3AED', logo:'logos/anana.png' },
+        OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
+        INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
+        TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
+        SWD:  { abbr:'SWD',    name:'Shervin Williams Ducks', color:'#0E7490', logo:'logos/swd.png' },
+        OWLS: { abbr:'OWLS',   name:'Owls',                   color:'#374151', logo:'logos/owls.png' },
+        SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
+        BAR:  { abbr:'BAR',    name:'Deportes Barnechea',     color:'#D4A800', logo:'logos/barne.png' },
+      },
+    },
+    segunda: {
+      label:'Segunda División', dbTable:'games_segunda',
+      teams: {
+        T2A:{ abbr:'BRE', name:'Brillante Resplandor', color:'#B91C1C', logo:'logos/brillante.png' },
+        T2B:{ abbr:'DYN', name:'Dynamos',              color:'#1D4ED8', logo:'logos/dynamos.png' },
+        T2C:{ abbr:'DER', name:'Derazzo',              color:'#047857', logo:'logos/derazzo.png' },
+        T2D:{ abbr:'TAB', name:'Tabancura',            color:'#B45309', logo:'logos/tabancura .png' },
+        T2E:{ abbr:'MMO', name:'Maria Monvel',         color:'#6D28D9', logo:'logos/maria .png' },
+        T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png' },
+        T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
+        T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
+        T2I:{ abbr:'BULL',name:'Bullets',              color:'#1E1B4B', logo:'logos/bullets.png' },
+      },
+    },
+  },
+};
+
+const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params = new URLSearchParams(location.search);
+const activeDivision = params.get('div') === 'segunda' ? 'segunda' : 'primera';
+const gameId = parseInt(params.get('id'), 10);
+
+function divCfg(){ return CONFIG.divisions[activeDivision]; }
+function divTeams(){ return divCfg().teams; }
+
+let _refreshInterval = null;
+
+function teamLogoHTML(id){
+  const t = divTeams()[id];
+  if (!t) return '';
+  return t.logo
+    ? `<img src="${t.logo}" alt="${t.name}" onerror="this.parentElement.textContent='${t.abbr}'">`
+    : t.abbr;
+}
+function quarterLabel(q){
+  return q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+}
+
+async function load(){
+  if (!gameId){
+    document.getElementById('root').innerHTML = emptyStateHTML('Partido no encontrado', 'Falta el identificador del partido en el enlace.');
+    return;
+  }
+  const { data: row, error } = await _supabase.from(divCfg().dbTable).select('*').eq('id', gameId).single();
+  if (error || !row){
+    document.getElementById('root').innerHTML = emptyStateHTML('Partido no encontrado', 'Puede que haya sido eliminado o el enlace esté mal escrito.');
+    return;
+  }
+
+  if (row.type === 'upcoming'){
+    renderUpcoming(row);
+    return;
+  }
+
+  await renderGame(row);
+
+  if (_refreshInterval) clearInterval(_refreshInterval);
+  if (row.type === 'live'){
+    _refreshInterval = setInterval(async () => {
+      const { data: freshRow } = await _supabase.from(divCfg().dbTable).select('*').eq('id', gameId).single();
+      if (!freshRow) return;
+      if (freshRow.type !== 'live'){ clearInterval(_refreshInterval); }
+      await renderGame(freshRow);
+    }, 6000);
+  }
+}
+
+function emptyStateHTML(title, sub){
+  return `<div class="empty-state">
+    <div class="empty-title">${title}</div>
+    <div>${sub}</div>
+    <a href="index.html#games-root" class="empty-cta">Ver partidos →</a>
+  </div>`;
+}
+
+function renderUpcoming(row){
+  const teams = divTeams();
+  const home = teams[row.home], away = teams[row.away];
+  document.getElementById('root').innerHTML = `
+    <div class="hero-bar">
+      <div class="hero-eyebrow">Jornada ${row.round} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
+      <div class="score-hero">
+        <div class="hero-team">
+          <div class="hero-team-logo">${teamLogoHTML(row.home)}</div>
+          <div class="hero-team-name">${home?.name || row.home}</div>
+          <div class="hero-team-tag">Local</div>
+        </div>
+        <div class="hero-center">
+          <div class="hero-vs">VS</div>
+          <div class="hero-meta">📅 ${row.date || 'Por definir'}</div>
+        </div>
+        <div class="hero-team">
+          <div class="hero-team-logo">${teamLogoHTML(row.away)}</div>
+          <div class="hero-team-name">${away?.name || row.away}</div>
+          <div class="hero-team-tag">Visita</div>
+        </div>
+      </div>
+    </div>
+    <div class="empty-state">
+      <div class="empty-title">Este partido aún no comienza</div>
+      <div>Vuelve cuando arranque para ver el marcador en vivo.</div>
+      <a href="index.html#games-root" class="empty-cta">Ver todos los partidos →</a>
+    </div>`;
+}
+
+async function renderGame(row){
+  const teams = divTeams();
+  const home = teams[row.home], away = teams[row.away];
+  const isLive = row.type === 'live';
+  const homeScore = row.home_score || 0, awayScore = row.away_score || 0;
+  const homeWon = homeScore > awayScore;
+
+  const { data: stats } = await _supabase.from('game_stats').select('*')
+    .eq('game_id', gameId).eq('division', activeDivision).order('points', { ascending: false });
+  const statsData = stats || [];
+  const homeStats = statsData.filter(s => s.team === row.home).sort((a,b) => b.points - a.points);
+  const awayStats = statsData.filter(s => s.team === row.away).sort((a,b) => b.points - a.points);
+  const topPerformers = [...statsData].filter(s => (s.points||0) > 0).sort((a,b) => b.points - a.points).slice(0, 4);
+
+  const bestOf = (list) => list.length ? list.reduce((best,s) => (s.points||0) > (best.points||0) ? s : best, list[0]) : null;
+  const homeLeader = isLive ? bestOf(homeStats) : null;
+  const awayLeader = isLive ? bestOf(awayStats) : null;
+
+  const statusHTML = isLive
+    ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span><span class="hero-quarter">${quarterLabel(row.quarter||1)}</span><span>Faltas ${row.home_fouls||0}-${row.away_fouls||0}</span>`
+    : `<span class="status-badge finished">✓ Finalizado</span>`;
+
+  const boxRow = (s, leader) => {
+    const pts = s.points||0, fouls = s.fouls||0;
+    const numBadge = s.player_number != null ? `<span class="boxscore-num">#${s.player_number}</span>` : `<span class="boxscore-num"></span>`;
+    const courtBadge = (isLive && s.on_court) ? `<span class="court-badge"><span class="court-dot"></span>CANCHA</span>` : '';
+    const leaderBadge = (isLive && s === leader) ? `<span class="leader-badge">⭐ LÍDER</span>` : (!isLive && s.player_name === row.mvp) ? `<span class="leader-badge">MVP</span>` : '';
+    return `<div class="boxscore-row">
+      <div class="boxscore-player">
+        ${numBadge}
+        <span class="boxscore-name">${s.player_name}</span>
+        ${leaderBadge}
+        ${courtBadge}
+      </div>
+      <div class="boxscore-stats">
+        ${fouls>0?`<span class="boxscore-fouls">${fouls}f</span>`:''}
+        <span class="boxscore-pts">${pts}</span>
+      </div>
+    </div>`;
+  };
+
+  const boxTeam = (teamId, team, list, leader) => `
+    <div class="boxscore-team">
+      <div class="boxscore-head">
+        <span class="boxscore-team-name">${team?.name || teamId}</span>
+        <span class="boxscore-team-total">${list.reduce((a,s)=>a+(s.points||0),0)} pts</span>
+      </div>
+      ${list.length ? list.map(s => boxRow(s, leader)).join('') : '<div class="boxscore-empty">Sin estadísticas registradas.</div>'}
+    </div>`;
+
+  document.getElementById('root').innerHTML = `
+    <div class="hero-bar">
+      <div class="hero-eyebrow">
+        <span>Jornada ${row.round} · ${divCfg().label}</span>
+        ${statusHTML}
+        <span>🏟️ ${row.venue || 'Colegio Cumbres'}</span>
+      </div>
+      <div class="score-hero">
+        <div class="hero-team">
+          <div class="hero-team-logo">${teamLogoHTML(row.home)}</div>
+          <div class="hero-team-name">${home?.name || row.home}</div>
+          <div class="hero-team-tag">Local</div>
+          <div class="hero-score ${isLive ? '' : (homeWon?'winner':'loser')}">${homeScore}</div>
+        </div>
+        <div class="hero-center">
+          <div class="hero-vs">VS</div>
+          ${!isLive ? `<div class="hero-meta">📅 ${row.date || ''}</div>` : ''}
+        </div>
+        <div class="hero-team">
+          <div class="hero-team-logo">${teamLogoHTML(row.away)}</div>
+          <div class="hero-team-name">${away?.name || row.away}</div>
+          <div class="hero-team-tag">Visita</div>
+          <div class="hero-score ${isLive ? '' : (homeWon?'loser':'winner')}">${awayScore}</div>
+        </div>
+      </div>
+      ${(!isLive && row.mvp) ? `<div class="hero-mvp"><span style="font-size:18px;">⭐</span><div><div class="hero-mvp-label">MVP del partido</div><div class="hero-mvp-name">${row.mvp}</div></div></div>` : ''}
+    </div>
+
+    ${topPerformers.length ? `
+    <div class="section-title">Destacados del partido</div>
+    <div class="performers-row">
+      ${topPerformers.map((s,i) => `<div class="performer-card">
+        <div class="performer-rank">#${i+1} · ${teams[s.team]?.abbr || s.team}</div>
+        <div class="performer-name">${s.player_name}</div>
+        <div class="performer-pts">${s.points} pts</div>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <div class="section-title">Estadísticas por jugador</div>
+    <div class="boxscore-grid">
+      ${boxTeam(row.home, home, homeStats, homeLeader)}
+      ${boxTeam(row.away, away, awayStats, awayLeader)}
+    </div>`;
+}
+
+load();
+</script>
+</body>
+</html>
