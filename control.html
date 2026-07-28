@@ -119,6 +119,7 @@
     .fouls-box.bonus{border-color:rgba(248,8,8,.5);background:rgba(248,8,8,.06);}
     .fouls-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
     .fouls-num{font-family:'Bebas Neue',sans-serif;font-size:24px;}
+    .fouls-hint{font-size:9px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
     .fouls-btns{display:flex;gap:5px;}
     .fouls-btn{width:30px;height:30px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:var(--text);font-size:15px;cursor:pointer;}
 
@@ -175,25 +176,36 @@
 
     /* ── PUNTOS/FALTAS POR JUGADOR ── */
     .roster-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
+    .roster-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .roster-wrap[hidden]{display:none;}
-    .roster-block{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;}
-    .roster-block-head{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
-    .roster-block-logo{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .roster-block{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;min-width:0;}
+    .roster-block-head{display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}
+    .roster-block-logo{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
     .roster-block-logo img{width:100%;height:100%;object-fit:contain;}
-    .roster-block-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;flex:1;}
-    .roster-block-empty{padding:12px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
-    .roster-player-row{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
+    .roster-block-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .roster-block-empty{padding:10px 8px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.5px;}
+    .roster-player-row{display:flex;flex-direction:column;gap:4px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
     .roster-player-row:last-child{border-bottom:none;}
-    .roster-player-info{flex:1;min-width:110px;}
-    .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
-    .roster-player-tally{font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+    .roster-player-info{width:100%;}
+    .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .roster-player-tally{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
     .roster-player-tally b{color:var(--gold);}
     .roster-player-tally .fo{color:#F87171;}
-    .roster-pt-btns{display:flex;gap:4px;}
-    .roster-pt-btn{min-width:34px;min-height:34px;border-radius:5px;border:none;font-family:'Bebas Neue',sans-serif;font-size:14px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);}
+    .roster-pt-btns{display:flex;gap:3px;width:100%;}
+    .roster-pt-btn{flex:1;min-width:0;min-height:28px;border-radius:5px;border:none;font-family:'Bebas Neue',sans-serif;font-size:12px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);padding:0;}
     .roster-pt-btn.plus{background:var(--gold);color:#000;}
     .roster-pt-btn.minus{background:rgba(248,113,113,.15);color:#F87171;}
-    .roster-foul-btn{min-width:34px;min-height:34px;border-radius:5px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;cursor:pointer;background:rgba(248,113,113,.12);color:#F87171;}
+    .roster-foul-btns{display:flex;gap:3px;width:100%;}
+    .roster-foul-btn{flex:1;min-height:24px;border-radius:5px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;cursor:pointer;background:rgba(248,113,113,.12);color:#F87171;padding:0;}
+    .roster-foul-btn.minus{background:rgba(255,255,255,.06);color:var(--muted);}
+
+    /* ── SELECCIÓN DE TITULARES ── */
+    .starters-list{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+    .starter-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;}
+    .starter-row:last-child{border-bottom:none;}
+    .starter-row.selected{background:rgba(242,179,78,.08);}
+    .starter-check{width:18px;height:18px;flex-shrink:0;accent-color:#f2b34e;pointer-events:none;}
+    .starter-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
 
     .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:12px;margin-top:4px;}
 
@@ -253,8 +265,15 @@
       <div class="start-round" id="start-round">Jornada —</div>
       <div class="section-lbl" style="margin-top:0;border:none;">Duración por cuarto</div>
       <div class="period-choices" id="period-choices"></div>
-      <button class="start-btn" onclick="startGame()">🔴 Iniciar partido en vivo</button>
     </div>
+
+    <div class="section-lbl">Titulares · Local (<span id="starters-home-count">0</span>/5)</div>
+    <div class="starters-list" id="starters-home-list"></div>
+
+    <div class="section-lbl">Titulares · Visita (<span id="starters-away-count">0</span>/5)</div>
+    <div class="starters-list" id="starters-away-list"></div>
+
+    <button class="start-btn" onclick="startGame()">🔴 Iniciar partido en vivo</button>
   </div>
 
   <!-- TABLERO -->
@@ -372,20 +391,14 @@
           <div>
             <div class="fouls-label">Faltas local</div>
             <div class="fouls-num" id="home-fouls-num">0</div>
-          </div>
-          <div class="fouls-btns">
-            <button class="fouls-btn" onclick="adjustFouls('home',-1)">−</button>
-            <button class="fouls-btn" onclick="adjustFouls('home',1)">+</button>
+            <div class="fouls-hint">Automático</div>
           </div>
         </div>
         <div class="fouls-box" id="away-fouls-box">
           <div>
             <div class="fouls-label">Faltas visita</div>
             <div class="fouls-num" id="away-fouls-num">0</div>
-          </div>
-          <div class="fouls-btns">
-            <button class="fouls-btn" onclick="adjustFouls('away',-1)">−</button>
-            <button class="fouls-btn" onclick="adjustFouls('away',1)">+</button>
+            <div class="fouls-hint">Automático</div>
           </div>
         </div>
       </div>
@@ -658,7 +671,10 @@ async function openGame(id){
 /* ══════════════════════════════════════════════════════════════
    VISTA: INICIAR PARTIDO
 ══════════════════════════════════════════════════════════════ */
-function openStart(){
+let startersHome = new Set();
+let startersAway = new Set();
+
+async function openStart(){
   setView('view-start');
   const teams = divTeams();
   document.getElementById('start-teams').textContent =
@@ -666,6 +682,18 @@ function openStart(){
   document.getElementById('start-round').textContent = `Jornada ${currentGame.round}`;
   chosenPeriodMinutes = 10;
   renderPeriodChoices();
+
+  startersHome = new Set();
+  startersAway = new Set();
+  const [homeRes, awayRes] = await Promise.all([
+    _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.home).order('name'),
+    _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.away).order('name'),
+  ]);
+  rosterHome = homeRes.data || [];
+  rosterAway = awayRes.data || [];
+  renderStartersList('home');
+  renderStartersList('away');
+  updateStartersCount();
 }
 function renderPeriodChoices(){
   const opts = [8,10,12];
@@ -675,7 +703,45 @@ function renderPeriodChoices(){
 }
 function setPeriodMinutes(m){ chosenPeriodMinutes = m; renderPeriodChoices(); }
 
+function renderStartersList(side){
+  const players = side === 'home' ? rosterHome : rosterAway;
+  const set = side === 'home' ? startersHome : startersAway;
+  const container = document.getElementById(`starters-${side}-list`);
+  if (!players.length){
+    container.innerHTML = '<div class="roster-block-empty">No hay jugadores registrados para este equipo.</div>';
+    return;
+  }
+  container.innerHTML = players.map(p => {
+    const checked = set.has(String(p.id));
+    const numBadge = p.number != null ? ` #${p.number}` : '';
+    return `<div class="starter-row ${checked?'selected':''}" onclick="toggleStarter('${side}','${p.id}')">
+      <input type="checkbox" class="starter-check" ${checked?'checked':''}>
+      <div class="starter-name">${p.name}${numBadge}</div>
+    </div>`;
+  }).join('');
+}
+function toggleStarter(side, playerId){
+  const set = side === 'home' ? startersHome : startersAway;
+  const id = String(playerId);
+  if (set.has(id)) set.delete(id);
+  else {
+    if (set.size >= 5){ showToast('⚠ Ya seleccionaste 5 titulares', true); return; }
+    set.add(id);
+  }
+  renderStartersList(side);
+  updateStartersCount();
+}
+function updateStartersCount(){
+  document.getElementById('starters-home-count').textContent = startersHome.size;
+  document.getElementById('starters-away-count').textContent = startersAway.size;
+}
+
 async function startGame(){
+  const needHome = Math.min(5, rosterHome.length);
+  const needAway = Math.min(5, rosterAway.length);
+  if (startersHome.size !== needHome){ showToast(`⚠ Selecciona ${needHome} titulares del equipo local`, true); return; }
+  if (startersAway.size !== needAway){ showToast(`⚠ Selecciona ${needAway} titulares del equipo visita`, true); return; }
+
   const seconds = chosenPeriodMinutes * 60;
   const payload = {
     type: 'live', quarter: 1,
@@ -687,6 +753,18 @@ async function startGame(){
   };
   const { error } = await _supabase.from(divCfg().dbTable).update(payload).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+
+  const starterRows = [
+    ...rosterHome.filter(p => startersHome.has(String(p.id))).map(player => ({ side:'home', player })),
+    ...rosterAway.filter(p => startersAway.has(String(p.id))).map(player => ({ side:'away', player })),
+  ];
+  await Promise.all(starterRows.map(({ side, player }) => _supabase.from('game_stats').upsert({
+    game_id: currentGame.id, player_id: player.id, player_name: player.name,
+    player_number: player.number ?? null,
+    team: side === 'home' ? currentGame.home : currentGame.away,
+    points: 0, fouls: 0, played: true, division: activeDivision, on_court: true,
+  }, { onConflict: 'game_id,player_id' })));
+
   Object.assign(currentGame, {
     type:'live', quarter:1, periodLen:seconds, clockSeconds:seconds,
     clockRunning:false, clockStartedAt:null, homeScore:0, awayScore:0, homeFouls:0, awayFouls:0,
@@ -769,7 +847,7 @@ async function loadRosterAndStats(){
   rosterAway = awayRes.data || [];
   playerStats = {};
   (statsRes.data || []).forEach(row => {
-    playerStats[row.player_id] = { points: row.points || 0, fouls: row.fouls || 0 };
+    playerStats[row.player_id] = { points: row.points || 0, fouls: row.fouls || 0, onCourt: !!row.on_court };
   });
   renderRosterUI();
 }
@@ -781,17 +859,18 @@ function renderRosterUI(){
 
 function renderRosterSide(side, players, containerId){
   const container = document.getElementById(containerId);
-  if (!players.length){
-    container.innerHTML = '<div class="roster-block-empty">No hay jugadores registrados para este equipo.</div>';
+  const onCourt = players.filter(p => playerStats[p.id]?.onCourt);
+  if (!onCourt.length){
+    container.innerHTML = '<div class="roster-block-empty">Sin jugadores en cancha. Usa Sustituciones para agregar.</div>';
     return;
   }
-  container.innerHTML = players.map(p => {
+  container.innerHTML = onCourt.map(p => {
     const st = playerStats[p.id] || { points: 0, fouls: 0 };
     const numBadge = p.number != null ? ` #${p.number}` : '';
     return `<div class="roster-player-row">
       <div class="roster-player-info">
         <div class="roster-player-name">${p.name}${numBadge}</div>
-        <div class="roster-player-tally"><b>${st.points}</b> pts · <span class="fo">${st.fouls}</span> faltas</div>
+        <div class="roster-player-tally"><b>${st.points}</b> pts · <span class="fo">${st.fouls}</span> f</div>
       </div>
       <div class="roster-pt-btns">
         <button class="roster-pt-btn minus" onclick="addPlayerPoints('${side}','${p.id}',-1)">−1</button>
@@ -799,7 +878,10 @@ function renderRosterSide(side, players, containerId){
         <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',2)">+2</button>
         <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',3)">+3</button>
       </div>
-      <button class="roster-foul-btn" onclick="addPlayerFoul('${side}','${p.id}',1)">🟨 Falta</button>
+      <div class="roster-foul-btns">
+        <button class="roster-foul-btn minus" onclick="addPlayerFoul('${side}','${p.id}',-1)">− falta</button>
+        <button class="roster-foul-btn plus" onclick="addPlayerFoul('${side}','${p.id}',1)">🟨 +1 falta</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -823,10 +905,10 @@ async function persistPlayerStat(side, player, points, fouls){
 async function addPlayerPoints(side, playerId, delta){
   const player = findPlayer(side, playerId);
   if (!player) return;
-  const st = playerStats[player.id] || { points: 0, fouls: 0 };
+  const st = playerStats[player.id] || { points: 0, fouls: 0, onCourt: false };
   const newPoints = Math.max(0, st.points + delta);
   const appliedDelta = newPoints - st.points;
-  playerStats[player.id] = { points: newPoints, fouls: st.fouls };
+  playerStats[player.id] = { ...st, points: newPoints };
 
   const scoreKey = side === 'home' ? 'homeScore' : 'awayScore';
   currentGame[scoreKey] = Math.max(0, currentGame[scoreKey] + appliedDelta);
@@ -842,11 +924,21 @@ async function addPlayerPoints(side, playerId, delta){
 async function addPlayerFoul(side, playerId, delta){
   const player = findPlayer(side, playerId);
   if (!player) return;
-  const st = playerStats[player.id] || { points: 0, fouls: 0 };
+  const st = playerStats[player.id] || { points: 0, fouls: 0, onCourt: false };
   const newFouls = Math.max(0, st.fouls + delta);
-  playerStats[player.id] = { points: st.points, fouls: newFouls };
+  const appliedDelta = newFouls - st.fouls;
+  playerStats[player.id] = { ...st, fouls: newFouls };
+
+  const foulKey = side === 'home' ? 'homeFouls' : 'awayFouls';
+  currentGame[foulKey] = Math.max(0, currentGame[foulKey] + appliedDelta);
+
   renderRosterUI();
-  await persistPlayerStat(side, player, st.points, newFouls);
+  renderBoard();
+  await Promise.all([
+    persistPlayerStat(side, player, st.points, newFouls),
+    persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] }),
+  ]);
+  if (appliedDelta > 0) playBuzzer(300, 250);
 }
 
 function renderBoard(){
@@ -959,14 +1051,6 @@ async function persist(fields){
   if (error) showToast('⚠ Error al guardar: ' + error.message, true);
 }
 
-/* ── FALTAS ── */
-async function adjustFouls(side, delta){
-  const key = side === 'home' ? 'homeFouls' : 'awayFouls';
-  currentGame[key] = Math.max(0, currentGame[key] + delta);
-  renderBoard();
-  await persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[key] });
-}
-
 /* ── CUARTO ── */
 async function changeQuarter(delta){
   const next = Math.max(1, currentGame.quarter + delta);
@@ -1069,9 +1153,13 @@ function toggleSubs(){
 function renderSubOptions(){
   const side = document.getElementById('sub-team-select').value;
   const players = side === 'home' ? rosterHome : rosterAway;
-  const opts = players.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
-  document.getElementById('sub-out-select').innerHTML = opts || '<option value="">— Sin jugadores —</option>';
-  document.getElementById('sub-in-select').innerHTML = opts || '<option value="">— Sin jugadores —</option>';
+  const onCourt = players.filter(p => playerStats[p.id]?.onCourt);
+  const bench = players.filter(p => !playerStats[p.id]?.onCourt);
+  const outOpts = onCourt.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
+  const inOpts = bench.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
+  document.getElementById('sub-out-select').innerHTML =
+    '<option value="">— Nadie (agregar sin sacar) —</option>' + outOpts;
+  document.getElementById('sub-in-select').innerHTML = inOpts || '<option value="">— Sin jugadores en banca —</option>';
 }
 async function loadSubstitutions(){
   const { data, error } = await _supabase.from('substitutions').select('*')
@@ -1094,14 +1182,45 @@ async function registerSubstitution(){
   const side = document.getElementById('sub-team-select').value;
   const outId = document.getElementById('sub-out-select').value;
   const inId = document.getElementById('sub-in-select').value;
-  if (!outId || !inId){ showToast('⚠ Selecciona ambos jugadores', true); return; }
-  if (outId === inId){ showToast('⚠ Selecciona jugadores distintos', true); return; }
-  const playerOut = findPlayer(side, outId), playerIn = findPlayer(side, inId);
+  if (!inId){ showToast('⚠ Selecciona el jugador que entra', true); return; }
+  if (outId && outId === inId){ showToast('⚠ Selecciona jugadores distintos', true); return; }
+  const playerOut = outId ? findPlayer(side, outId) : null;
+  const playerIn = findPlayer(side, inId);
+  if (!playerIn) return;
+  const teamId = side === 'home' ? currentGame.home : currentGame.away;
+
+  if (playerOut){
+    const outSt = playerStats[playerOut.id] || { points: 0, fouls: 0 };
+    playerStats[playerOut.id] = { ...outSt, onCourt: false };
+  }
+  const inSt = playerStats[playerIn.id] || { points: 0, fouls: 0 };
+  playerStats[playerIn.id] = { ...inSt, onCourt: true };
+  renderRosterUI();
+  renderSubOptions();
+
+  const upserts = [];
+  if (playerOut){
+    upserts.push(_supabase.from('game_stats').upsert({
+      game_id: currentGame.id, player_id: playerOut.id, player_name: playerOut.name,
+      player_number: playerOut.number ?? null, team: teamId,
+      points: playerStats[playerOut.id].points, fouls: playerStats[playerOut.id].fouls,
+      played: true, division: activeDivision, on_court: false,
+    }, { onConflict: 'game_id,player_id' }));
+  }
+  upserts.push(_supabase.from('game_stats').upsert({
+    game_id: currentGame.id, player_id: playerIn.id, player_name: playerIn.name,
+    player_number: playerIn.number ?? null, team: teamId,
+    points: playerStats[playerIn.id].points, fouls: playerStats[playerIn.id].fouls,
+    played: true, division: activeDivision, on_court: true,
+  }, { onConflict: 'game_id,player_id' }));
+  const results = await Promise.all(upserts);
+  const failed = results.find(r => r.error);
+  if (failed){ showToast('⚠ Error: ' + failed.error.message, true); return; }
+
   const payload = {
     game_id: currentGame.id, division: activeDivision,
-    team: side === 'home' ? currentGame.home : currentGame.away,
-    quarter: currentGame.quarter,
-    player_out_name: playerOut?.name || null, player_in_name: playerIn?.name || null,
+    team: teamId, quarter: currentGame.quarter,
+    player_out_name: playerOut?.name || null, player_in_name: playerIn.name,
   };
   const { error } = await _supabase.from('substitutions').insert(payload);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
