@@ -902,6 +902,15 @@ async function persistPlayerStat(side, player, points, fouls){
   if (error) showToast('⚠ Error al guardar jugador: ' + error.message, true);
 }
 
+async function logGameEvent(teamId, eventType, playerName, value, detail){
+  const { error } = await _supabase.from('game_events').insert({
+    game_id: currentGame.id, division: activeDivision, quarter: currentGame.quarter,
+    team: teamId, event_type: eventType, player_name: playerName || null,
+    value: value ?? null, detail: detail || null,
+  });
+  if (error) console.warn('Error registrando evento:', error.message);
+}
+
 async function addPlayerPoints(side, playerId, delta){
   const player = findPlayer(side, playerId);
   if (!player) return;
@@ -919,6 +928,8 @@ async function addPlayerPoints(side, playerId, delta){
     persistPlayerStat(side, player, newPoints, st.fouls),
     persist({ [side === 'home' ? 'home_score' : 'away_score']: currentGame[scoreKey] }),
   ]);
+  const teamId = side === 'home' ? currentGame.home : currentGame.away;
+  if (appliedDelta > 0) logGameEvent(teamId, 'points', player.name, appliedDelta);
 }
 
 async function addPlayerFoul(side, playerId, delta){
@@ -938,7 +949,11 @@ async function addPlayerFoul(side, playerId, delta){
     persistPlayerStat(side, player, st.points, newFouls),
     persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] }),
   ]);
-  if (appliedDelta > 0) playBuzzer(300, 250);
+  if (appliedDelta > 0){
+    playBuzzer(300, 250);
+    const teamId = side === 'home' ? currentGame.home : currentGame.away;
+    logGameEvent(teamId, 'foul', player.name);
+  }
 }
 
 function renderBoard(){
@@ -1224,6 +1239,7 @@ async function registerSubstitution(){
   };
   const { error } = await _supabase.from('substitutions').insert(payload);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+  logGameEvent(teamId, 'substitution', playerIn.name, null, playerOut ? `Sale: ${playerOut.name}` : null);
   showToast('✓ Sustitución registrada');
   loadSubstitutions();
 }
