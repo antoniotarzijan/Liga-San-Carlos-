@@ -318,7 +318,7 @@
     .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
     .game-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .2s,border-color .2s;}
     .game-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15);}
-    .game-card.live{border-color:rgba(232,0,29,.4);}
+    .game-card.live{border-color:rgba(232,0,29,.4);cursor:pointer;}
     .game-card.upcoming{border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.03);}
     .game-card.finished{border-color:rgba(74,222,128,.15);cursor:pointer;}
     .game-card-header{padding:10px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
@@ -1464,14 +1464,20 @@ function renderGames() {
     const rowAway=`<div class="ts-info">${smallLogo(g.away)}<div class="ts-name">${away.name}</div></div>`;
 
     if (g.type==='live') return `
-      <div class="game-card live reveal">
+      <div class="game-card live reveal" onclick="openGameDetail(${g.id})">
         <div class="game-card-header"><span class="game-round">Jornada ${g.round} · EN VIVO</span>
         <span class="game-status-live"><span class="live-dot"></span>EN CURSO</span></div>
         <div class="game-body">
           <div class="team-score-row">${rowHome}<div class="ts-score winner">${g.homeScore}</div></div>
           <div class="team-score-row">${rowAway}<div class="ts-score loser">${g.awayScore}</div></div>
         </div>
-        <div class="game-footer"><span>🏟️ ${g.venue}</span>${g.mvp?`<span class="mvp">⚡ ${g.mvp}</span>`:''}</div>
+        <div class="game-footer">
+          <span>🏟️ ${g.venue}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${g.mvp?`<span class="mvp">⚡ ${g.mvp}</span>`:''}
+            <span class="game-detail-hint">Ver en vivo →</span>
+          </div>
+        </div>
       </div>`;
 
     if (g.type==='upcoming') return `
@@ -1541,16 +1547,50 @@ function renderGames() {
 function setFilter(f) { activeFilter=f; renderGames(); setTimeout(activateReveal,50); }
 
 /* ══ MODAL DETALLE PARTIDO ══ */
+let _gameDetailRefreshInterval = null;
+
 async function openGameDetail(gameId) {
   const g=STATE.games.find(x=>x.id===gameId);
-  if (!g||g.type!=='finished') return;
+  if (!g||(g.type!=='finished'&&g.type!=='live')) return;
 
   const modal=document.getElementById('game-detail-modal');
   const content=document.getElementById('game-detail-content');
   modal.classList.add('open');
   content.innerHTML=`<div style="padding:48px;text-align:center;color:#6B7280;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:13px;">Cargando estadísticas...</div>`;
 
+  await renderGameDetailContent(gameId);
+
+  if (_gameDetailRefreshInterval) clearInterval(_gameDetailRefreshInterval);
+  if (g.type==='live') {
+    _gameDetailRefreshInterval = setInterval(() => {
+      if (!modal.classList.contains('open')) { clearInterval(_gameDetailRefreshInterval); return; }
+      renderGameDetailContent(gameId);
+    }, 6000);
+  }
+}
+
+async function renderGameDetailContent(gameId) {
+  const content=document.getElementById('game-detail-content');
   const teams=divTeams();
+
+  const isLive = STATE.games.find(x=>x.id===gameId)?.type==='live';
+  let g;
+  if (isLive) {
+    const {data:row}=await _supabase.from(divCfg().dbTable).select('*').eq('id',gameId).single();
+    if (!row) return;
+    g = {
+      id:row.id, type:row.type, round:row.round, date:row.date, venue:row.venue||'Colegio Cumbres',
+      home:row.home, away:row.away, homeScore:row.home_score||0, awayScore:row.away_score||0,
+      mvp:row.mvp||'', quarter:row.quarter||1,
+      clockSeconds:row.clock_seconds??(row.period_length_seconds||600),
+      clockRunning:!!row.clock_running, clockStartedAt:row.clock_started_at,
+      homeFouls:row.home_fouls||0, awayFouls:row.away_fouls||0,
+    };
+  } else {
+    g = STATE.games.find(x=>x.id===gameId);
+    if (!g) return;
+  }
+
   const home=teams[g.home], away=teams[g.away];
   const homeWon=+g.homeScore>+g.awayScore;
 
@@ -1563,30 +1603,44 @@ async function openGameDetail(gameId) {
   const homeStats=statsData.filter(s=>s.team===g.home).sort((a,b)=>b.points-a.points);
   const awayStats=statsData.filter(s=>s.team===g.away).sort((a,b)=>b.points-a.points);
   const hasStats=statsData.length>0;
+  const topPerformers=[...statsData].filter(s=>(s.points||0)>0).sort((a,b)=>b.points-a.points).slice(0,3);
 
   const teamLogoHTML=(team)=>{
     if (team?.logo) return `<img src="${team.logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'">`;
     return `<div style="width:100%;height:100%;border-radius:8px;background:${team?.color||'#333'}44;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#fff;">${team?.abbr||'?'}</div>`;
   };
 
+  const bestOfTeam=(teamStats)=>{
+    if (!teamStats.length) return null;
+    return teamStats.reduce((best,s)=>(s.points||0)>(best.points||0)?s:best, teamStats[0]);
+  };
+  const homeLeader = isLive ? bestOfTeam(homeStats) : null;
+  const awayLeader = isLive ? bestOfTeam(awayStats) : null;
+
   const playerRowHTML=(s,isMvp)=>{
     const pts=s.points||0;
+    const fouls=s.fouls||0;
     const numLabel=s.player_number!=null?`<span style="font-size:11px;color:#6B7280;min-width:24px;text-align:center;font-family:'Barlow Condensed',sans-serif;">#${s.player_number}</span>`:'<span style="min-width:24px;display:inline-block;"></span>';
-    const mvpBadge=isMvp?`<span style="font-size:10px;background:rgba(242,179,78,.15);color:#f2b34e;padding:1px 7px;border-radius:3px;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0;">MVP</span>`:'';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;${isMvp?'background:rgba(255,255,255,.03);':''};border-bottom:1px solid rgba(255,255,255,.04);">
+    const mvpBadge=isMvp?`<span style="font-size:10px;background:rgba(242,179,78,.15);color:#f2b34e;padding:1px 7px;border-radius:3px;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0;">${isLive?'⭐ LÍDER':'MVP'}</span>`:'';
+    const courtBadge=(isLive&&s.on_court)?`<span style="font-size:9px;color:#F87171;display:flex;align-items:center;gap:3px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;"><span style="width:5px;height:5px;border-radius:50%;background:#F87171;"></span>EN CANCHA</span>`:'';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;${isMvp?'background:rgba(255,255,255,.03);':''};border-bottom:1px solid rgba(255,255,255,.04);gap:8px;">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
         ${numLabel}
         <span style="font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:${pts>0?'#E8EAF0':'#6B7280'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.player_name}</span>
         ${mvpBadge}
+        ${courtBadge}
       </div>
-      <span style="font-size:18px;font-family:'Bebas Neue',sans-serif;color:${pts>0?'#f2b34e':'#6B7280'};margin-left:12px;flex-shrink:0;">${pts}</span>
+      <div style="display:flex;align-items:baseline;gap:8px;flex-shrink:0;">
+        ${fouls>0?`<span style="font-size:11px;color:#F87171;font-family:'Barlow Condensed',sans-serif;">${fouls}f</span>`:''}
+        <span style="font-size:18px;font-family:'Bebas Neue',sans-serif;color:${pts>0?'#f2b34e':'#6B7280'};">${pts}</span>
+      </div>
     </div>`;
   };
 
-  const buildTeamSection=(teamId,team,teamStats,accentColor)=>{
+  const buildTeamSection=(teamId,team,teamStats,accentColor,leader)=>{
     if (!teamStats.length) return '';
     const total=teamStats.reduce((acc,s)=>acc+(s.points||0),0);
-    const rows=teamStats.map(s=>playerRowHTML(s,s.player_name===g.mvp)).join('');
+    const rows=teamStats.map(s=>playerRowHTML(s, isLive ? s===leader : s.player_name===g.mvp)).join('');
     return `<div style="margin-bottom:4px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px;border-bottom:1px solid rgba(255,255,255,.08);">
         <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${accentColor};font-family:'Barlow Condensed',sans-serif;font-weight:700;">${team?.name||teamId}</span>
@@ -1596,14 +1650,22 @@ async function openGameDetail(gameId) {
     </div>`;
   };
 
+  const statusBadge = isLive
+    ? `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f80808;background:rgba(248,8,8,.1);border:1px solid rgba(248,8,8,.3);padding:4px 10px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#f80808;animation:pulse 1.2s ease infinite;"></span>EN VIVO</div>`
+    : `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4ADE80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:4px 10px;border-radius:3px;flex-shrink:0;">✓ Finalizado</div>`;
+
+  const liveMeta = isLive
+    ? `<div style="font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#f2b34e;margin-top:3px;">${g.quarter<=4?'CUARTO '+g.quarter:'TIEMPO EXTRA'} · Faltas ${g.homeFouls}-${g.awayFouls}</div>`
+    : `<div style="font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#E8EAF0;margin-top:3px;">📅 ${g.date} · 🏟️ ${g.venue}</div>`;
+
   content.innerHTML=`
     <div style="height:4px;background:linear-gradient(90deg,#f80808 50%,#3009dc 50%);"></div>
     <div style="padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
         <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">Jornada ${g.round} · ${divCfg().label}</div>
-        <div style="font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#E8EAF0;margin-top:3px;">📅 ${g.date} · 🏟️ ${g.venue}</div>
+        ${liveMeta}
       </div>
-      <div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4ADE80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);padding:4px 10px;border-radius:3px;flex-shrink:0;">✓ Finalizado</div>
+      ${statusBadge}
     </div>
     <div style="padding:18px 18px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
@@ -1614,19 +1676,19 @@ async function openGameDetail(gameId) {
             <div style="font-size:11px;color:#6B7280;margin-top:1px;">Local</div>
           </div>
         </div>
-        <div style="font-size:52px;font-family:'Bebas Neue',sans-serif;line-height:1;color:${homeWon?'#E8EAF0':'#6B7280'};">${g.homeScore}</div>
+        <div style="font-size:52px;font-family:'Bebas Neue',sans-serif;line-height:1;color:${isLive?'#E8EAF0':(homeWon?'#E8EAF0':'#6B7280')};">${g.homeScore}</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;${g.mvp?'border-bottom:1px solid rgba(255,255,255,.06);':''}">
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="width:48px;height:48px;flex-shrink:0;">${teamLogoHTML(away)}</div>
           <div>
-            <div style="font-size:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:${homeWon?'#6B7280':'#E8EAF0'};">${away?.name||g.away}</div>
+            <div style="font-size:16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:${isLive?'#E8EAF0':(homeWon?'#6B7280':'#E8EAF0')};">${away?.name||g.away}</div>
             <div style="font-size:11px;color:#6B7280;margin-top:1px;">Visita</div>
           </div>
         </div>
-        <div style="font-size:52px;font-family:'Bebas Neue',sans-serif;line-height:1;color:${homeWon?'#6B7280':'#E8EAF0'};">${g.awayScore}</div>
+        <div style="font-size:52px;font-family:'Bebas Neue',sans-serif;line-height:1;color:${isLive?'#E8EAF0':(homeWon?'#6B7280':'#E8EAF0')};">${g.awayScore}</div>
       </div>
-      ${g.mvp?`<div style="padding:10px 12px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:6px;display:flex;align-items:center;gap:10px;margin-top:14px;">
+      ${(!isLive&&g.mvp)?`<div style="padding:10px 12px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:6px;display:flex;align-items:center;gap:10px;margin-top:14px;">
         <span style="font-size:20px;">⭐</span>
         <div>
           <div style="font-size:10px;color:#6B7280;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;">MVP del partido</div>
@@ -1634,27 +1696,39 @@ async function openGameDetail(gameId) {
         </div>
       </div>`:''}
     </div>
+    ${topPerformers.length?`
+    <div style="padding:10px 18px 14px;border-top:1px solid rgba(255,255,255,.08);">
+      <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">Destacados del partido</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${topPerformers.map((s,i)=>`<div style="flex:1;min-width:100px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:8px 10px;">
+          <div style="font-size:9px;color:#6B7280;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">#${i+1} · ${teams[s.team]?.abbr||s.team}</div>
+          <div style="font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:#E8EAF0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">${s.player_name}</div>
+          <div style="font-size:20px;font-family:'Bebas Neue',sans-serif;color:#f2b34e;">${s.points} pts</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
     ${hasStats?`
     <div style="border-top:1px solid rgba(255,255,255,.08);">
       <div style="padding:10px 16px 4px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">Estadísticas del partido</span>
+        <span style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">Estadísticas por jugador</span>
       </div>
-      ${buildTeamSection(g.home,home,homeStats,'#4ADE80')}
-      ${buildTeamSection(g.away,away,awayStats,'#F87171')}
+      ${buildTeamSection(g.home,home,homeStats,'#4ADE80',homeLeader)}
+      ${buildTeamSection(g.away,away,awayStats,'#F87171',awayLeader)}
     </div>`:`
     <div style="padding:20px;text-align:center;border-top:1px solid rgba(255,255,255,.08);">
       <div style="color:#6B7280;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;">No hay estadísticas por jugador registradas para este partido.</div>
     </div>`}
-    <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:center;">
+    ${!isLive?`<div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:center;">
       <button onclick="event.stopPropagation();closeGameDetail();setTimeout(()=>openShareModal(${g.id}),150);"
         style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 22px;border-radius:3px;background:rgba(242,179,78,.1);border:1px solid rgba(242,179,78,.3);color:#f2b34e;cursor:pointer;transition:all .2s;">
         📤 Compartir resultado
       </button>
-    </div>`;
+    </div>`:''}`;
 }
 
 function closeGameDetail() {
   document.getElementById('game-detail-modal').classList.remove('open');
+  if (_gameDetailRefreshInterval) { clearInterval(_gameDetailRefreshInterval); _gameDetailRefreshInterval = null; }
 }
 
 /* ══ MODAL COMPARTIR ══ */
