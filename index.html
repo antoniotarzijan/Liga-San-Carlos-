@@ -1454,7 +1454,8 @@ function renderGames() {
     filteredToRender = finishedVisible;
   } else {
     const live = STATE.games.filter(g => g.type === 'live');
-    filteredToRender = [...live, ...upcoming, ...finishedVisible];
+    const trueUpcoming = STATE.games.filter(g => g.type === 'upcoming');
+    filteredToRender = [...live, ...trueUpcoming, ...finishedVisible];
   }
 
   const cards=filteredToRender.map(g => {   
