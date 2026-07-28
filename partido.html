@@ -55,6 +55,8 @@
     .hero-vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);}
     .hero-meta{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;}
     .hero-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+    .hero-clock{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--green);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:2px 12px;}
+    .hero-clock.paused{color:var(--text);}
     .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:0 auto 24px;max-width:360px;}
     .hero-mvp-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
     .hero-mvp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--gold);}
@@ -85,6 +87,17 @@
     .boxscore-fouls{font-size:11px;color:#F87171;}
     .boxscore-pts{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
     .boxscore-empty{padding:20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+
+    /* ── TIMELINE JUGADA A JUGADA ── */
+    .timeline-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .timeline-item{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--card);font-size:13px;}
+    .timeline-q{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--muted);min-width:26px;flex-shrink:0;}
+    .timeline-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .timeline-desc{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--text);min-width:0;}
+    .timeline-desc b{font-weight:700;}
+    .timeline-desc .team-tag{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-right:4px;}
+    .timeline-score{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold);flex-shrink:0;white-space:nowrap;}
+    .timeline-empty{padding:20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
 
     @media(max-width:640px){
       .boxscore-grid{grid-template-columns:1fr;}
@@ -154,6 +167,27 @@ function divCfg(){ return CONFIG.divisions[activeDivision]; }
 function divTeams(){ return divCfg().teams; }
 
 let _refreshInterval = null;
+let _tickInterval = null;
+let _liveClock = { seconds: 0, running: false, startedAt: null };
+
+function fmtClock(totalSeconds){
+  const s = Math.max(0, Math.ceil(totalSeconds));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`;
+}
+function remainingClockSeconds(){
+  if (!_liveClock.running || !_liveClock.startedAt) return _liveClock.seconds;
+  const elapsed = (Date.now() - new Date(_liveClock.startedAt).getTime()) / 1000;
+  return Math.max(0, _liveClock.seconds - elapsed);
+}
+function tickClock(){
+  const disp = document.getElementById('hero-clock-display');
+  if (!disp) return;
+  const remaining = remainingClockSeconds();
+  disp.textContent = fmtClock(remaining);
+  disp.classList.toggle('paused', !_liveClock.running);
+}
 
 function teamLogoHTML(id){
   const t = divTeams()[id];
@@ -164,6 +198,32 @@ function teamLogoHTML(id){
 }
 function quarterLabel(q){
   return q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+}
+
+function buildTimelineHTML(events, row, teams){
+  if (!events.length) return '';
+  let h = 0, a = 0;
+  const rows = events.map(ev => {
+    if (ev.event_type === 'points'){
+      if (ev.team === row.home) h += (ev.value||0); else a += (ev.value||0);
+    }
+    const team = teams[ev.team];
+    const color = team?.color || '#666';
+    let desc;
+    if (ev.event_type === 'points') desc = `<b>${ev.player_name}</b> anota +${ev.value}`;
+    else if (ev.event_type === 'foul') desc = `Falta · <b>${ev.player_name}</b>`;
+    else desc = `Sustitución${ev.detail?` · ${ev.detail}`:''} · entra <b>${ev.player_name}</b>`;
+    return {
+      html: `<div class="timeline-item">
+        <span class="timeline-q">C${ev.quarter||1}</span>
+        <span class="timeline-dot" style="background:${color};"></span>
+        <span class="timeline-desc"><span class="team-tag">${team?.abbr||ev.team}</span>${desc}</span>
+        <span class="timeline-score">${h}-${a}</span>
+      </div>`,
+    };
+  });
+  return `<div class="section-title">Jugada a jugada</div>
+    <div class="timeline-list">${rows.map(r=>r.html).reverse().join('')}</div>`;
 }
 
 async function load(){
@@ -185,11 +245,13 @@ async function load(){
   await renderGame(row);
 
   if (_refreshInterval) clearInterval(_refreshInterval);
+  if (_tickInterval) clearInterval(_tickInterval);
   if (row.type === 'live'){
+    _tickInterval = setInterval(tickClock, 250);
     _refreshInterval = setInterval(async () => {
       const { data: freshRow } = await _supabase.from(divCfg().dbTable).select('*').eq('id', gameId).single();
       if (!freshRow) return;
-      if (freshRow.type !== 'live'){ clearInterval(_refreshInterval); }
+      if (freshRow.type !== 'live'){ clearInterval(_refreshInterval); clearInterval(_tickInterval); }
       await renderGame(freshRow);
     }, 6000);
   }
@@ -251,9 +313,22 @@ async function renderGame(row){
   const homeLeader = isLive ? bestOf(homeStats) : null;
   const awayLeader = isLive ? bestOf(awayStats) : null;
 
+  if (isLive){
+    _liveClock = {
+      seconds: row.clock_seconds ?? (row.period_length_seconds || 600),
+      running: !!row.clock_running,
+      startedAt: row.clock_started_at,
+    };
+  }
+
   const statusHTML = isLive
-    ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span><span class="hero-quarter">${quarterLabel(row.quarter||1)}</span><span>Faltas ${row.home_fouls||0}-${row.away_fouls||0}</span>`
+    ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span><span class="hero-quarter">${quarterLabel(row.quarter||1)}</span><span class="hero-clock" id="hero-clock-display">${fmtClock(remainingClockSeconds())}</span><span>Faltas ${row.home_fouls||0}-${row.away_fouls||0}</span>`
     : `<span class="status-badge finished">✓ Finalizado</span>`;
+
+  const { data: ev } = await _supabase.from('game_events').select('*')
+    .eq('game_id', gameId).eq('division', activeDivision).order('created_at', { ascending: true });
+  const events = ev || [];
+  const timelineHTML = buildTimelineHTML(events, row, teams);
 
   const boxRow = (s, leader) => {
     const pts = s.points||0, fouls = s.fouls||0;
@@ -325,7 +400,9 @@ async function renderGame(row){
     <div class="boxscore-grid">
       ${boxTeam(row.home, home, homeStats, homeLeader)}
       ${boxTeam(row.away, away, awayStats, awayLeader)}
-    </div>`;
+    </div>
+
+    ${timelineHTML}`;
 }
 
 load();
