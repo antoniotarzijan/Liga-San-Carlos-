@@ -1464,7 +1464,7 @@ function renderGames() {
     const rowAway=`<div class="ts-info">${smallLogo(g.away)}<div class="ts-name">${away.name}</div></div>`;
 
     if (g.type==='live') return `
-      <div class="game-card live reveal" onclick="openGameDetail(${g.id})">
+      <div class="game-card live reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
         <div class="game-card-header"><span class="game-round">Jornada ${g.round} · EN VIVO</span>
         <span class="game-status-live"><span class="live-dot"></span>EN CURSO</span></div>
         <div class="game-body">
@@ -1495,7 +1495,7 @@ function renderGames() {
 
     const homeWon=+g.homeScore>+g.awayScore;
     return `
-      <div class="game-card finished reveal" onclick="openGameDetail(${g.id})">
+      <div class="game-card finished reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
         <div class="game-card-header">
           <span class="game-round">Jornada ${g.round}</span>
           <span class="game-date">✓ ${g.date}</span>
@@ -1508,6 +1508,7 @@ function renderGames() {
           <span>🏟️ ${g.venue}</span>
           <div style="display:flex;align-items:center;gap:8px;">
             ${g.mvp?`<span class="mvp">⭐ ${g.mvp}</span>`:''}
+            <button class="share-btn" onclick="event.stopPropagation();openShareModal(${g.id})" title="Compartir resultado">📤</button>
             <span class="game-detail-hint">Ver detalle →</span>
           </div>
         </div>
