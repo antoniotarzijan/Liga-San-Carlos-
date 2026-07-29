@@ -78,7 +78,7 @@
     #sched-strip{display:none;gap:1px;background:var(--border);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:relative;z-index:5;padding-top:64px;}
     #sched-strip::-webkit-scrollbar{display:none;}
     #sched-strip.show{display:flex;}
-    .sched-card{flex-shrink:0;width:190px;background:var(--dark2);padding:12px 14px;cursor:pointer;transition:background .15s;}
+    .sched-card{flex:1 1 190px;min-width:190px;background:var(--dark2);padding:12px 14px;cursor:pointer;transition:background .15s;}
     .sched-card:hover{background:#171a20;}
     .sched-card.is-live{background:rgba(248,8,8,.06);}
     .sched-date{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -608,7 +608,7 @@
     @media(max-width:768px){
       nav{padding:0 16px;height:56px;gap:8px;}
       #sched-strip{padding-top:56px;}
-      .sched-card{width:160px;padding:10px 12px;}
+      .sched-card{flex-basis:160px;min-width:160px;padding:10px 12px;}
       .nav-links{display:none;}
       .nav-logo{font-size:18px;}
       .nav-cta{padding:7px 12px;font-size:11px;letter-spacing:1px;}
