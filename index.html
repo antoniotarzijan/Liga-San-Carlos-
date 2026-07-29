@@ -74,18 +74,23 @@
     /* ── NAV ── */
     nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 clamp(16px,6vw,120px);height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,9,12,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);gap:12px;}
 
-    /* ── TICKER DE MARCADORES ── */
-    #live-ticker{position:fixed;top:64px;left:0;right:0;z-index:99;display:none;align-items:center;gap:0;background:rgba(8,9,12,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(248,8,8,.25);height:38px;overflow-x:auto;scrollbar-width:none;}
-    #live-ticker::-webkit-scrollbar{display:none;}
-    #live-ticker.show{display:flex;}
-    .ticker-label{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;background:rgba(248,8,8,.12);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);white-space:nowrap;}
-    .ticker-items{display:flex;align-items:center;}
-    .ticker-item{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 18px;height:100%;cursor:pointer;white-space:nowrap;border-right:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:12px;transition:background .15s;}
-    .ticker-item:hover{background:rgba(255,255,255,.04);}
-    .ticker-item .tk-team{font-weight:700;color:var(--muted);}
-    .ticker-item .tk-team.winning{color:var(--text);}
-    .ticker-item .tk-score{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold);letter-spacing:1px;}
-    .ticker-item .tk-meta{font-size:10px;color:var(--muted);letter-spacing:1px;}
+    /* ── FRANJA DE PARTIDOS (próximos + en vivo) ── */
+    #sched-strip{display:none;gap:1px;background:var(--border);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:relative;z-index:5;padding-top:64px;}
+    #sched-strip::-webkit-scrollbar{display:none;}
+    #sched-strip.show{display:flex;}
+    .sched-card{flex-shrink:0;width:190px;background:var(--dark2);padding:12px 14px;cursor:pointer;transition:background .15s;}
+    .sched-card:hover{background:#171a20;}
+    .sched-card.is-live{background:rgba(248,8,8,.06);}
+    .sched-date{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sched-date.is-live{color:var(--red);display:flex;align-items:center;gap:5px;}
+    .sched-team-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0;}
+    .sched-team-left{display:flex;align-items:center;gap:8px;min-width:0;}
+    .sched-logo{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .sched-logo img{width:100%;height:100%;object-fit:contain;}
+    .sched-abbr{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sched-abbr.winning{color:var(--text);}
+    .sched-score{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);flex-shrink:0;}
+    .sched-meta{margin-top:8px;font-size:10px;color:var(--muted);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;flex-shrink:0;}
     .nav-logo span{color:var(--red);}
     .nav-links{display:flex;gap:24px;}
@@ -596,7 +601,8 @@
     /* ── MOBILE ── */
     @media(max-width:768px){
       nav{padding:0 16px;height:56px;gap:8px;}
-      #live-ticker{top:56px;}
+      #sched-strip{padding-top:56px;}
+      .sched-card{width:160px;padding:10px 12px;}
       .nav-links{display:none;}
       .nav-logo{font-size:18px;}
       .nav-cta{padding:7px 12px;font-size:11px;letter-spacing:1px;}
@@ -1069,10 +1075,7 @@
   </div>
 </nav>
 
-<div id="live-ticker">
-  <div class="ticker-label"><span class="live-dot"></span>En vivo</div>
-  <div class="ticker-items" id="ticker-items"></div>
-</div>
+<div id="sched-strip"></div>
 
 <main>
   <div class="hero" id="hero-root"></div>
@@ -1199,37 +1202,51 @@ function showDivisionSelector() {
   window.scrollTo(0, 0);
 }
 
-/* ══ TICKER DE MARCADORES (partidos en vivo, ambas divisiones) ══ */
-async function fetchLiveTickerGames() {
+/* ══ FRANJA DE PARTIDOS (próximos + en vivo, ambas divisiones) ══ */
+async function fetchSchedStripGames() {
   const results = await Promise.all(['primera', 'segunda'].map(div =>
-    _supabase.from(CONFIG.divisions[div].dbTable).select('*').eq('type', 'live')
+    _supabase.from(CONFIG.divisions[div].dbTable).select('*').in('type', ['live', 'upcoming'])
+      .order('round', { ascending: true }).order('id', { ascending: true })
       .then(res => (res.data || []).map(row => ({ ...row, _div: div })))
   ));
-  return [...results[0], ...results[1]];
+  const live = [...results[0], ...results[1]].filter(g => g.type === 'live');
+  const upcoming = [...results[0], ...results[1]].filter(g => g.type === 'upcoming');
+  return [...live, ...upcoming].slice(0, 10);
 }
 
-async function renderLiveTicker() {
-  const wrap = document.getElementById('live-ticker');
-  const itemsEl = document.getElementById('ticker-items');
-  if (!wrap || !itemsEl) return;
-  const games = await fetchLiveTickerGames();
+async function renderSchedStrip() {
+  const wrap = document.getElementById('sched-strip');
+  if (!wrap) return;
+  const games = await fetchSchedStripGames();
   if (!games.length) { wrap.classList.remove('show'); return; }
-  itemsEl.innerHTML = games.map(g => {
+  wrap.innerHTML = games.map(g => {
     const teams = CONFIG.divisions[g._div].teams;
     const home = teams[g.home], away = teams[g.away];
+    const isLive = g.type === 'live';
     const hs = g.home_score || 0, as = g.away_score || 0;
-    return `<div class="ticker-item" onclick="location.href='partido.html?div=${g._div}&id=${g.id}'">
-      <span class="tk-team ${hs>as?'winning':''}">${home?.abbr || g.home}</span>
-      <span class="tk-score">${hs}-${as}</span>
-      <span class="tk-team ${as>hs?'winning':''}">${away?.abbr || g.away}</span>
-      <span class="tk-meta">C${g.quarter || 1}</span>
+    const scoreHTML = isLive ? `<span class="sched-score">${hs}</span>` : '';
+    const scoreAwayHTML = isLive ? `<span class="sched-score">${as}</span>` : '';
+    const dateHTML = isLive
+      ? `<span class="live-dot"></span>EN VIVO · C${g.quarter||1}`
+      : (g.date || 'Por definir');
+    return `<div class="sched-card ${isLive?'is-live':''}" onclick="location.href='partido.html?div=${g._div}&id=${g.id}'">
+      <div class="sched-date ${isLive?'is-live':''}">${dateHTML}</div>
+      <div class="sched-team-row">
+        <div class="sched-team-left"><div class="sched-logo">${home?.logo?`<img src="${home.logo}" onerror="this.parentElement.textContent='${home.abbr}'">`:(home?.abbr||g.home)}</div><span class="sched-abbr ${isLive&&hs>as?'winning':''}">${home?.abbr||g.home}</span></div>
+        ${scoreHTML}
+      </div>
+      <div class="sched-team-row">
+        <div class="sched-team-left"><div class="sched-logo">${away?.logo?`<img src="${away.logo}" onerror="this.parentElement.textContent='${away.abbr}'">`:(away?.abbr||g.away)}</div><span class="sched-abbr ${isLive&&as>hs?'winning':''}">${away?.abbr||g.away}</span></div>
+        ${scoreAwayHTML}
+      </div>
+      <div class="sched-meta">🏟️ ${g.venue || 'Colegio Cumbres'}</div>
     </div>`;
   }).join('');
   wrap.classList.add('show');
 }
 
-renderLiveTicker();
-setInterval(renderLiveTicker, 15000);
+renderSchedStrip();
+setInterval(renderSchedStrip, 15000);
 
 function rowToGame(row) {
   return {
