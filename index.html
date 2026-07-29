@@ -247,19 +247,19 @@
 
     /* ── STANDINGS ── */
     .standings-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
-    .standings-header{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:14px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border);}    .standings-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;}
+    .standings-header{display:grid;grid-template-columns:32px 1fr repeat(7,54px);padding:9px 16px;background:rgba(255,255,255,.05);border-bottom:1px solid var(--border);}    .standings-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center;}
     .standings-header span:nth-child(2){text-align:left;}
-    .standings-row{display:grid;grid-template-columns:40px 1fr repeat(7,54px);padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;}    .standings-row:last-child{border-bottom:none;}
-    .standings-row:hover{background:rgba(255,255,255,.03);}
-    .standings-row.leader::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
-    .standings-row.playoff::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}    .leader .rank{color:var(--gold);}
-    .team-info{display:flex;align-items:center;gap:12px;}
-    .team-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:64px;height:64px;background:transparent;}
+    .standings-row{display:grid;grid-template-columns:32px 1fr repeat(7,54px);padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;border-left:4px solid var(--team-color,var(--border));}    .standings-row:last-child{border-bottom:none;}
+    .standings-row:hover{background:rgba(255,255,255,.04);}
+    .standings-row.leader .rank{color:var(--gold);}
+    .standings-row.cutoff{border-bottom:2px solid rgba(242,179,78,.5);}
+    .team-info{display:flex;align-items:center;gap:10px;}
+    .team-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:44px;height:44px;background:transparent;}
     .team-logo img{width:100%;height:100%;object-fit:contain;}
     .ts-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:56px;height:56px;background:transparent;}
     .ts-logo img{width:100%;height:100%;object-fit:contain;}
-    .team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.5px;}
-    .cell{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;}
+    .team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.5px;}
+    .cell{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;}
     .cell.pct{color:var(--gold);font-weight:700;}
     .cell.diff-pos{color:#4ADE80;}
     .cell.diff-neg{color:#F87171;}
@@ -271,10 +271,11 @@
     /* ── TEAMS GRID ── */
     #teams-root{background:var(--dark2);}
     .teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;}
-    .team-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:28px 20px 22px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
-    .team-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;pointer-events:none;}
+    .team-card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--team-color,var(--border));border-radius:8px;padding:28px 20px 22px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+    .team-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,var(--team-color,#666),transparent 70%);opacity:0;transition:opacity .22s;pointer-events:none;}
     .team-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.18);}
-    .team-card:hover::before{opacity:1;}
+    .team-card:hover{border-top-color:var(--team-color,var(--border));}
+    .team-card:hover::before{opacity:.16;}
     .team-card-logo{width:96px;height:96px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;}
     .team-card-logo img{width:100%;height:100%;object-fit:contain;transition:transform .22s;}
     .team-card:hover .team-card-logo img{transform:scale(1.08);}
@@ -330,8 +331,8 @@
     .game-card.finished .game-date{color:#4ADE80;}
     .game-status-live{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;color:var(--red);text-transform:uppercase;display:flex;align-items:center;gap:5px;}
     .live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;}
-    .game-body{padding:20px 16px;}
-    .team-score-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+    .game-body{padding:14px 16px;}
+    .team-score-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0 8px 10px;border-left:3px solid var(--team-color,transparent);}
     .team-score-row:not(:last-child){border-bottom:1px solid var(--border);}
     .ts-info{display:flex;align-items:center;gap:10px;}
     .ts-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;}
@@ -1370,11 +1371,11 @@ function renderStandings() {
   const rows = standings.map((row, i) => {
     const t = divTeams()[row.teamId]; if (!t) return '';
     const pos = i + 1;
-    const cls = pos <= league.playoffSpots ? 'playoff' : '';
+    const cls = [pos <= league.playoffSpots ? 'playoff' : '', pos === 1 ? 'leader' : '', pos === league.playoffSpots ? 'cutoff' : ''].filter(Boolean).join(' ');
         const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
     const diffCls = row.diff > 0 ? 'diff-pos' : row.diff < 0 ? 'diff-neg' : '';
     const dots = (row.form || []).slice(-5).map(r => `<span class="dot ${r}"></span>`).join('');
-    return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;">      <div class="rank">${pos}</div>
+    return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;--team-color:${t.color};">      <div class="rank">${pos}</div>
       <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
       <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
       <div class="cell">${row.gp}</div>
@@ -1418,7 +1419,7 @@ function renderTeams() {
     const logoBlock=t.logo
       ?`<div class="team-card-logo"><img src="${t.logo}" alt="${t.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\'team-card-logo-placeholder\' style=\'background:${t.color}\'>${t.abbr}</div>'"></div>`
       :`<div class="team-card-logo-placeholder" style="background:${t.color}">${t.abbr}</div>`;
-      return `<div class="team-card reveal" onclick="window.location.href='team.html?id=${id}&div=${activeDivision}'" style="--team-color:${t.color};">      <style>.team-card[data-id='${id}']::before{background:radial-gradient(ellipse at 50% 0%,${t.color}33,transparent 70%)}</style>
+      return `<div class="team-card reveal" onclick="window.location.href='team.html?id=${id}&div=${activeDivision}'" style="--team-color:${t.color};">
       ${logoBlock}
       <div class="team-card-name">${t.name}</div>
       <div class="team-card-abbr">${t.abbr}</div>
@@ -1468,8 +1469,8 @@ function renderGames() {
         <div class="game-card-header"><span class="game-round">Jornada ${g.round} · EN VIVO</span>
         <span class="game-status-live"><span class="live-dot"></span>EN CURSO</span></div>
         <div class="game-body">
-          <div class="team-score-row">${rowHome}<div class="ts-score winner">${g.homeScore}</div></div>
-          <div class="team-score-row">${rowAway}<div class="ts-score loser">${g.awayScore}</div></div>
+          <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="ts-score winner">${g.homeScore}</div></div>
+          <div class="team-score-row" style="--team-color:${away.color}">${rowAway}<div class="ts-score loser">${g.awayScore}</div></div>
         </div>
         <div class="game-footer">
           <span>🏟️ ${g.venue}</span>
@@ -1484,8 +1485,8 @@ function renderGames() {
       <div class="game-card upcoming reveal">
         <div class="game-card-header"><span class="game-round">Próximo · Jornada ${g.round}</span><span class="game-date">${g.date}</span></div>
         <div class="game-body">
-          <div class="team-score-row">${rowHome}<div class="vs-label">VS</div></div>
-          <div class="team-score-row">${rowAway}</div>
+          <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="vs-label">VS</div></div>
+          <div class="team-score-row" style="--team-color:${away.color}">${rowAway}</div>
         </div>
         <div class="game-footer" style="justify-content:space-between;">
           <span style="font-size:12px;color:var(--muted);">🏟️ ${g.venue}</span>
@@ -1501,8 +1502,8 @@ function renderGames() {
           <span class="game-date">✓ ${g.date}</span>
         </div>
         <div class="game-body">
-          <div class="team-score-row">${rowHome}<div class="ts-score ${homeWon?'winner':'loser'}">${g.homeScore}</div></div>
-          <div class="team-score-row">${rowAway}<div class="ts-score ${homeWon?'loser':'winner'}">${g.awayScore}</div></div>
+          <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="ts-score ${homeWon?'winner':'loser'}">${g.homeScore}</div></div>
+          <div class="team-score-row" style="--team-color:${away.color}">${rowAway}<div class="ts-score ${homeWon?'loser':'winner'}">${g.awayScore}</div></div>
         </div>
         <div class="game-footer">
           <span>🏟️ ${g.venue}</span>
