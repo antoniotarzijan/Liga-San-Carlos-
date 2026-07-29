@@ -251,7 +251,8 @@
     .standings-header span:nth-child(2){text-align:left;}
     .standings-row{display:grid;grid-template-columns:32px 1fr repeat(7,54px);padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;position:relative;border-left:4px solid var(--team-color,var(--border));}    .standings-row:last-child{border-bottom:none;}
     .standings-row:hover{background:rgba(255,255,255,.04);}
-    .standings-row.leader .rank{color:var(--gold);}
+    .standings-row.playoff{background:rgba(242,179,78,.035);}
+    .standings-row.playoff .rank{color:var(--gold);font-weight:700;}
     .standings-row.cutoff{border-bottom:2px solid rgba(242,179,78,.5);}
     .team-info{display:flex;align-items:center;gap:10px;}
     .team-logo{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:44px;height:44px;background:transparent;}
