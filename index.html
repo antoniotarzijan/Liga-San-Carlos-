@@ -37,33 +37,56 @@
     main{position:relative;z-index:1;}
 
     /* ── SELECTOR DE DIVISIÓN ── */
-    #division-selector{position:fixed;inset:0;z-index:500;background:var(--dark);display:flex;flex-direction:column;align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 24px 40px;gap:24px;}
+    #division-selector{position:fixed;inset:0;z-index:500;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 24px 40px;gap:22px;}
     #division-selector.hidden{display:none;}
-    .div-sel-logo{height:clamp(70px,11vw,130px);width:auto;object-fit:contain;filter:drop-shadow(0 4px 24px rgba(0,0,0,.6));flex-shrink:0;}
-    .div-sel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(12px,2vw,15px);letter-spacing:4px;color:var(--muted);text-transform:uppercase;text-align:center;flex-shrink:0;}
-    .div-sel-league-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,50px);letter-spacing:3px;color:#fff;text-align:center;line-height:1;margin-top:-8px;flex-shrink:0;}
-    .div-sel-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;flex-shrink:0;}
-    .div-sel-sponsors{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;padding-bottom:8px;flex-shrink:0;}
-    .div-sel-sponsors-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+    .div-sel-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+    .div-sel-watermark{position:absolute;left:-40px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:clamp(160px,24vw,340px);line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.05);letter-spacing:-4px;user-select:none;}
+    .div-sel-court{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:min(46vw,560px);height:min(46vw,560px);opacity:.05;}
+    .div-sel-court circle,.div-sel-court line,.div-sel-court path{stroke:#fff;fill:none;stroke-width:1.5;}
+    .div-sel-glow-r{position:absolute;left:0;bottom:0;width:44vw;height:44vw;max-width:520px;max-height:520px;background:radial-gradient(ellipse at 0% 100%,rgba(248,8,8,.16),transparent 70%);}
+    .div-sel-glow-b{position:absolute;right:0;bottom:0;width:44vw;height:44vw;max-width:520px;max-height:520px;background:radial-gradient(ellipse at 100% 100%,rgba(48,9,220,.18),transparent 70%);}
+    .div-sel-logo{position:relative;z-index:1;height:clamp(70px,11vw,110px);width:auto;object-fit:contain;filter:drop-shadow(0 4px 24px rgba(0,0,0,.6));flex-shrink:0;}
+    .div-sel-league-name{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,58px);letter-spacing:3px;color:#fff;text-align:center;line-height:1;flex-shrink:0;}
+    .div-sel-title-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;}
+    .div-sel-title-line{width:36px;height:1px;flex-shrink:0;}
+    .div-sel-title-line.left{background:var(--red);}
+    .div-sel-title-line.right{background:var(--blue);}
+    .div-sel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(12px,2vw,15px);letter-spacing:4px;color:var(--muted);text-transform:uppercase;text-align:center;white-space:nowrap;}
+    .div-sel-cards{position:relative;z-index:1;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;flex-shrink:0;margin-top:6px;}
+    .div-sel-sponsors{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;padding-bottom:8px;flex-shrink:0;margin-top:8px;}
+    .div-sel-sponsors-label{display:flex;align-items:center;gap:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+    .div-sel-sponsors-label::before,.div-sel-sponsors-label::after{content:'';width:30px;height:1px;background:var(--border);}
     .div-sel-sponsors-logos{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;}
     .sponsor-logo-wrap{height:70px;display:flex;align-items:center;justify-content:center;opacity:.7;transition:opacity .2s;filter:grayscale(30%);}
     .sponsor-logo-wrap:hover{opacity:1;filter:none;}
     .sponsor-logo-wrap img{height:100%;width:auto;max-width:180px;object-fit:contain;}
     .sponsor-placeholder{height:40px;min-width:100px;border:1px dashed rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;padding:0 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;}
-    .div-card{width:clamp(200px,28vw,270px);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;flex-shrink:0;}
-    .div-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;}
-    .div-card.primera::before{background:radial-gradient(ellipse at 50% 0%,rgba(248,8,8,.18),transparent 70%);}
-    .div-card.segunda::before{background:radial-gradient(ellipse at 50% 0%,rgba(48,9,220,.18),transparent 70%);}
+    .div-card{width:clamp(220px,28vw,290px);background:linear-gradient(160deg,var(--card) 0%,var(--dark2) 100%);border:1px solid var(--border);border-radius:12px;padding:28px 22px;text-align:left;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;flex-shrink:0;}
+    .div-card.primera{border-color:rgba(248,8,8,.35);}
+    .div-card.segunda{border-color:rgba(48,9,220,.35);}
+    .div-card::before{content:'';position:absolute;inset:0;opacity:.5;transition:opacity .2s;}
+    .div-card.primera::before{background:radial-gradient(ellipse at 100% 0%,rgba(248,8,8,.16),transparent 65%);}
+    .div-card.segunda::before{background:radial-gradient(ellipse at 100% 0%,rgba(48,9,220,.18),transparent 65%);}
     .div-card:hover{transform:translateY(-6px);}
-    .div-card.primera:hover{border-color:rgba(248,8,8,.5);}
-    .div-card.segunda:hover{border-color:rgba(48,9,220,.5);}
+    .div-card.primera:hover{border-color:rgba(248,8,8,.6);}
+    .div-card.segunda:hover{border-color:rgba(48,9,220,.6);}
     .div-card:hover::before{opacity:1;}
+    .div-card-badge{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:26px;padding:0 8px;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;color:#fff;margin-bottom:18px;}
+    .div-card.primera .div-card-badge{background:var(--red);}
+    .div-card.segunda .div-card-badge{background:var(--blue);}
     .div-card-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,78px);line-height:1;margin-bottom:8px;position:relative;z-index:1;}
     .div-card.primera .div-card-num{color:var(--red);}
     .div-card.segunda .div-card-num{color:#0555a0;}
     .div-card-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:var(--text);position:relative;z-index:1;}
-    .div-card-sub{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:1px;position:relative;z-index:1;}
-    .div-card-arrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--muted);margin-top:20px;text-transform:uppercase;position:relative;z-index:1;}
+    .div-card-sub{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.5px;position:relative;z-index:1;}
+    .div-card-dash{width:22px;height:2px;margin-top:14px;position:relative;z-index:1;}
+    .div-card.primera .div-card-dash{background:var(--red);}
+    .div-card.segunda .div-card-dash{background:var(--blue);}
+    .div-card-arrow{display:inline-flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-top:20px;padding:10px 18px;border-radius:6px;border:1px solid var(--border);color:var(--text);position:relative;z-index:1;transition:all .2s;}
+    .div-card.primera .div-card-arrow{border-color:rgba(248,8,8,.4);}
+    .div-card.segunda .div-card-arrow{border-color:rgba(48,9,220,.4);}
+    .div-card.primera:hover .div-card-arrow{background:rgba(248,8,8,.1);border-color:var(--red);}
+    .div-card.segunda:hover .div-card-arrow{background:rgba(48,9,220,.12);border-color:var(--blue);}
 
     /* ── BADGE DIVISIÓN (nav) ── */
     .div-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:2px;cursor:pointer;transition:opacity .15s;}
@@ -630,6 +653,7 @@
       .section-title{font-size:clamp(28px,8vw,40px);}
       .section-line{display:none;}
       #division-selector{padding:32px 16px 32px;gap:20px;justify-content:flex-start;}
+      .div-sel-watermark,.div-sel-court{display:none;}
       .div-sel-logo{height:clamp(60px,16vw,90px);}
       .div-sel-league-name{font-size:clamp(22px,6vw,34px);}
       .div-sel-cards{flex-direction:column;align-items:center;gap:12px;width:100%;}
@@ -727,20 +751,41 @@
 
 <!-- ══ SELECTOR DE DIVISIÓN ══ -->
 <div id="division-selector">
+  <div class="div-sel-bg">
+    <div class="div-sel-watermark">SC</div>
+    <svg class="div-sel-court" viewBox="0 0 400 400">
+      <circle cx="200" cy="200" r="180"/><circle cx="200" cy="200" r="60"/>
+      <circle cx="200" cy="200" r="8" fill="rgba(255,255,255,0.06)"/>
+      <line x1="20" y1="200" x2="380" y2="200"/>
+      <path d="M110,20 L110,115 Q200,165 290,115 L290,20"/>
+      <path d="M110,380 L110,285 Q200,235 290,285 L290,380"/>
+      <circle cx="200" cy="115" r="30"/><circle cx="200" cy="285" r="30"/>
+    </svg>
+    <div class="div-sel-glow-r"></div>
+    <div class="div-sel-glow-b"></div>
+  </div>
   <img src="images/logo liga.png" class="div-sel-logo" alt="Liga San Carlos" onerror="this.style.display='none'">
   <div class="div-sel-league-name">Liga San Carlos</div>
-  <div class="div-sel-title">Selecciona tu División</div>
+  <div class="div-sel-title-row">
+    <span class="div-sel-title-line left"></span>
+    <div class="div-sel-title">Selecciona tu División</div>
+    <span class="div-sel-title-line right"></span>
+  </div>
   <div class="div-sel-cards">
     <div class="div-card primera" onclick="selectDivision('primera')">
+      <div class="div-card-badge">01</div>
       <div class="div-card-num">1°</div>
       <div class="div-card-label">División</div>
       <div class="div-card-sub">Primera División</div>
+      <div class="div-card-dash"></div>
       <div class="div-card-arrow">Ver temporada →</div>
     </div>
     <div class="div-card segunda" onclick="selectDivision('segunda')">
+      <div class="div-card-badge">02</div>
       <div class="div-card-num">2°</div>
       <div class="div-card-label">División</div>
       <div class="div-card-sub">Segunda División</div>
+      <div class="div-card-dash"></div>
       <div class="div-card-arrow">Ver temporada →</div>
     </div>
   </div>
