@@ -247,6 +247,11 @@
 
     /* ── GAMES ── */
     .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
+    .games-hscroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;}
+    .games-hscroll .game-card{flex:0 0 300px;min-width:300px;}
+    .games-subtitle{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin:0 0 14px;display:flex;align-items:center;gap:10px;}
+    .games-subtitle .games-subtitle-count{color:var(--muted);font-weight:600;font-size:12px;letter-spacing:1px;}
+    .games-block + .games-block{margin-top:36px;}
     .game-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .2s,border-color .2s;}
     .game-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15);}
     .game-card.live{border-color:rgba(232,0,29,.4);cursor:pointer;}
@@ -356,11 +361,6 @@
     .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;}
     .footer-logo span{color:var(--red);}
     .footer-copy{font-size:12px;color:var(--muted);}
-    .games-filter{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
-    .filter-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
-    .filter-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
-    .filter-btn:hover:not(.active){border-color:rgba(255,255,255,.2);color:var(--text);}
-
     /* ══ MODAL LOGIN ══ */
     #login-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;}
     #login-modal.open{display:flex;}
@@ -572,6 +572,7 @@
       .roster-cell{font-size:13px;}
       .roster-cell.pts{font-size:15px;}
       .games-grid{grid-template-columns:1fr;gap:14px;}
+      .games-hscroll .game-card{flex:0 0 260px;min-width:260px;}
       .game-card-header{flex-wrap:wrap;gap:4px;}
       .game-round{font-size:10px;}
       .game-date{font-size:11px;}
@@ -580,8 +581,6 @@
       .ts-name{font-size:13px;}
       .ts-score{font-size:30px;}
       .game-footer{flex-wrap:wrap;gap:6px;font-size:11px;}
-      .games-filter{gap:8px;}
-      .filter-btn{font-size:11px;padding:7px 14px;letter-spacing:1px;}
       #scorers-root .standings-header{grid-template-columns:28px 1fr 44px 44px 56px!important;padding:10px 12px;}
       #scorers-root .standings-row{grid-template-columns:28px 1fr 44px 44px 56px!important;padding:12px 12px;}
       #scorers-root .standings-header span:nth-child(4),
@@ -998,9 +997,9 @@
   <div class="nav-logo" id="nav-abbr">LSC<span>·</span>2026</div>
   <div class="nav-links">
     <a href="en-vivo.html" style="color:var(--red);display:flex;align-items:center;gap:6px;"><span style="width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;"></span>En Vivo</a>
+    <a href="#games-root">Partidos</a>
     <a href="#standings-root">Posiciones</a>
     <a href="#teams-root">Equipos</a>
-    <a href="#games-root">Partidos</a>
     <a href="#scorers-root">Anotadores</a>
     <a href="#sanctions-root">Sanciones</a>
   </div>
@@ -1013,10 +1012,10 @@
 
 <main>
   <div class="hero" id="hero-root"></div>
+  <section id="games-root" class="games-section"></section>
   <section id="standings-root"></section>
   <section id="teams-root"></section>
   <section id="roster-root"></section>
-  <section id="games-root" class="games-section"></section>
   <section id="scorers-root"></section>
   <section id="instagram-root"></section>
   <section id="sanctions-root"></section>
@@ -1106,7 +1105,6 @@ let activeDivision  = 'primera';
 let STATE           = { games:[] };
 let editingId       = null;
 let editingPlayerId = null;
-let activeFilter    = 'all';
 let lbPhotos        = [];
 let lbIndex         = 0;
 let _scoringHomePlayers = [];
@@ -1119,7 +1117,6 @@ const divTeams = () => divCfg().teams;
 /* ══ DIVISIÓN ══ */
 function selectDivision(div) {
   activeDivision = div;
-  activeFilter   = 'all';
   STATE.games    = [];
   document.getElementById('division-selector').classList.add('hidden');
   document.getElementById('roster-root').style.display = 'none';
@@ -1422,24 +1419,14 @@ let _showAllFinished = false;
 function renderGames() {
   const teams    = divTeams();
   const finished = STATE.games.filter(g=>g.type==='finished');
-  const upcoming = STATE.games.filter(g=>g.type==='upcoming'||g.type==='live');
-  let filtered   = activeFilter==='finished'?finished:activeFilter==='upcoming'?upcoming:STATE.games;
+  const live     = STATE.games.filter(g=>g.type==='live');
+  const trueUpcoming = STATE.games.filter(g=>g.type==='upcoming');
+  const upcoming = [...live, ...trueUpcoming];
 
   const INITIAL_SHOW = 4;
   const finishedVisible = _showAllFinished ? finished : finished.slice(-INITIAL_SHOW);
 
-  let filteredToRender;
-  if (activeFilter === 'upcoming') {
-    filteredToRender = upcoming;
-  } else if (activeFilter === 'finished') {
-    filteredToRender = finishedVisible;
-  } else {
-    const live = STATE.games.filter(g => g.type === 'live');
-    const trueUpcoming = STATE.games.filter(g => g.type === 'upcoming');
-    filteredToRender = [...live, ...trueUpcoming, ...finishedVisible];
-  }
-
-  const cards=filteredToRender.map(g => {   
+  const buildCard = (g) => {
     const home=teams[g.home], away=teams[g.away]; if(!home||!away) return '';
     const rowHome=`<div class="ts-info">${smallLogo(g.home)}<div class="ts-name">${home.name}</div></div>`;
     const rowAway=`<div class="ts-info">${smallLogo(g.away)}<div class="ts-name">${away.name}</div></div>`;
@@ -1494,7 +1481,10 @@ function renderGames() {
           </div>
         </div>
       </div>`;
-  }).join('');
+  };
+
+  const upcomingCards  = upcoming.map(buildCard).join('');
+  const finishedCards  = finishedVisible.map(buildCard).join('');
 
   document.getElementById('games-root').innerHTML=`
     <div class="section-header reveal">
@@ -1502,31 +1492,33 @@ function renderGames() {
       <span class="section-tag">Temporada ${league.season}</span>
       <div class="section-line"></div>
     </div>
-    <div class="games-filter">
-      <button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">Todos</button>
-      <button class="filter-btn ${activeFilter==='upcoming'?'active':''}" onclick="setFilter('upcoming')">Próximos (${upcoming.length})</button>
-      <button class="filter-btn ${activeFilter==='finished'?'active':''}" onclick="setFilter('finished')">Resultados (${finished.length})</button>
-    </div>
-    <div class="games-grid">${cards||'<p style="color:var(--muted)">No hay partidos en esta categoría.</p>'}</div>
-    ${activeFilter !== 'upcoming' && finished.length > INITIAL_SHOW ? `
-      <div style="text-align:center;margin-top:24px;">
-        ${!_showAllFinished ? `
-          <button onclick="_showAllFinished=true;renderGames();setTimeout(activateReveal,50);"
-            style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
-            onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
-            onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
-            Ver todos los resultados (${finished.length}) ↓
-          </button>` : `
-          <button onclick="_showAllFinished=false;renderGames();setTimeout(activateReveal,50);setTimeout(()=>document.getElementById('games-root').scrollIntoView({behavior:'smooth'}),100);"
-            style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
-            onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
-            onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
-            Ver menos ↑
-          </button>`}
-      </div>` : ''}`;
-}
 
-function setFilter(f) { activeFilter=f; renderGames(); setTimeout(activateReveal,50); }
+    <div class="games-block">
+      <h3 class="games-subtitle">Próximos Partidos <span class="games-subtitle-count">(${upcoming.length})</span></h3>
+      ${upcoming.length ? `<div class="games-hscroll">${upcomingCards}</div>` : '<p style="color:var(--muted)">No hay próximos partidos programados.</p>'}
+    </div>
+
+    <div class="games-block">
+      <h3 class="games-subtitle">Resultados <span class="games-subtitle-count">(${finished.length})</span></h3>
+      <div class="games-grid">${finishedCards||'<p style="color:var(--muted)">Todavía no hay resultados.</p>'}</div>
+      ${finished.length > INITIAL_SHOW ? `
+        <div style="text-align:center;margin-top:24px;">
+          ${!_showAllFinished ? `
+            <button onclick="_showAllFinished=true;renderGames();setTimeout(activateReveal,50);"
+              style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
+              onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
+              Ver todos los resultados (${finished.length}) ↓
+            </button>` : `
+            <button onclick="_showAllFinished=false;renderGames();setTimeout(activateReveal,50);setTimeout(()=>document.getElementById('games-root').scrollIntoView({behavior:'smooth'}),100);"
+              style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;border-radius:3px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='var(--text)'"
+              onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--muted)'">
+              Ver menos ↑
+            </button>`}
+        </div>` : ''}
+    </div>`;
+}
 
 /* ══ MODAL DETALLE PARTIDO ══ */
 let _gameDetailRefreshInterval = null;
