@@ -124,7 +124,15 @@
     .nav-cta:hover{background:#c8001a;}
 
     /* ── HERO ── */
-    .hero{position:relative;min-height:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(80px,10vw,120px) clamp(24px,8vw,120px) 48px;overflow:hidden;}
+    .hero{position:relative;min-height:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(64px,8vw,96px) clamp(24px,8vw,80px) 40px;overflow:hidden;}
+    .hero-columns{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:32px;width:100%;max-width:1240px;}
+    .hero-main{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0;}
+    @media(min-width:900px){
+      .hero-columns{flex-direction:row;justify-content:space-between;align-items:center;}
+      .hero-main{align-items:flex-start;text-align:left;}
+      .hero-eyebrow,.hero-meta-row,.hero-badges{justify-content:flex-start;}
+      .hero-stats{flex-direction:column;align-items:flex-start;gap:22px;margin-top:0;flex-shrink:0;}
+    }
     .hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(0,45,114,.35) 0%,transparent 65%),radial-gradient(ellipse 50% 70% at 90% 20%,rgba(232,0,29,.2) 0%,transparent 55%),radial-gradient(ellipse 40% 40% at 10% 80%,rgba(245,166,35,.1) 0%,transparent 50%),var(--dark);}
     .hero-court{position:absolute;right:-80px;top:50%;transform:translateY(-50%);width:520px;height:520px;z-index:0;opacity:.06;}
     .hero-court circle,.hero-court line,.hero-court path{stroke:#fff;fill:none;stroke-width:2;}
@@ -161,132 +169,6 @@
     .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:1px;}
     .section-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);padding:4px 10px;border:1px solid var(--red);border-radius:2px;}
     .section-line{flex:1;height:1px;background:var(--border);}
-
-    /* ── PLAYOFF BRACKET BTN ── */
-   /* ══ PLAYOFF HERO CTA ══ */
-.playoff-hero-cta {
-  position: relative;
-  display: block;
-  text-decoration: none;
-  margin-top: 28px;
-  width: min(480px, 90vw);
-  border-radius: 10px;
-  overflow: hidden;
-  cursor: pointer;
-  animation: fadeUp .6s .35s ease both;
-  transition: transform .22s, box-shadow .22s;
-  z-index: 1;
-}
-.playoff-hero-cta:hover {
-  transform: translateY(-4px) scale(1.015);
-  box-shadow: 0 0 48px rgba(242,179,78,.35), 0 0 80px rgba(242,179,78,.12);
-}
-.playoff-hero-cta-glow {
-  position: absolute;
-  inset: -2px;
-  border-radius: 12px;
-  background: linear-gradient(120deg, #f2b34e, #f80808, #f2b34e, #3009dc, #f2b34e);
-  background-size: 300% 300%;
-  animation: playoffGradient 3.5s ease infinite;
-  z-index: 0;
-}
-.playoff-hero-cta-inner {
-  position: relative;
-  z-index: 1;
-  background: #0f1015;
-  border-radius: 9px;
-  margin: 2px;
-  padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.playoff-hero-cta-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.playoff-hero-cta-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-.playoff-live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  flex-shrink: 0;
-  animation: pulse 1.4s ease infinite;
-}
-.playoff-hero-cta-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(28px, 5vw, 38px);
-  letter-spacing: 3px;
-  color: #fff;
-  line-height: 1;
-}
-.playoff-hero-cta-sub {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 2px;
-  transition: color .15s;
-}
-.playoff-hero-cta:hover .playoff-hero-cta-sub {
-  color: var(--gold);
-}
-.playoff-hero-cta-logos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  max-width: 180px;
-  justify-content: flex-end;
-  align-items: center;
-}
-.playoff-hero-cta-logos img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  border-radius: 50%;
-  background: rgba(255,255,255,.06);
-  padding: 2px;
-  transition: transform .2s;
-}
-.playoff-hero-cta:hover .playoff-hero-cta-logos img {
-  transform: scale(1.12);
-}
-.playoff-hero-cta-logos-label {
-  width: 100%;
-  text-align: right;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 2px;
-}
-@keyframes playoffGradient {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-@media (max-width: 768px) {
-  .playoff-hero-cta { width: min(380px, 92vw); }
-  .playoff-hero-cta-inner { padding: 14px 16px; }
-  .playoff-hero-cta-logos { max-width: 130px; gap: 5px; }
-  .playoff-hero-cta-logos img { width: 26px; height: 26px; }
-}
 
     /* ── INSTAGRAM BTN ── */
     .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
@@ -1430,18 +1312,6 @@ function renderHero() {
   const logoHTML = league.logo ? `<div class="hero-league-logo"><img src="${league.logo}" alt="${league.name}"></div>` : '';
   const divLabel = activeDivision === 'primera' ? 'Primera División' : 'Segunda División';
 
-  // Top 8 clasificados para mostrar logos
-  const standings = computeStandings();
-  const top8 = standings.slice(0, 8);
-  const teams = divTeams();
-
-  const logosHTML = top8.map(row => {
-    const t = teams[row.teamId]; if (!t) return '';
-    return t.logo
-      ? `<img src="${t.logo}" alt="${t.abbr}" title="${t.name}" onerror="this.onerror=null;this.style.display='none'">`
-      : `<div style="width:28px;height:28px;border-radius:50%;background:${t.color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:9px;color:#fff;">${t.abbr.slice(0,3)}</div>`;
-  }).join('');
-
   document.getElementById('hero-root').innerHTML = `
     <div class="hero-bg"></div><div class="hero-flag"></div>
     <svg class="hero-court" viewBox="0 0 400 400">
@@ -1452,43 +1322,27 @@ function renderHero() {
       <path d="M110,380 L110,285 Q200,235 290,285 L290,380"/>
       <circle cx="200" cy="115" r="30"/><circle cx="200" cy="285" r="30"/>
     </svg>
-    ${logoHTML}
-    <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span>🏀 Temporada ${league.season}<span class="hero-eyebrow-line"></span></div>
-    <h1 class="hero-title">${titleHTML}</h1>
-    <div class="hero-div-tag ${activeDivision}">${divLabel}</div>
-    <p class="hero-sub">${league.tagline}</p>
-    <div class="hero-meta-row">
-      <span class="hero-meta-item">📅 ${league.scheduleDays}</span>
-      <span class="hero-meta-divider">|</span>
-      <span class="hero-meta-item">📍 ${league.venue}</span>
-    </div>
-    <div class="hero-badges">
-      <button class="hero-change-div-btn" onclick="showDivisionSelector()">⇄ Cambiar División</button>
-    </div>
-
-    <!-- ══ PLAYOFF CTA ══ -->
-    <a href="playoff.html" class="playoff-hero-cta">
-      <div class="playoff-hero-cta-glow"></div>
-      <div class="playoff-hero-cta-inner">
-        <div class="playoff-hero-cta-left">
-          <div class="playoff-hero-cta-eyebrow">
-            <span class="playoff-live-dot"></span>
-            EN CURSO · ${league.season}
-          </div>
-          <div class="playoff-hero-cta-title">🏆 PLAYOFFS</div>
-          <div class="playoff-hero-cta-sub">Ver bracket completo →</div>
+    <div class="hero-columns">
+      <div class="hero-main">
+        ${logoHTML}
+        <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span>🏀 Temporada ${league.season}<span class="hero-eyebrow-line"></span></div>
+        <h1 class="hero-title">${titleHTML}</h1>
+        <div class="hero-div-tag ${activeDivision}">${divLabel}</div>
+        <p class="hero-sub">${league.tagline}</p>
+        <div class="hero-meta-row">
+          <span class="hero-meta-item">📅 ${league.scheduleDays}</span>
+          <span class="hero-meta-divider">|</span>
+          <span class="hero-meta-item">📍 ${league.venue}</span>
         </div>
-        <div class="playoff-hero-cta-logos">
-          ${logosHTML}
-          <div class="playoff-hero-cta-logos-label">Top 8 clasificados</div>
+        <div class="hero-badges">
+          <button class="hero-change-div-btn" onclick="showDivisionSelector()">⇄ Cambiar División</button>
         </div>
       </div>
-    </a>
-
-    <div class="hero-stats">
-      <div class="stat-item"><div class="stat-num">${Object.keys(divTeams()).length}</div><div class="stat-label">Equipos</div></div>
-      <div class="stat-item"><div class="stat-num">${league.totalRounds}</div><div class="stat-label">Jornadas</div></div>
-      <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div></div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num">${Object.keys(divTeams()).length}</div><div class="stat-label">Equipos</div></div>
+        <div class="stat-item"><div class="stat-num">${league.totalRounds}</div><div class="stat-label">Jornadas</div></div>
+        <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div></div>
+      </div>
     </div>`;
 }
 
