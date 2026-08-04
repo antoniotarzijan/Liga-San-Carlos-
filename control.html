@@ -65,6 +65,7 @@
     .gp-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;flex-shrink:0;}
     .gp-tag.live{color:var(--red);display:flex;align-items:center;gap:5px;}
     .gp-tag.upcoming{color:var(--gold);}
+    .gp-tag.finished{color:#4ADE80;}
     .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
     .empty-hint{padding:40px 16px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:1px;}
@@ -209,6 +210,35 @@
 
     .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:12px;margin-top:4px;}
 
+    /* ── FINALIZADO: BANNER ── */
+    .finished-banner{display:none;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);color:#4ADE80;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 10px;border-radius:8px;margin-bottom:8px;text-align:center;}
+    #view-board.finished-mode .finished-banner{display:block;}
+    #view-board.finished-mode .role-tabs,
+    #view-board.finished-mode .buzzer-btn,
+    #view-board.finished-mode .clock-shot-row,
+    #view-board.finished-mode .role-section,
+    #view-board.finished-mode .finish-btn{display:none!important;}
+
+    /* ── OBSERVACIONES Y FIRMA DEL ÁRBITRO ── */
+    .ref-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:4px;margin-bottom:8px;}
+    .ref-panel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+    .ref-panel-hint{font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+    .ref-textarea{width:100%;min-height:80px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);font-size:13px;font-family:inherit;resize:vertical;margin-bottom:10px;box-sizing:border-box;}
+    .ref-sig-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .ref-sig-canvas{width:100%;height:150px;background:#fff;border-radius:6px;display:block;touch-action:none;cursor:crosshair;}
+    .ref-sig-btns{display:flex;gap:8px;margin-top:8px;}
+    .ref-sig-clear{flex:1;padding:9px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+    .ref-save-btn{flex:2;padding:9px;border-radius:6px;border:none;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+
+    /* ── CORREGIR RESULTADO FINAL ── */
+    .edit-score-panel{display:none;background:var(--card);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:12px;margin-bottom:8px;}
+    #view-board.finished-mode .edit-score-panel{display:block;}
+    .edit-score-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+    .edit-score-team{flex:1;text-align:center;min-width:0;}
+    .edit-score-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .edit-score-input{width:100%;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:28px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);box-sizing:border-box;}
+    .edit-score-sep{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);flex-shrink:0;}
+
     .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;padding:12px 22px;border-radius:6px;transition:transform .3s;z-index:999;white-space:nowrap;}
     .toast.show{transform:translateX(-50%) translateY(0);}
     .toast.err{background:#F87171;}
@@ -255,6 +285,7 @@
   <div id="view-list" class="view">
     <div id="live-section"></div>
     <div id="upcoming-section"></div>
+    <div id="finished-section"></div>
   </div>
 
   <!-- INICIAR PARTIDO -->
@@ -282,6 +313,25 @@
     <div class="board-top">
       <div class="board-round" id="board-round">Jornada —</div>
       <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
+    </div>
+
+    <div class="finished-banner">✓ Partido finalizado</div>
+
+    <div class="edit-score-panel">
+      <div class="ref-panel-title">✏ Corregir resultado final</div>
+      <div class="ref-panel-hint">Úsalo solo si hubo un error al anotar. Se guarda directo en Supabase y se refleja de inmediato en la web. No modifica los puntos ya sumados a cada jugador.</div>
+      <div class="edit-score-row">
+        <div class="edit-score-team">
+          <div class="edit-score-team-name" id="edit-score-home-name">Local</div>
+          <input type="number" class="edit-score-input" id="edit-score-home" min="0">
+        </div>
+        <div class="edit-score-sep">–</div>
+        <div class="edit-score-team">
+          <div class="edit-score-team-name" id="edit-score-away-name">Visita</div>
+          <input type="number" class="edit-score-input" id="edit-score-away" min="0">
+        </div>
+      </div>
+      <button class="ref-save-btn" style="width:100%;margin-top:10px;" onclick="saveFinalScore()">💾 Guardar resultado corregido</button>
     </div>
 
     <div class="compact-header">
@@ -446,6 +496,19 @@
       </div>
     </div>
 
+    <!-- OBSERVACIONES Y FIRMA DEL ÁRBITRO -->
+    <div class="ref-panel">
+      <div class="ref-panel-title">📝 Observaciones y firma del árbitro</div>
+      <div class="ref-panel-hint">Opcional — no es necesario completarlo para finalizar el partido. Puedes volver a editarlo cuando quieras, incluso días después de terminado el partido.</div>
+      <textarea class="ref-textarea" id="ref-observations" placeholder="Observaciones del árbitro (incidentes, reclamos, notas del partido...)"></textarea>
+      <div class="ref-sig-label">Firma del árbitro</div>
+      <canvas class="ref-sig-canvas" id="sig-canvas" width="500" height="150"></canvas>
+      <div class="ref-sig-btns">
+        <button class="ref-sig-clear" onclick="clearSignature()">✕ Limpiar firma</button>
+        <button class="ref-save-btn" onclick="saveRefereeNotes()">💾 Guardar observaciones y firma</button>
+      </div>
+    </div>
+
     <div class="save-hint">Los cambios se guardan automáticamente y se ven en vivo en la web · <a href="en-vivo.html" target="_blank" style="color:var(--gold);">Ver página en vivo →</a></div>
   </div>
 </div>
@@ -504,6 +567,8 @@ _supabase.auth.onAuthStateChange((event, session) => {
   _session = session;
   if (event === 'SIGNED_OUT') showLogin();
 });
+
+initSignaturePad();
 
 (async () => {
   const { data } = await _supabase.auth.getSession();
@@ -604,6 +669,8 @@ function rowToLive(row){
     shotClockStartedAt: row.shot_clock_started_at,
     possessionArrow: row.possession_arrow || 'home',
     homeTimeouts: row.home_timeouts || 0, awayTimeouts: row.away_timeouts || 0,
+    refereeObservations: row.referee_observations || '',
+    refereeSignature: row.referee_signature || null,
   };
 }
 
@@ -634,37 +701,52 @@ async function goToList(){
   if (subsWrap) subsWrap.hidden = true;
   setView('view-list');
   updateDivPill();
-  const { data, error } = await _supabase.from(divCfg().dbTable).select('*')
-    .in('type', ['upcoming','live']).order('round', { ascending: true });
-  if (error){ showToast('⚠ Error al conectar', true); return; }
-  const games = (data || []).map(rowToLive);
+  const [activeRes, finishedRes] = await Promise.all([
+    _supabase.from(divCfg().dbTable).select('*').in('type', ['upcoming','live']).order('round', { ascending: true }),
+    _supabase.from(divCfg().dbTable).select('*').eq('type', 'finished').order('id', { ascending: false }).limit(20),
+  ]);
+  if (activeRes.error || finishedRes.error){ showToast('⚠ Error al conectar', true); return; }
+  const games = (activeRes.data || []).map(rowToLive);
+  const finished = (finishedRes.data || []).map(rowToLive);
   const teams = divTeams();
   const live = games.filter(g => g.type === 'live');
   const upcoming = games.filter(g => g.type === 'upcoming');
 
-  const pickHTML = (g, isLive) => {
+  const pickHTML = (g, tag) => {
     const h = teams[g.home]?.name || g.home, a = teams[g.away]?.name || g.away;
-    return `<div class="game-pick ${isLive?'is-live':''}" onclick="openGame(${g.id})">
+    const metaByTag = {
+      live: ` · C${g.quarter} · ${g.homeScore}-${g.awayScore}`,
+      upcoming: ' · ' + (g.date||'Por definir'),
+      finished: ` · ${g.homeScore}-${g.awayScore} · ${g.date||''}`,
+    };
+    const tagHTML = {
+      live: '<span class="live-dot"></span>EN VIVO',
+      upcoming: '⏳ PRÓXIMO',
+      finished: '✓ FINALIZADO',
+    };
+    return `<div class="game-pick ${tag==='live'?'is-live':''}" onclick="openGame(${g.id})">
       <div>
         <div class="gp-teams">${h} vs ${a}</div>
-        <div class="gp-meta">Jornada ${g.round}${isLive ? ` · C${g.quarter} · ${g.homeScore}-${g.awayScore}` : ' · ' + (g.date||'Por definir')}</div>
+        <div class="gp-meta">Jornada ${g.round}${metaByTag[tag]}</div>
       </div>
-      <div class="gp-tag ${isLive?'live':'upcoming'}">${isLive?'<span class="live-dot"></span>EN VIVO':'⏳ PRÓXIMO'}</div>
+      <div class="gp-tag ${tag}">${tagHTML[tag]}</div>
     </div>`;
   };
 
   document.getElementById('live-section').innerHTML = live.length
-    ? `<div class="section-lbl">🔴 En vivo ahora</div>${live.map(g=>pickHTML(g,true)).join('')}` : '';
+    ? `<div class="section-lbl">🔴 En vivo ahora</div>${live.map(g=>pickHTML(g,'live')).join('')}` : '';
   document.getElementById('upcoming-section').innerHTML = upcoming.length
-    ? `<div class="section-lbl">Partidos disponibles para iniciar</div>${upcoming.map(g=>pickHTML(g,false)).join('')}`
+    ? `<div class="section-lbl">Partidos disponibles para iniciar</div>${upcoming.map(g=>pickHTML(g,'upcoming')).join('')}`
     : (live.length ? '' : `<div class="empty-hint">No hay partidos próximos ni en vivo registrados.<br>Agrégalos primero en el Panel Admin.</div>`);
+  document.getElementById('finished-section').innerHTML = finished.length
+    ? `<div class="section-lbl">✓ Finalizados recientes · editar observaciones/firma</div>${finished.map(g=>pickHTML(g,'finished')).join('')}` : '';
 }
 
 async function openGame(id){
   const { data, error } = await _supabase.from(divCfg().dbTable).select('*').eq('id', id).single();
   if (error || !data){ showToast('⚠ No se pudo cargar el partido', true); return; }
   currentGame = rowToLive(data);
-  if (currentGame.type === 'live') openBoard();
+  if (currentGame.type === 'live' || currentGame.type === 'finished') openBoard();
   else openStart();
 }
 
@@ -780,6 +862,8 @@ async function startGame(){
 ══════════════════════════════════════════════════════════════ */
 function openBoard(){
   setView('view-board');
+  const isFinished = currentGame.type === 'finished';
+  document.getElementById('view-board').classList.toggle('finished-mode', isFinished);
   const teams = divTeams();
   const home = teams[currentGame.home], away = teams[currentGame.away];
   document.getElementById('board-round').textContent = `Jornada ${currentGame.round}`;
@@ -795,9 +879,11 @@ function openBoard(){
   document.getElementById('caway-name').textContent = away?.abbr || currentGame.away;
   setRole('todos');
   renderBoard();
-  startTicker();
+  if (isFinished) stopTicker(); else startTicker();
   loadRosterAndStats();
   loadSubstitutions();
+  loadRefereeNotes();
+  loadFinalScoreEditor();
 }
 
 function toggleRoster(){
@@ -1242,6 +1328,99 @@ async function registerSubstitution(){
   logGameEvent(teamId, 'substitution', playerIn.name, null, playerOut ? `Sale: ${playerOut.name}` : null);
   showToast('✓ Sustitución registrada');
   loadSubstitutions();
+}
+
+/* ── OBSERVACIONES Y FIRMA DEL ÁRBITRO ── */
+let sigDrawing = false;
+let sigHasContent = false;
+
+function initSignaturePad(){
+  const canvas = document.getElementById('sig-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+
+  const posFromEvent = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  };
+
+  canvas.addEventListener('pointerdown', (e) => {
+    sigDrawing = true; sigHasContent = true;
+    const p = posFromEvent(e);
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    canvas.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!sigDrawing) return;
+    const p = posFromEvent(e);
+    ctx.lineTo(p.x, p.y); ctx.stroke();
+    e.preventDefault();
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev =>
+    canvas.addEventListener(ev, () => { sigDrawing = false; }));
+}
+
+function clearSignature(){
+  const canvas = document.getElementById('sig-canvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  sigHasContent = false;
+}
+
+function loadSignatureFromDataUrl(dataUrl){
+  const canvas = document.getElementById('sig-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  sigHasContent = false;
+  if (!dataUrl) return;
+  const img = new Image();
+  img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); sigHasContent = true; };
+  img.src = dataUrl;
+}
+
+function loadRefereeNotes(){
+  document.getElementById('ref-observations').value = currentGame.refereeObservations || '';
+  loadSignatureFromDataUrl(currentGame.refereeSignature || null);
+}
+
+async function saveRefereeNotes(){
+  const canvas = document.getElementById('sig-canvas');
+  const observations = document.getElementById('ref-observations').value.trim();
+  const signatureDataUrl = sigHasContent ? canvas.toDataURL('image/png') : null;
+  const { error } = await _supabase.from(divCfg().dbTable).update({
+    referee_observations: observations || null,
+    referee_signature: signatureDataUrl,
+  }).eq('id', currentGame.id);
+  if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+  currentGame.refereeObservations = observations;
+  currentGame.refereeSignature = signatureDataUrl;
+  showToast('✓ Observaciones y firma guardadas');
+}
+
+/* ── CORREGIR RESULTADO FINAL ── */
+function loadFinalScoreEditor(){
+  const teams = divTeams();
+  document.getElementById('edit-score-home-name').textContent = teams[currentGame.home]?.abbr || currentGame.home;
+  document.getElementById('edit-score-away-name').textContent = teams[currentGame.away]?.abbr || currentGame.away;
+  document.getElementById('edit-score-home').value = currentGame.homeScore;
+  document.getElementById('edit-score-away').value = currentGame.awayScore;
+}
+
+async function saveFinalScore(){
+  const hs = document.getElementById('edit-score-home').value;
+  const as = document.getElementById('edit-score-away').value;
+  if (hs === '' || as === '' || +hs < 0 || +as < 0){ showToast('⚠ Ingresa ambos marcadores', true); return; }
+  if (!confirm('¿Guardar este resultado corregido? Se actualizará de inmediato en la base de datos.')) return;
+  const { error } = await _supabase.from(divCfg().dbTable).update({
+    home_score: +hs, away_score: +as,
+  }).eq('id', currentGame.id);
+  if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+  currentGame.homeScore = +hs; currentGame.awayScore = +as;
+  renderBoard();
+  showToast('✓ Resultado corregido guardado');
 }
 
 /* ── FINALIZAR ── */
