@@ -42,51 +42,78 @@
     .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
-    .score-hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(10px,3vw,32px);padding:20px 0 24px;}
-    .hero-team{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;}
-    .hero-team-logo{width:clamp(56px,10vw,84px);height:clamp(56px,10vw,84px);display:flex;align-items:center;justify-content:center;}
-    .hero-team-logo img{width:100%;height:100%;object-fit:contain;}
-    .hero-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(14px,2vw,18px);}
-    .hero-team-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
-    .hero-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,12vw,96px);line-height:1;}
+    .status-row{display:flex;justify-content:center;margin-bottom:10px;}
+    .hero-meta-line{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+
+    .score-hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(10px,3vw,32px);padding:4px 0 20px;}
+    .hero-team{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;min-width:0;}
+    .score-hero.matchday .hero-team.home{align-items:flex-start;text-align:left;}
+    .score-hero.matchday .hero-team.away{align-items:flex-end;text-align:right;}
+    .hero-team-top{display:flex;align-items:center;gap:12px;}
+    .hero-team-top.reverse{flex-direction:row-reverse;}
+    .hero-team-id{min-width:0;}
+    .hero-team-logo{width:clamp(48px,9vw,68px);height:clamp(48px,9vw,68px);flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.03);}
+    .hero-team-logo img{width:100%;height:100%;object-fit:contain;border-radius:50%;}
+    .hero-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(13px,2.1vw,18px);letter-spacing:.3px;line-height:1.15;}
+    .hero-team-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--tc,var(--muted));font-weight:700;margin-top:2px;}
+    .hero-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,11vw,84px);line-height:1;}
     .hero-score.winner{color:var(--text);}
     .hero-score.loser{color:var(--muted);}
-    .hero-center{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .hero-score-bar{width:56px;height:3px;border-radius:3px;background:var(--tc,#666);box-shadow:0 0 14px var(--tc,#666);}
+    .score-hero.matchday .hero-team.away .hero-score-bar{margin-left:auto;}
+    .hero-center{display:flex;flex-direction:column;align-items:center;gap:5px;}
     .hero-vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);}
     .hero-meta{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1px;}
-    .hero-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
-    .hero-clock{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--green);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:2px 12px;}
-    .hero-clock.paused{color:var(--text);}
-    .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:0 auto 24px;max-width:360px;}
+    .hero-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+    .hero-clock{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,42px);letter-spacing:1px;color:var(--text);}
+    .hero-clock.paused{color:var(--muted);}
+    .hero-center-div{width:52px;height:1px;background:var(--border);margin:6px 0;}
+    .hero-poss-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+    .poss-ring{width:56px;height:56px;border-radius:50%;border:3px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-top:2px;}
+    .poss-ring span{font-family:'Bebas Neue',sans-serif;font-size:21px;color:#FB923C;}
+    .poss-ring.warn{border-color:rgba(248,8,8,.5);}
+    .poss-ring.warn span{color:var(--red);}
+    .hero-fouls-line{text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:14px;}
+    .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:16px auto 0;max-width:360px;}
     .hero-mvp-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
     .hero-mvp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--gold);}
 
     /* ── TOP PERFORMERS ── */
     .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-    .performers-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
-    .performer-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
-    .performer-rank{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
-    .performer-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .performer-pts{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);}
+    .performers-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+    .performer-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;background:color-mix(in srgb, var(--pc,#666) 14%, var(--card));border-color:color-mix(in srgb, var(--pc,#666) 40%, var(--border));}
+    .performer-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:color-mix(in srgb, var(--pc,#666) 65%, #fff);line-height:1;flex-shrink:0;}
+    .performer-info{min-width:0;}
+    .performer-rank{font-size:9px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+    .performer-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .performer-pts{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
 
     /* ── BOX SCORE ── */
     .boxscore-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
     .boxscore-team{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-    .boxscore-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);}
+    .boxscore-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:color-mix(in srgb, var(--tc,#666) 30%, var(--card));border-bottom:1px solid var(--border);}
     .boxscore-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
     .boxscore-team-total{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
-    .boxscore-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);gap:8px;}
+    .boxscore-colhead,.boxscore-row{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:6px;}
+    .boxscore-colhead.with-court,.boxscore-row.with-court{grid-template-columns:1fr 44px 76px;}
+    .boxscore-colhead{padding:7px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+    .boxscore-colhead span{text-align:center;}
+    .boxscore-colhead span:first-child{text-align:left;}
+    .boxscore-row{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);}
     .boxscore-row:last-child{border-bottom:none;}
-    .boxscore-player{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
-    .boxscore-num{font-size:11px;color:var(--muted);min-width:24px;text-align:center;flex-shrink:0;}
-    .boxscore-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .court-badge{font-size:9px;color:#F87171;display:flex;align-items:center;gap:3px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;}
-    .court-dot{width:5px;height:5px;border-radius:50%;background:#F87171;}
+    .boxscore-player{display:flex;align-items:center;gap:8px;min-width:0;}
+    .boxscore-num{font-size:11px;color:var(--muted);min-width:20px;flex-shrink:0;}
+    .boxscore-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .leader-badge{font-size:9px;background:rgba(242,179,78,.15);color:var(--gold);padding:2px 6px;border-radius:3px;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0;}
-    .boxscore-stats{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
-    .boxscore-fouls{font-size:11px;color:#F87171;}
-    .boxscore-pts{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);}
+    .boxscore-fouls{font-size:10px;color:#F87171;margin-right:4px;}
+    .boxscore-pts-cell{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--gold);}
+    .boxscore-court-cell{display:flex;align-items:center;justify-content:center;}
+    .court-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+    .court-dot.on{background:var(--green);box-shadow:0 0 6px rgba(74,222,128,.6);}
+    .court-dot.off{background:#3a3f4a;}
     .boxscore-empty{padding:20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+    .boxscore-legend{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:14px 4px 0;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
+    .boxscore-legend span{display:flex;align-items:center;gap:6px;}
 
     /* ── TIMELINE JUGADA A JUGADA ── */
     .timeline-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
@@ -101,10 +128,14 @@
 
     @media(max-width:640px){
       .boxscore-grid{grid-template-columns:1fr;}
-      .score-hero{grid-template-columns:1fr;gap:16px;}
+      .score-hero{grid-template-columns:1fr;gap:18px;}
       .hero-center{order:2;}
       .hero-team:nth-child(1){order:1;}
       .hero-team:nth-child(3){order:3;}
+      .score-hero.matchday .hero-team.home,
+      .score-hero.matchday .hero-team.away{align-items:center;text-align:center;}
+      .hero-team-top.reverse{flex-direction:row;}
+      .score-hero.matchday .hero-team.away .hero-score-bar{margin-left:0;}
     }
   </style>
 </head>
@@ -169,6 +200,7 @@ function divTeams(){ return divCfg().teams; }
 let _refreshInterval = null;
 let _tickInterval = null;
 let _liveClock = { seconds: 0, running: false, startedAt: null };
+let _liveShot  = { seconds: 24, running: false, startedAt: null };
 
 function fmtClock(totalSeconds){
   const s = Math.max(0, Math.ceil(totalSeconds));
@@ -181,12 +213,25 @@ function remainingClockSeconds(){
   const elapsed = (Date.now() - new Date(_liveClock.startedAt).getTime()) / 1000;
   return Math.max(0, _liveClock.seconds - elapsed);
 }
+function remainingShotSeconds(){
+  if (!_liveShot.running || !_liveShot.startedAt) return _liveShot.seconds;
+  const elapsed = (Date.now() - new Date(_liveShot.startedAt).getTime()) / 1000;
+  return Math.max(0, _liveShot.seconds - elapsed);
+}
 function tickClock(){
   const disp = document.getElementById('hero-clock-display');
-  if (!disp) return;
-  const remaining = remainingClockSeconds();
-  disp.textContent = fmtClock(remaining);
-  disp.classList.toggle('paused', !_liveClock.running);
+  if (disp){
+    const remaining = remainingClockSeconds();
+    disp.textContent = fmtClock(remaining);
+    disp.classList.toggle('paused', !_liveClock.running);
+  }
+  const ring = document.getElementById('poss-ring');
+  const ringNum = document.getElementById('poss-ring-num');
+  if (ring && ringNum){
+    const remaining = Math.ceil(remainingShotSeconds());
+    ringNum.textContent = remaining;
+    ring.classList.toggle('warn', remaining <= 5);
+  }
 }
 
 function teamLogoHTML(id){
@@ -197,7 +242,7 @@ function teamLogoHTML(id){
     : t.abbr;
 }
 function quarterLabel(q){
-  return q <= 4 ? `CUARTO ${q}` : (q === 5 ? 'TIEMPO EXTRA' : `TIEMPO EXTRA ${q-4}`);
+  return q <= 4 ? `${q}° CUARTO` : (q === 5 ? 'TIEMPO EXTRA' : `${q-4}° TIEMPO EXTRA`);
 }
 
 function buildTimelineHTML(events, row, teams){
@@ -319,11 +364,12 @@ async function renderGame(row){
       running: !!row.clock_running,
       startedAt: row.clock_started_at,
     };
+    _liveShot = {
+      seconds: row.shot_clock_seconds ?? 24,
+      running: !!row.shot_clock_running,
+      startedAt: row.shot_clock_started_at,
+    };
   }
-
-  const statusHTML = isLive
-    ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span><span class="hero-quarter">${quarterLabel(row.quarter||1)}</span><span class="hero-clock" id="hero-clock-display">${fmtClock(remainingClockSeconds())}</span><span>Faltas ${row.home_fouls||0}-${row.away_fouls||0}</span>`
-    : `<span class="status-badge finished">✓ Finalizado</span>`;
 
   const { data: ev } = await _supabase.from('game_events').select('*')
     .eq('game_id', gameId).eq('division', activeDivision).order('created_at', { ascending: true });
@@ -333,74 +379,105 @@ async function renderGame(row){
   const boxRow = (s, leader) => {
     const pts = s.points||0, fouls = s.fouls||0;
     const numBadge = s.player_number != null ? `<span class="boxscore-num">#${s.player_number}</span>` : `<span class="boxscore-num"></span>`;
-    const courtBadge = (isLive && s.on_court) ? `<span class="court-badge"><span class="court-dot"></span>CANCHA</span>` : '';
     const leaderBadge = (isLive && s === leader) ? `<span class="leader-badge">⭐ LÍDER</span>` : (!isLive && s.player_name === row.mvp) ? `<span class="leader-badge">MVP</span>` : '';
-    return `<div class="boxscore-row">
+    const courtCell = isLive ? `<div class="boxscore-court-cell"><span class="court-dot ${s.on_court?'on':'off'}"></span></div>` : '';
+    return `<div class="boxscore-row ${isLive?'with-court':''}">
       <div class="boxscore-player">
         ${numBadge}
         <span class="boxscore-name">${s.player_name}</span>
         ${leaderBadge}
-        ${courtBadge}
       </div>
-      <div class="boxscore-stats">
-        ${fouls>0?`<span class="boxscore-fouls">${fouls}f</span>`:''}
-        <span class="boxscore-pts">${pts}</span>
-      </div>
+      <div class="boxscore-pts-cell">${fouls>0?`<span class="boxscore-fouls">${fouls}f</span>`:''}${pts}</div>
+      ${courtCell}
     </div>`;
   };
 
   const boxTeam = (teamId, team, list, leader) => `
-    <div class="boxscore-team">
+    <div class="boxscore-team" style="--tc:${team?.color || '#666'}">
       <div class="boxscore-head">
         <span class="boxscore-team-name">${team?.name || teamId}</span>
         <span class="boxscore-team-total">${list.reduce((a,s)=>a+(s.points||0),0)} pts</span>
       </div>
-      ${list.length ? list.map(s => boxRow(s, leader)).join('') : '<div class="boxscore-empty">Sin estadísticas registradas.</div>'}
+      ${list.length ? `<div class="boxscore-colhead ${isLive?'with-court':''}">
+        <span>Jugador</span><span>Pts</span>${isLive?'<span>En cancha</span>':''}
+      </div>${list.map(s => boxRow(s, leader)).join('')}` : '<div class="boxscore-empty">Sin estadísticas registradas.</div>'}
     </div>`;
+
+  const shotRemaining = isLive ? Math.ceil(remainingShotSeconds()) : 0;
 
   document.getElementById('root').innerHTML = `
     <div class="hero-bar">
-      <div class="hero-eyebrow">
-        <span>Jornada ${row.round} · ${divCfg().label}</span>
-        ${statusHTML}
-        <span>🏟️ ${row.venue || 'Colegio Cumbres'}</span>
+      <div class="status-row">
+        ${isLive ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span>` : `<span class="status-badge finished">✓ FINALIZADO</span>`}
       </div>
-      <div class="score-hero">
-        <div class="hero-team">
-          <div class="hero-team-logo">${teamLogoHTML(row.home)}</div>
-          <div class="hero-team-name">${home?.name || row.home}</div>
-          <div class="hero-team-tag">Local</div>
-          <div class="hero-score ${isLive ? '' : (homeWon?'winner':'loser')}">${homeScore}</div>
+      <div class="hero-meta-line">Jornada ${row.round} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
+
+      <div class="score-hero matchday">
+        <div class="hero-team home" style="--tc:${home?.color||'#666'}">
+          <div class="hero-team-top">
+            <div class="hero-team-logo">${teamLogoHTML(row.home)}</div>
+            <div class="hero-team-id">
+              <div class="hero-team-name">${(home?.name || row.home).toUpperCase()}</div>
+              <div class="hero-team-tag">Local</div>
+            </div>
+          </div>
+          <div class="hero-score ${!isLive ? (homeWon?'winner':'loser') : ''}">${homeScore}</div>
+          <div class="hero-score-bar"></div>
         </div>
+
         <div class="hero-center">
-          <div class="hero-vs">VS</div>
-          ${!isLive ? `<div class="hero-meta">📅 ${row.date || ''}</div>` : ''}
+          ${isLive ? `
+            <div class="hero-quarter">${quarterLabel(row.quarter||1)}</div>
+            <div class="hero-clock" id="hero-clock-display">${fmtClock(remainingClockSeconds())}</div>
+            <div class="hero-center-div"></div>
+            <div class="hero-poss-label">Posesión</div>
+            <div class="poss-ring ${shotRemaining<=5?'warn':''}" id="poss-ring"><span id="poss-ring-num">${shotRemaining}</span></div>
+          ` : `
+            <div class="hero-vs">VS</div>
+            <div class="hero-meta">📅 ${row.date || ''}</div>
+          `}
         </div>
-        <div class="hero-team">
-          <div class="hero-team-logo">${teamLogoHTML(row.away)}</div>
-          <div class="hero-team-name">${away?.name || row.away}</div>
-          <div class="hero-team-tag">Visita</div>
-          <div class="hero-score ${isLive ? '' : (homeWon?'loser':'winner')}">${awayScore}</div>
+
+        <div class="hero-team away" style="--tc:${away?.color||'#666'}">
+          <div class="hero-team-top reverse">
+            <div class="hero-team-logo">${teamLogoHTML(row.away)}</div>
+            <div class="hero-team-id">
+              <div class="hero-team-name">${(away?.name || row.away).toUpperCase()}</div>
+              <div class="hero-team-tag">Visita</div>
+            </div>
+          </div>
+          <div class="hero-score ${!isLive ? (homeWon?'loser':'winner') : ''}">${awayScore}</div>
+          <div class="hero-score-bar"></div>
         </div>
       </div>
+
+      ${isLive ? `<div class="hero-fouls-line">Faltas de equipo: ${row.home_fouls||0} – ${row.away_fouls||0}</div>` : ''}
       ${(!isLive && row.mvp) ? `<div class="hero-mvp"><span style="font-size:18px;">⭐</span><div><div class="hero-mvp-label">MVP del partido</div><div class="hero-mvp-name">${row.mvp}</div></div></div>` : ''}
     </div>
 
     ${topPerformers.length ? `
-    <div class="section-title">Destacados del partido</div>
+    <div class="section-title">⭐ Destacados del partido</div>
     <div class="performers-row">
-      ${topPerformers.map((s,i) => `<div class="performer-card">
-        <div class="performer-rank">#${i+1} · ${teams[s.team]?.abbr || s.team}</div>
-        <div class="performer-name">${s.player_name}</div>
-        <div class="performer-pts">${s.points} pts</div>
+      ${topPerformers.map((s,i) => `<div class="performer-card" style="--pc:${teams[s.team]?.color || '#666'}">
+        <div class="performer-num">${i+1}</div>
+        <div class="performer-info">
+          <div class="performer-rank">${teams[s.team]?.abbr || s.team}</div>
+          <div class="performer-name">${s.player_name}</div>
+          <div class="performer-pts">${s.points} PTS</div>
+        </div>
       </div>`).join('')}
     </div>` : ''}
 
-    <div class="section-title">Estadísticas por jugador</div>
+    <div class="section-title">📊 Estadísticas por jugador</div>
     <div class="boxscore-grid">
       ${boxTeam(row.home, home, homeStats, homeLeader)}
       ${boxTeam(row.away, away, awayStats, awayLeader)}
     </div>
+    ${isLive ? `<div class="boxscore-legend">
+      <span><span class="court-dot on"></span>En cancha</span>
+      <span><span class="court-dot off"></span>Fuera de cancha</span>
+      <span>⭐ Líder anotador</span>
+    </div>` : ''}
 
     ${timelineHTML}`;
 }
