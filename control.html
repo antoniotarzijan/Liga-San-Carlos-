@@ -86,9 +86,11 @@
     .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;margin-bottom:16px;padding:8px 0;}
 
     /* ── TABLERO DE CONTROL ── */
-    .board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .board-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
     .board-round{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;}
+    .board-top-actions{display:flex;gap:6px;flex-shrink:0;}
     .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
+    .ot-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid rgba(242,179,78,.4);background:rgba(242,179,78,.1);color:var(--gold);cursor:pointer;white-space:nowrap;}
 
     /* ── ENCABEZADO COMPACTO (siempre visible) ── */
     .compact-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:8px;}
@@ -188,11 +190,15 @@
     .roster-block-empty{padding:10px 8px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.5px;}
     .roster-player-row{display:flex;flex-direction:column;gap:4px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
     .roster-player-row:last-child{border-bottom:none;}
-    .roster-player-info{width:100%;}
-    .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .roster-player-tally{font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
-    .roster-player-tally b{color:var(--gold);}
-    .roster-player-tally .fo{color:#F87171;}
+    .roster-player-row.fouled-out{background:rgba(248,8,8,.07);border-left:3px solid var(--red);}
+    .roster-player-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+    .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+    .roster-stat-badges{display:flex;gap:4px;flex-shrink:0;}
+    .stat-badge{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.5px;padding:2px 7px;border-radius:9px;background:rgba(255,255,255,.07);color:var(--text);}
+    .stat-badge.pts{background:rgba(242,179,78,.15);color:var(--gold);}
+    .stat-badge.fouls{background:rgba(248,113,113,.14);color:#F87171;}
+    .stat-badge.fouls.out{background:var(--red);color:#fff;box-shadow:0 0 8px rgba(248,8,8,.5);}
+    .foulout-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 7px;border-radius:4px;display:inline-block;}
     .roster-pt-btns{display:flex;gap:3px;width:100%;}
     .roster-pt-btn{flex:1;min-width:0;min-height:28px;border-radius:5px;border:none;font-family:'Bebas Neue',sans-serif;font-size:12px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);padding:0;}
     .roster-pt-btn.plus{background:var(--gold);color:#000;}
@@ -217,7 +223,8 @@
     #view-board.finished-mode .role-tabs,
     #view-board.finished-mode .clock-shot-row,
     #view-board.finished-mode .role-section,
-    #view-board.finished-mode .finish-btn{display:none!important;}
+    #view-board.finished-mode .finish-btn,
+    #view-board.finished-mode .ot-btn{display:none!important;}
 
     /* ── OBSERVACIONES Y FIRMA DEL ÁRBITRO ── */
     .ref-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:4px;margin-bottom:8px;}
@@ -313,7 +320,10 @@
     <button class="back-link" onclick="goToList()">← Elegir otro partido</button>
     <div class="board-top">
       <div class="board-round" id="board-round">Jornada —</div>
-      <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
+      <div class="board-top-actions">
+        <button class="ot-btn" onclick="startOvertime()">➕ Tiempo Extra</button>
+        <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
+      </div>
     </div>
 
     <div class="finished-banner">✓ Partido finalizado</div>
@@ -1026,11 +1036,16 @@ function renderRosterSide(side, players, containerId){
   container.innerHTML = onCourt.map(p => {
     const st = playerStats[p.id] || { points: 0, fouls: 0 };
     const numBadge = p.number != null ? ` #${p.number}` : '';
-    return `<div class="roster-player-row">
-      <div class="roster-player-info">
+    const fouledOut = st.fouls >= 5;
+    return `<div class="roster-player-row ${fouledOut?'fouled-out':''}">
+      <div class="roster-player-top">
         <div class="roster-player-name">${p.name}${numBadge}</div>
-        <div class="roster-player-tally"><b>${st.points}</b> pts · <span class="fo">${st.fouls}</span> f</div>
+        <div class="roster-stat-badges">
+          <span class="stat-badge pts">${st.points} pts</span>
+          <span class="stat-badge fouls ${fouledOut?'out':''}">${st.fouls} f</span>
+        </div>
       </div>
+      ${fouledOut ? `<div class="foulout-tag">🚫 5 faltas — debe salir del partido</div>` : ''}
       <div class="roster-pt-btns">
         <button class="roster-pt-btn minus" onclick="addPlayerPoints('${side}','${p.id}',-1)">−1</button>
         <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',1)">+1</button>
@@ -1221,12 +1236,17 @@ async function persist(fields){
 }
 
 /* ── CUARTO ── */
+const OT_SECONDS = 300; // 5 minutos reglamentarios por tiempo extra
+
 async function changeQuarter(delta){
   const next = Math.max(1, currentGame.quarter + delta);
   if (next === currentGame.quarter) return;
-  if (!confirm(`¿Cambiar a ${next <= 4 ? 'Cuarto ' + next : 'Tiempo Extra'}? Se reiniciará el cronómetro y las faltas de equipo.`)) return;
+  const isOT = next > 4;
+  const label = next <= 4 ? 'Cuarto ' + next : `Tiempo Extra ${next - 4}`;
+  if (!confirm(`¿Cambiar a ${label}? Se reiniciará el cronómetro${isOT ? ' a 5:00' : ''} y las faltas de equipo.`)) return;
+  const newLen = isOT ? OT_SECONDS : currentGame.periodLen;
   currentGame.quarter = next;
-  currentGame.clockSeconds = currentGame.periodLen;
+  currentGame.clockSeconds = newLen;
   currentGame.clockRunning = false;
   currentGame.clockStartedAt = null;
   currentGame.homeFouls = 0;
@@ -1236,12 +1256,16 @@ async function changeQuarter(delta){
   currentGame.shotClockStartedAt = null;
   renderBoard();
   await persist({
-    quarter: next, clock_seconds: currentGame.periodLen,
+    quarter: next, clock_seconds: newLen,
     clock_running: false, clock_started_at: null,
     home_fouls: 0, away_fouls: 0,
     shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
   });
-  showToast('✓ Cuarto actualizado');
+  showToast(isOT ? `✓ ${label} iniciado` : '✓ Cuarto actualizado');
+}
+
+async function startOvertime(){
+  await changeQuarter(1);
 }
 
 /* ── CRONÓMETRO ── */
@@ -1487,6 +1511,11 @@ async function saveFinalScore(){
 
 /* ── FINALIZAR ── */
 async function finishGame(){
+  if (currentGame.homeScore === currentGame.awayScore){
+    const wantsOT = confirm(`⚠ El partido está empatado ${currentGame.homeScore}-${currentGame.awayScore}. No puede terminar así.\n\nPresiona "Aceptar" para agregar un Tiempo Extra, o "Cancelar" para volver sin finalizar.`);
+    if (wantsOT) await startOvertime();
+    return;
+  }
   if (!confirm('¿Finalizar este partido? El marcador y los puntos por jugador quedarán guardados como resultado final.')) return;
   stopTicker();
 
