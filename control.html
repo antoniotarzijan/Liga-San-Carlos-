@@ -41,6 +41,11 @@
     #app{display:none;min-height:100vh;flex-direction:column;}
     #app.visible{display:flex;}
     nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:rgba(8,9,12,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+
+    /* ── ESTADO DE CONEXIÓN / SINCRONIZACIÓN ── */
+    .conn-badge{position:sticky;top:0;z-index:21;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-align:center;background:rgba(248,8,8,.92);color:#fff;}
+    .conn-badge.syncing{background:rgba(242,179,78,.95);color:#000;}
+    .conn-badge[hidden]{display:none;}
     .nav-left{display:flex;align-items:center;gap:10px;min-width:0;}
     .nav-left img{height:28px;flex-shrink:0;}
     .nav-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -155,10 +160,6 @@
     .shot-toggle.play{background:#FB923C;color:#000;}
     .shot-toggle.pause{background:rgba(255,255,255,.1);color:var(--text);}
 
-    /* ── BOCINA ── */
-    .buzzer-btn{width:100%;padding:10px;border-radius:8px;border:2px solid var(--red);background:rgba(248,8,8,.1);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
-    .buzzer-btn:active{background:rgba(248,8,8,.3);}
-
     /* ── TIMEOUTS ── */
     .timeouts-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 
@@ -214,7 +215,6 @@
     .finished-banner{display:none;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.35);color:#4ADE80;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 10px;border-radius:8px;margin-bottom:8px;text-align:center;}
     #view-board.finished-mode .finished-banner{display:block;}
     #view-board.finished-mode .role-tabs,
-    #view-board.finished-mode .buzzer-btn,
     #view-board.finished-mode .clock-shot-row,
     #view-board.finished-mode .role-section,
     #view-board.finished-mode .finish-btn{display:none!important;}
@@ -270,6 +270,7 @@
 
 <!-- ══ APP ══ -->
 <div id="app">
+  <div class="conn-badge" id="conn-badge" hidden></div>
   <nav>
     <div class="nav-left">
       <img src="images/logo liga.png" alt="LSC" onerror="this.style.display='none'">
@@ -363,8 +364,6 @@
       <button class="role-tab" data-role="cronometrista" onclick="setRole('cronometrista')">⏱ Cronometrista</button>
       <button class="role-tab" data-role="operador24" onclick="setRole('operador24')">⏲ Operador 24s</button>
     </div>
-
-    <button class="buzzer-btn" onclick="playBuzzer(1000,300)">🔊 Bocina manual</button>
 
     <!-- CRONÓMETRO DE JUEGO + CRONÓMETRO DE POSESIÓN (uno al lado del otro) -->
     <div class="clock-shot-row">
@@ -901,26 +900,100 @@ function setRole(role){
   });
 }
 
-/* ══ BOCINA ══ */
-let _audioCtx = null;
-function ensureAudioCtx(){
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_audioCtx.state === 'suspended') _audioCtx.resume();
-  return _audioCtx;
+/* ══════════════════════════════════════════════════════════════
+   SINCRONIZACIÓN OFFLINE
+   Si se corta el internet, cada guardado que falle se encola en
+   localStorage y se reintenta solo cuando vuelve la conexión, para
+   que nadie pierda anotaciones por un corte de wifi/datos.
+══════════════════════════════════════════════════════════════ */
+const SYNC_QUEUE_KEY = 'lsc_control_sync_queue_v1';
+
+function loadSyncQueue(){
+  try { return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY) || '[]'); }
+  catch(e){ return []; }
 }
-function playBuzzer(durationMs, freq){
-  try{
-    const ctx = ensureAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.value = freq || 300;
-    gain.gain.value = 0.35;
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.start();
-    setTimeout(() => { try{ osc.stop(); }catch(e){} }, durationMs || 1000);
-  } catch(e){ console.warn('Audio no disponible', e); }
+function saveSyncQueue(queue){
+  try { localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue)); } catch(e){}
+  refreshConnBadge();
 }
+
+function buildWriteQuery(op){
+  const q = _supabase.from(op.table);
+  if (op.kind === 'update') return q.update(op.payload).eq(op.matchCol, op.matchVal);
+  if (op.kind === 'insert') return q.insert(op.payload);
+  return q.upsert(op.payload, { onConflict: op.onConflict });
+}
+
+function looksLikeNetworkError(err){
+  if (!navigator.onLine) return true;
+  const msg = (err && (err.message || String(err))) || '';
+  return /fetch|network|failed to fetch/i.test(msg);
+}
+
+async function runOrQueue(op, opts){
+  opts = opts || {};
+  try {
+    const { error } = await buildWriteQuery(op);
+    if (error) throw error;
+    return true;
+  } catch(e){
+    if (looksLikeNetworkError(e)){
+      const queue = loadSyncQueue();
+      queue.push(op);
+      saveSyncQueue(queue);
+      if (!opts.silent) showToast('📡 Sin conexión — se guardará al volver la señal', true);
+    } else if (!opts.silent) {
+      showToast('⚠ Error: ' + (e?.message || 'no se pudo guardar'), true);
+    }
+    return false;
+  }
+}
+
+let _syncingQueue = false;
+async function syncPendingWrites(){
+  if (_syncingQueue) return;
+  let queue = loadSyncQueue();
+  if (!queue.length) return;
+  _syncingQueue = true;
+  try {
+    while (queue.length){
+      const op = queue[0];
+      let ok = false;
+      try {
+        const { error } = await buildWriteQuery(op);
+        ok = !error;
+      } catch(e){ ok = false; }
+      if (!ok) break;
+      queue.shift();
+      saveSyncQueue(queue);
+    }
+    if (!queue.length) showToast('✓ Sincronizado — todos los cambios se guardaron');
+  } finally {
+    _syncingQueue = false;
+  }
+}
+
+function refreshConnBadge(){
+  const badge = document.getElementById('conn-badge');
+  if (!badge) return;
+  const pending = loadSyncQueue().length;
+  const offline = !navigator.onLine;
+  if (!offline && !pending){ badge.hidden = true; return; }
+  badge.hidden = false;
+  badge.classList.toggle('syncing', !offline && pending > 0);
+  if (offline){
+    badge.textContent = pending
+      ? `📡 Sin conexión · ${pending} cambio${pending>1?'s':''} pendiente${pending>1?'s':''} · se guardan solos al volver la señal`
+      : '📡 Sin conexión';
+  } else {
+    badge.textContent = `⏳ Sincronizando ${pending} cambio${pending>1?'s':''}...`;
+  }
+}
+
+window.addEventListener('online', () => { refreshConnBadge(); syncPendingWrites(); });
+window.addEventListener('offline', refreshConnBadge);
+setInterval(() => { if (navigator.onLine) syncPendingWrites(); else refreshConnBadge(); }, 5000);
+refreshConnBadge();
 
 /* ══ PUNTOS Y FALTAS POR JUGADOR ══ */
 async function loadRosterAndStats(){
@@ -984,17 +1057,16 @@ async function persistPlayerStat(side, player, points, fouls){
     team: side === 'home' ? currentGame.home : currentGame.away,
     points, fouls, played: true, division: activeDivision,
   };
-  const { error } = await _supabase.from('game_stats').upsert(payload, { onConflict: 'game_id,player_id' });
-  if (error) showToast('⚠ Error al guardar jugador: ' + error.message, true);
+  await runOrQueue({ table: 'game_stats', kind: 'upsert', payload, onConflict: 'game_id,player_id' });
 }
 
 async function logGameEvent(teamId, eventType, playerName, value, detail){
-  const { error } = await _supabase.from('game_events').insert({
+  const payload = {
     game_id: currentGame.id, division: activeDivision, quarter: currentGame.quarter,
     team: teamId, event_type: eventType, player_name: playerName || null,
     value: value ?? null, detail: detail || null,
-  });
-  if (error) console.warn('Error registrando evento:', error.message);
+  };
+  await runOrQueue({ table: 'game_events', kind: 'insert', payload }, { silent: true });
 }
 
 async function addPlayerPoints(side, playerId, delta){
@@ -1036,7 +1108,6 @@ async function addPlayerFoul(side, playerId, delta){
     persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] }),
   ]);
   if (appliedDelta > 0){
-    playBuzzer(300, 250);
     const teamId = side === 'home' ? currentGame.home : currentGame.away;
     logGameEvent(teamId, 'foul', player.name);
   }
@@ -1116,7 +1187,6 @@ function renderShotClock(){
   if (currentGame.shotClockRunning && remaining <= 0) autoStopShotClock();
 }
 async function toggleShotClock(){
-  ensureAudioCtx();
   if (currentGame.shotClockRunning){
     currentGame.shotClockSeconds = remainingShotSeconds();
     currentGame.shotClockRunning = false;
@@ -1144,12 +1214,10 @@ async function autoStopShotClock(){
   currentGame.shotClockStartedAt = null;
   renderBoard();
   await persist({ shot_clock_seconds: 0, shot_clock_running: false, shot_clock_started_at: null });
-  playBuzzer(900, 520);
 }
 
 async function persist(fields){
-  const { error } = await _supabase.from(divCfg().dbTable).update(fields).eq('id', currentGame.id);
-  if (error) showToast('⚠ Error al guardar: ' + error.message, true);
+  await runOrQueue({ table: divCfg().dbTable, kind: 'update', payload: fields, matchCol: 'id', matchVal: currentGame.id });
 }
 
 /* ── CUARTO ── */
@@ -1178,7 +1246,6 @@ async function changeQuarter(delta){
 
 /* ── CRONÓMETRO ── */
 async function toggleClock(){
-  ensureAudioCtx();
   if (currentGame.clockRunning){
     currentGame.clockSeconds = remainingSeconds();
     currentGame.clockRunning = false;
@@ -1200,7 +1267,6 @@ async function autoStopClock(){
   renderBoard();
   await persist({ clock_seconds: 0, clock_running: false, clock_started_at: null });
   showToast('⏱ Fin del tiempo');
-  playBuzzer(1500, 180);
 }
 
 /* ── POSESIÓN ALTERNA ── */
@@ -1216,7 +1282,6 @@ async function adjustTimeouts(side, delta){
   currentGame[key] = Math.max(0, currentGame[key] + delta);
   renderBoard();
   await persist({ [side === 'home' ? 'home_timeouts' : 'away_timeouts']: currentGame[key] });
-  if (delta > 0) playBuzzer(500, 400);
 }
 async function adjustClock(deltaSeconds){
   if (currentGame.clockRunning){ showToast('⚠ Pausa el cronómetro para ajustarlo', true); return; }
@@ -1299,32 +1364,29 @@ async function registerSubstitution(){
   renderRosterUI();
   renderSubOptions();
 
-  const upserts = [];
+  const writes = [];
   if (playerOut){
-    upserts.push(_supabase.from('game_stats').upsert({
+    writes.push(runOrQueue({ table: 'game_stats', kind: 'upsert', onConflict: 'game_id,player_id', payload: {
       game_id: currentGame.id, player_id: playerOut.id, player_name: playerOut.name,
       player_number: playerOut.number ?? null, team: teamId,
       points: playerStats[playerOut.id].points, fouls: playerStats[playerOut.id].fouls,
       played: true, division: activeDivision, on_court: false,
-    }, { onConflict: 'game_id,player_id' }));
+    }}, { silent: true }));
   }
-  upserts.push(_supabase.from('game_stats').upsert({
+  writes.push(runOrQueue({ table: 'game_stats', kind: 'upsert', onConflict: 'game_id,player_id', payload: {
     game_id: currentGame.id, player_id: playerIn.id, player_name: playerIn.name,
     player_number: playerIn.number ?? null, team: teamId,
     points: playerStats[playerIn.id].points, fouls: playerStats[playerIn.id].fouls,
     played: true, division: activeDivision, on_court: true,
-  }, { onConflict: 'game_id,player_id' }));
-  const results = await Promise.all(upserts);
-  const failed = results.find(r => r.error);
-  if (failed){ showToast('⚠ Error: ' + failed.error.message, true); return; }
+  }}, { silent: true }));
+  await Promise.all(writes);
 
   const payload = {
     game_id: currentGame.id, division: activeDivision,
     team: teamId, quarter: currentGame.quarter,
     player_out_name: playerOut?.name || null, player_in_name: playerIn.name,
   };
-  const { error } = await _supabase.from('substitutions').insert(payload);
-  if (error){ showToast('⚠ Error: ' + error.message, true); return; }
+  await runOrQueue({ table: 'substitutions', kind: 'insert', payload }, { silent: true });
   logGameEvent(teamId, 'substitution', playerIn.name, null, playerOut ? `Sale: ${playerOut.name}` : null);
   showToast('✓ Sustitución registrada');
   loadSubstitutions();
