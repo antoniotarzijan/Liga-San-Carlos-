@@ -1431,13 +1431,17 @@ function renderGames() {
     const rowHome=`<div class="ts-info">${smallLogo(g.home)}<div class="ts-name">${home.name}</div></div>`;
     const rowAway=`<div class="ts-info">${smallLogo(g.away)}<div class="ts-name">${away.name}</div></div>`;
 
-    if (g.type==='live') return `
+    if (g.type==='live') {
+      const hs = +g.homeScore, as = +g.awayScore;
+      const homeLiveCls = hs === as ? '' : (hs > as ? 'winner' : 'loser');
+      const awayLiveCls = hs === as ? '' : (as > hs ? 'winner' : 'loser');
+      return `
       <div class="game-card live reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
         <div class="game-card-header"><span class="game-round">Jornada ${g.round} · EN VIVO</span>
         <span class="game-status-live"><span class="live-dot"></span>EN CURSO</span></div>
         <div class="game-body">
-          <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="ts-score winner">${g.homeScore}</div></div>
-          <div class="team-score-row" style="--team-color:${away.color}">${rowAway}<div class="ts-score loser">${g.awayScore}</div></div>
+          <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="ts-score ${homeLiveCls}">${g.homeScore}</div></div>
+          <div class="team-score-row" style="--team-color:${away.color}">${rowAway}<div class="ts-score ${awayLiveCls}">${g.awayScore}</div></div>
         </div>
         <div class="game-footer">
           <span>🏟️ ${g.venue}</span>
@@ -1447,6 +1451,7 @@ function renderGames() {
           </div>
         </div>
       </div>`;
+    }
 
     if (g.type==='upcoming') return `
       <div class="game-card upcoming reveal">
