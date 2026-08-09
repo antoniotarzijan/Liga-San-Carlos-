@@ -1080,6 +1080,7 @@ async function logGameEvent(teamId, eventType, playerName, value, detail){
     game_id: currentGame.id, division: activeDivision, quarter: currentGame.quarter,
     team: teamId, event_type: eventType, player_name: playerName || null,
     value: value ?? null, detail: detail || null,
+    clock_seconds: Math.round(remainingSeconds()),
   };
   await runOrQueue({ table: 'game_events', kind: 'insert', payload }, { silent: true });
 }
