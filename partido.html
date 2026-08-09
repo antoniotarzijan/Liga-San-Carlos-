@@ -67,12 +67,6 @@
     .hero-quarter{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;color:var(--text);text-transform:uppercase;}
     .hero-clock{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,42px);letter-spacing:1px;color:var(--text);}
     .hero-clock.paused{color:var(--muted);}
-    .hero-center-div{width:52px;height:1px;background:var(--border);margin:6px 0;}
-    .hero-poss-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-    .poss-ring{width:56px;height:56px;border-radius:50%;border:3px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-top:2px;}
-    .poss-ring span{font-family:'Bebas Neue',sans-serif;font-size:21px;color:#FB923C;}
-    .poss-ring.warn{border-color:rgba(248,8,8,.5);}
-    .poss-ring.warn span{color:var(--red);}
     .hero-fouls-line{text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:14px;}
     .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:16px auto 0;max-width:360px;}
     .hero-mvp-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
@@ -80,6 +74,10 @@
 
     /* ── TOP PERFORMERS ── */
     .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .stats-toggle{display:flex;gap:8px;margin:28px 0 16px;border-bottom:1px solid var(--border);}
+    .stats-tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 4px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;margin-bottom:-1px;}
+    .stats-tab.active{color:var(--text);border-bottom-color:var(--gold);}
+    #plays-panel[hidden],#stats-panel[hidden]{display:none;}
     .performers-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
     .performer-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;background:color-mix(in srgb, var(--pc,#666) 14%, var(--card));border-color:color-mix(in srgb, var(--pc,#666) 40%, var(--border));}
     .performer-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:color-mix(in srgb, var(--pc,#666) 65%, #fff);line-height:1;flex-shrink:0;}
@@ -198,9 +196,21 @@ function divCfg(){ return CONFIG.divisions[activeDivision]; }
 function divTeams(){ return divCfg().teams; }
 
 let _refreshInterval = null;
+let _statsView = 'stats';
+
+function setStatsView(view){
+  _statsView = view;
+  const statsPanel = document.getElementById('stats-panel');
+  const playsPanel = document.getElementById('plays-panel');
+  if (statsPanel) statsPanel.hidden = view !== 'stats';
+  if (playsPanel) playsPanel.hidden = view !== 'plays';
+  const tabStats = document.getElementById('tab-stats-btn');
+  const tabPlays = document.getElementById('tab-plays-btn');
+  if (tabStats) tabStats.classList.toggle('active', view === 'stats');
+  if (tabPlays) tabPlays.classList.toggle('active', view === 'plays');
+}
 let _tickInterval = null;
 let _liveClock = { seconds: 0, running: false, startedAt: null };
-let _liveShot  = { seconds: 24, running: false, startedAt: null };
 
 function fmtClock(totalSeconds){
   const s = Math.max(0, Math.ceil(totalSeconds));
@@ -213,25 +223,12 @@ function remainingClockSeconds(){
   const elapsed = (Date.now() - new Date(_liveClock.startedAt).getTime()) / 1000;
   return Math.max(0, _liveClock.seconds - elapsed);
 }
-function remainingShotSeconds(){
-  if (!_liveShot.running || !_liveShot.startedAt) return _liveShot.seconds;
-  const elapsed = (Date.now() - new Date(_liveShot.startedAt).getTime()) / 1000;
-  return Math.max(0, _liveShot.seconds - elapsed);
-}
 function tickClock(){
   const disp = document.getElementById('hero-clock-display');
-  if (disp){
-    const remaining = remainingClockSeconds();
-    disp.textContent = fmtClock(remaining);
-    disp.classList.toggle('paused', !_liveClock.running);
-  }
-  const ring = document.getElementById('poss-ring');
-  const ringNum = document.getElementById('poss-ring-num');
-  if (ring && ringNum){
-    const remaining = Math.ceil(remainingShotSeconds());
-    ringNum.textContent = remaining;
-    ring.classList.toggle('warn', remaining <= 5);
-  }
+  if (!disp) return;
+  const remaining = remainingClockSeconds();
+  disp.textContent = fmtClock(remaining);
+  disp.classList.toggle('paused', !_liveClock.running);
 }
 
 function teamLogoHTML(id){
@@ -246,7 +243,7 @@ function quarterLabel(q){
 }
 
 function buildTimelineHTML(events, row, teams){
-  if (!events.length) return '';
+  if (!events.length) return '<div class="timeline-empty">Aún no hay jugadas registradas.</div>';
   let h = 0, a = 0;
   const rows = events.map(ev => {
     if (ev.event_type === 'points'){
@@ -255,20 +252,23 @@ function buildTimelineHTML(events, row, teams){
     const team = teams[ev.team];
     const color = team?.color || '#666';
     let desc;
-    if (ev.event_type === 'points') desc = `<b>${ev.player_name}</b> anota +${ev.value}`;
+    if (ev.event_type === 'points'){
+      const label = ev.value === 3 ? 'anota un triple' : ev.value === 2 ? 'anota un doble' : `anota +${ev.value}`;
+      desc = `<b>${ev.player_name}</b> ${label}`;
+    }
     else if (ev.event_type === 'foul') desc = `Falta · <b>${ev.player_name}</b>`;
     else desc = `Sustitución${ev.detail?` · ${ev.detail}`:''} · entra <b>${ev.player_name}</b>`;
+    const timeLabel = ev.clock_seconds != null ? fmtClock(ev.clock_seconds) : '';
     return {
       html: `<div class="timeline-item">
-        <span class="timeline-q">C${ev.quarter||1}</span>
+        <span class="timeline-q">C${ev.quarter||1}${timeLabel?` · ${timeLabel}`:''}</span>
         <span class="timeline-dot" style="background:${color};"></span>
         <span class="timeline-desc"><span class="team-tag">${team?.abbr||ev.team}</span>${desc}</span>
         <span class="timeline-score">${h}-${a}</span>
       </div>`,
     };
   });
-  return `<div class="section-title">Jugada a jugada</div>
-    <div class="timeline-list">${rows.map(r=>r.html).reverse().join('')}</div>`;
+  return `<div class="timeline-list">${rows.map(r=>r.html).reverse().join('')}</div>`;
 }
 
 async function load(){
@@ -364,11 +364,6 @@ async function renderGame(row){
       running: !!row.clock_running,
       startedAt: row.clock_started_at,
     };
-    _liveShot = {
-      seconds: row.shot_clock_seconds ?? 24,
-      running: !!row.shot_clock_running,
-      startedAt: row.shot_clock_started_at,
-    };
   }
 
   const { data: ev } = await _supabase.from('game_events').select('*')
@@ -403,8 +398,6 @@ async function renderGame(row){
       </div>${list.map(s => boxRow(s, leader)).join('')}` : '<div class="boxscore-empty">Sin estadísticas registradas.</div>'}
     </div>`;
 
-  const shotRemaining = isLive ? Math.ceil(remainingShotSeconds()) : 0;
-
   document.getElementById('root').innerHTML = `
     <div class="hero-bar">
       <div class="status-row">
@@ -429,9 +422,6 @@ async function renderGame(row){
           ${isLive ? `
             <div class="hero-quarter">${quarterLabel(row.quarter||1)}</div>
             <div class="hero-clock" id="hero-clock-display">${fmtClock(remainingClockSeconds())}</div>
-            <div class="hero-center-div"></div>
-            <div class="hero-poss-label">Posesión</div>
-            <div class="poss-ring ${shotRemaining<=5?'warn':''}" id="poss-ring"><span id="poss-ring-num">${shotRemaining}</span></div>
           ` : `
             <div class="hero-vs">VS</div>
             <div class="hero-meta">📅 ${row.date || ''}</div>
@@ -468,18 +458,26 @@ async function renderGame(row){
       </div>`).join('')}
     </div>` : ''}
 
-    <div class="section-title">📊 Estadísticas por jugador</div>
-    <div class="boxscore-grid">
-      ${boxTeam(row.home, home, homeStats, homeLeader)}
-      ${boxTeam(row.away, away, awayStats, awayLeader)}
+    <div class="stats-toggle">
+      <button class="stats-tab ${_statsView==='stats'?'active':''}" id="tab-stats-btn" onclick="setStatsView('stats')">📊 Estadísticas</button>
+      <button class="stats-tab ${_statsView==='plays'?'active':''}" id="tab-plays-btn" onclick="setStatsView('plays')">🎯 Jugada a jugada</button>
     </div>
-    ${isLive ? `<div class="boxscore-legend">
-      <span><span class="court-dot on"></span>En cancha</span>
-      <span><span class="court-dot off"></span>Fuera de cancha</span>
-      <span>⭐ Líder anotador</span>
-    </div>` : ''}
 
-    ${timelineHTML}`;
+    <div id="stats-panel" ${_statsView!=='stats'?'hidden':''}>
+      <div class="boxscore-grid">
+        ${boxTeam(row.home, home, homeStats, homeLeader)}
+        ${boxTeam(row.away, away, awayStats, awayLeader)}
+      </div>
+      ${isLive ? `<div class="boxscore-legend">
+        <span><span class="court-dot on"></span>En cancha</span>
+        <span><span class="court-dot off"></span>Fuera de cancha</span>
+        <span>⭐ Líder anotador</span>
+      </div>` : ''}
+    </div>
+
+    <div id="plays-panel" ${_statsView!=='plays'?'hidden':''}>
+      ${timelineHTML}
+    </div>`;
 }
 
 load();
