@@ -952,8 +952,9 @@ async function runOrQueue(op, opts){
       queue.push(op);
       saveSyncQueue(queue);
       if (!opts.silent) showToast('📡 Sin conexión — se guardará al volver la señal', true);
-    } else if (!opts.silent) {
-      showToast('⚠ Error: ' + (e?.message || 'no se pudo guardar'), true);
+    } else {
+      console.warn('Error al guardar en', op.table, e);
+      showToast('⚠ Error al guardar en ' + op.table + ': ' + (e?.message || 'revisa la consola'), true);
     }
     return false;
   }
