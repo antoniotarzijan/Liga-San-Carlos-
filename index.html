@@ -1082,11 +1082,14 @@ const CONFIG = {
 ══════════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
-const ADMIN_UID = 'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c';
+const ADMIN_UIDS = [
+  'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c',
+  '272f8ea8-a576-46cc-97ae-7c292424a858',
+];
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let _currentSession = null;
 
-function isAdmin() { return _currentSession?.user?.id === ADMIN_UID; }
+function isAdmin() { return ADMIN_UIDS.includes(_currentSession?.user?.id); }
 
 _supabase.auth.onAuthStateChange((event, session) => {
   _currentSession = session;
