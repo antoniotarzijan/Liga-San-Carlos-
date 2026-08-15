@@ -250,6 +250,56 @@
     .toast.show{transform:translateX(-50%) translateY(0);}
     .toast.err{background:#F87171;}
 
+    /* ── CELULAR HORIZONTAL: mostrar tiempo + jugadores en cancha + puntos/faltas de una sola vez ── */
+    @media (orientation: landscape) and (max-width: 926px) {
+      nav{padding:6px 12px;}
+      .nav-left img{height:20px;}
+      .nav-title{font-size:14px;}
+      .pill,.logout-btn{padding:4px 8px;font-size:9px;}
+      .conn-badge{padding:5px 10px;font-size:10px;}
+
+      .view{max-width:100%;padding:6px 10px;}
+      .back-link{margin-bottom:4px;font-size:10px;padding:2px 0;}
+      .board-top{margin-bottom:5px;}
+      .board-round{font-size:10px;}
+      .finish-btn,.ot-btn{font-size:9px;padding:5px 8px;}
+
+      .compact-header{padding:5px 8px;margin-bottom:5px;}
+      .compact-shot{display:none;}
+      .compact-score-num{font-size:19px;}
+      .compact-clock{font-size:17px;padding:1px 8px;}
+      .compact-clock-row{margin-top:2px;}
+
+      .role-tabs{display:none;}
+      .role-section[data-role-section="operador24"]{display:none!important;}
+      .poss-section{display:none!important;}
+      .team-fouls-section{display:none!important;}
+
+      /* Forzar visibles el cronómetro y el editor de puntos/faltas, sea cual sea el rol activo */
+      .role-section[data-role-section="cronometrista"]:not(.poss-section){display:block!important;}
+      .roster-points-section{display:block!important;}
+
+      .clock-shot-row{margin-bottom:5px;}
+      .clock-card{padding:6px;margin-bottom:0;}
+      .quarter-row{margin-bottom:2px;gap:6px;}
+      .quarter-label{font-size:10px;min-width:auto;}
+      .clock-display{font-size:24px;margin-bottom:0;}
+      .clock-edit{margin-bottom:2px;font-size:8px;}
+      .clock-adjust{margin-bottom:3px;gap:3px;}
+      .adj-btn{padding:3px 6px;font-size:8px;}
+      .toggle-clock{padding:6px;font-size:11px;}
+
+      #roster-toggle-btn{display:none;}
+      #roster-wrap{display:grid!important;gap:6px;}
+      .roster-block-head{padding:4px 7px;}
+      .roster-player-row{padding:4px 7px;gap:3px;}
+      .roster-player-name{font-size:11px;}
+      .stat-badge{font-size:10px;padding:1px 5px;}
+      .roster-pt-btn{min-height:22px;font-size:10px;}
+      .roster-foul-btns{margin-top:1px;}
+      .roster-foul-btn{min-height:18px;font-size:8px;}
+    }
+
   </style>
 </head>
 <body>
@@ -410,7 +460,7 @@
       </div>
     </div>
 
-    <div class="role-section" data-role-section="cronometrista">
+    <div class="role-section poss-section" data-role-section="cronometrista">
       <div class="poss-card">
         <div class="fouls-label">Posesión alterna</div>
         <div class="poss-row">
@@ -422,7 +472,7 @@
     </div>
 
     <!-- PUNTOS Y FALTAS POR JUGADOR -->
-    <div class="role-section" data-role-section="anotador">
+    <div class="role-section roster-points-section" data-role-section="anotador">
       <button class="roster-toggle" id="roster-toggle-btn" onclick="toggleRoster()">🏀 Puntos y faltas por jugador ▾</button>
       <div class="roster-wrap" id="roster-wrap" hidden>
         <div class="roster-block" id="roster-block-home">
@@ -443,7 +493,7 @@
     </div>
 
     <!-- FALTAS Y TIMEOUTS -->
-    <div class="role-section" data-role-section="anotador">
+    <div class="role-section team-fouls-section" data-role-section="anotador">
       <div class="section-lbl" style="margin-top:0;">Faltas de equipo (cuarto actual)</div>
       <div class="fouls-row">
         <div class="fouls-box" id="home-fouls-box">
