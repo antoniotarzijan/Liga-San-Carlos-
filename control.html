@@ -213,7 +213,8 @@
     .starter-row:last-child{border-bottom:none;}
     .starter-row.selected{background:rgba(242,179,78,.08);}
     .starter-check{width:18px;height:18px;flex-shrink:0;accent-color:#f2b34e;pointer-events:none;}
-    .starter-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
+    .starter-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;flex:1;}
+    .jersey-input{width:46px;flex-shrink:0;text-align:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;padding:6px 2px;color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:14px;}
 
     .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:12px;margin-top:4px;}
 
@@ -272,12 +273,14 @@
 
       .role-tabs{display:none;}
       .role-section[data-role-section="operador24"]{display:none!important;}
-      .poss-section{display:none!important;}
-      .team-fouls-section{display:none!important;}
 
-      /* Forzar visibles el cronómetro y el editor de puntos/faltas, sea cual sea el rol activo */
+      /* Forzar visibles todas las secciones (cronómetro, puntos/faltas, posesión, faltas de equipo,
+         sustituciones) sea cual sea el rol que haya quedado activo — el cronómetro y el editor de
+         puntos/faltas quedan arriba de todo, el resto sigue disponible más abajo con scroll. */
       .role-section[data-role-section="cronometrista"]:not(.poss-section){display:block!important;}
       .roster-points-section{display:block!important;}
+      .poss-section{display:block!important;}
+      .team-fouls-section{display:block!important;}
 
       .clock-shot-row{margin-bottom:5px;}
       .clock-card{padding:6px;margin-bottom:0;}
@@ -355,6 +358,12 @@
       <div class="section-lbl" style="margin-top:0;border:none;">Duración por cuarto</div>
       <div class="period-choices" id="period-choices"></div>
     </div>
+
+    <div class="section-lbl" style="margin-top:0;">Jugadores en el partido · Local (<span id="gameroster-home-count">0</span>/12)</div>
+    <div class="starters-list" id="gameroster-home-list"></div>
+
+    <div class="section-lbl">Jugadores en el partido · Visita (<span id="gameroster-away-count">0</span>/12)</div>
+    <div class="starters-list" id="gameroster-away-list"></div>
 
     <div class="section-lbl">Titulares · Local (<span id="starters-home-count">0</span>/5)</div>
     <div class="starters-list" id="starters-home-list"></div>
@@ -817,6 +826,8 @@ async function openGame(id){
 ══════════════════════════════════════════════════════════════ */
 let startersHome = new Set();
 let startersAway = new Set();
+let gameRosterHome = new Set();
+let gameRosterAway = new Set();
 
 async function openStart(){
   setView('view-start');
@@ -829,15 +840,20 @@ async function openStart(){
 
   startersHome = new Set();
   startersAway = new Set();
+  gameRosterHome = new Set();
+  gameRosterAway = new Set();
   const [homeRes, awayRes] = await Promise.all([
     _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.home).order('name'),
     _supabase.from(divCfg().playersTable).select('*').eq('team', currentGame.away).order('name'),
   ]);
   rosterHome = homeRes.data || [];
   rosterAway = awayRes.data || [];
+  renderGameRosterList('home');
+  renderGameRosterList('away');
   renderStartersList('home');
   renderStartersList('away');
   updateStartersCount();
+  updateGameRosterCount();
 }
 function renderPeriodChoices(){
   const opts = [8,10,12];
@@ -847,12 +863,58 @@ function renderPeriodChoices(){
 }
 function setPeriodMinutes(m){ chosenPeriodMinutes = m; renderPeriodChoices(); }
 
-function renderStartersList(side){
+function renderGameRosterList(side){
   const players = side === 'home' ? rosterHome : rosterAway;
+  const set = side === 'home' ? gameRosterHome : gameRosterAway;
+  const container = document.getElementById(`gameroster-${side}-list`);
+  if (!players.length){
+    container.innerHTML = '<div class="roster-block-empty">No hay jugadores registrados para este equipo.</div>';
+    return;
+  }
+  container.innerHTML = players.map(p => {
+    const checked = set.has(String(p.id));
+    return `<div class="starter-row ${checked?'selected':''}" onclick="toggleGameRoster('${side}','${p.id}')">
+      <input type="checkbox" class="starter-check" ${checked?'checked':''}>
+      <div class="starter-name">${p.name}</div>
+      <input type="number" class="jersey-input" value="${p.number ?? ''}" placeholder="#" onclick="event.stopPropagation()" onchange="updatePlayerNumber('${side}','${p.id}',this.value)">
+    </div>`;
+  }).join('');
+}
+function toggleGameRoster(side, playerId){
+  const set = side === 'home' ? gameRosterHome : gameRosterAway;
+  const startersSet = side === 'home' ? startersHome : startersAway;
+  const id = String(playerId);
+  if (set.has(id)){
+    set.delete(id);
+    startersSet.delete(id);
+  } else {
+    if (set.size >= 12){ showToast('⚠ Máximo 12 jugadores en el partido', true); return; }
+    set.add(id);
+  }
+  renderGameRosterList(side);
+  renderStartersList(side);
+  updateGameRosterCount();
+  updateStartersCount();
+}
+function updatePlayerNumber(side, playerId, value){
+  const list = side === 'home' ? rosterHome : rosterAway;
+  const player = list.find(p => String(p.id) === String(playerId));
+  if (!player) return;
+  player.number = value === '' ? null : Math.max(0, parseInt(value, 10) || 0);
+  renderStartersList(side);
+}
+function updateGameRosterCount(){
+  document.getElementById('gameroster-home-count').textContent = gameRosterHome.size;
+  document.getElementById('gameroster-away-count').textContent = gameRosterAway.size;
+}
+
+function renderStartersList(side){
+  const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
+  const players = (side === 'home' ? rosterHome : rosterAway).filter(p => gameRoster.has(String(p.id)));
   const set = side === 'home' ? startersHome : startersAway;
   const container = document.getElementById(`starters-${side}-list`);
   if (!players.length){
-    container.innerHTML = '<div class="roster-block-empty">No hay jugadores registrados para este equipo.</div>';
+    container.innerHTML = '<div class="roster-block-empty">Primero selecciona los jugadores en el partido.</div>';
     return;
   }
   container.innerHTML = players.map(p => {
@@ -881,8 +943,10 @@ function updateStartersCount(){
 }
 
 async function startGame(){
-  const needHome = Math.min(5, rosterHome.length);
-  const needAway = Math.min(5, rosterAway.length);
+  if (gameRosterHome.size === 0){ showToast('⚠ Selecciona los jugadores en el partido del equipo local', true); return; }
+  if (gameRosterAway.size === 0){ showToast('⚠ Selecciona los jugadores en el partido del equipo visita', true); return; }
+  const needHome = Math.min(5, gameRosterHome.size);
+  const needAway = Math.min(5, gameRosterAway.size);
   if (startersHome.size !== needHome){ showToast(`⚠ Selecciona ${needHome} titulares del equipo local`, true); return; }
   if (startersAway.size !== needAway){ showToast(`⚠ Selecciona ${needAway} titulares del equipo visita`, true); return; }
 
@@ -898,16 +962,19 @@ async function startGame(){
   const { error } = await _supabase.from(divCfg().dbTable).update(payload).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
 
-  const starterRows = [
-    ...rosterHome.filter(p => startersHome.has(String(p.id))).map(player => ({ side:'home', player })),
-    ...rosterAway.filter(p => startersAway.has(String(p.id))).map(player => ({ side:'away', player })),
+  const gameRosterRows = [
+    ...rosterHome.filter(p => gameRosterHome.has(String(p.id))).map(player => ({ side:'home', player })),
+    ...rosterAway.filter(p => gameRosterAway.has(String(p.id))).map(player => ({ side:'away', player })),
   ];
-  await Promise.all(starterRows.map(({ side, player }) => _supabase.from('game_stats').upsert({
-    game_id: currentGame.id, player_id: player.id, player_name: player.name,
-    player_number: player.number ?? null,
-    team: side === 'home' ? currentGame.home : currentGame.away,
-    points: 0, fouls: 0, played: true, division: activeDivision, on_court: true,
-  }, { onConflict: 'game_id,player_id' })));
+  await Promise.all(gameRosterRows.map(({ side, player }) => {
+    const onCourt = (side === 'home' ? startersHome : startersAway).has(String(player.id));
+    return _supabase.from('game_stats').upsert({
+      game_id: currentGame.id, player_id: player.id, player_name: player.name,
+      player_number: player.number ?? null,
+      team: side === 'home' ? currentGame.home : currentGame.away,
+      points: 0, fouls: 0, played: onCourt, division: activeDivision, on_court: onCourt,
+    }, { onConflict: 'game_id,player_id' });
+  }));
 
   Object.assign(currentGame, {
     type:'live', quarter:1, periodLen:seconds, clockSeconds:seconds,
@@ -1069,9 +1136,19 @@ async function loadRosterAndStats(){
   rosterHome = homeRes.data || [];
   rosterAway = awayRes.data || [];
   playerStats = {};
-  (statsRes.data || []).forEach(row => {
+  const statsRows = statsRes.data || [];
+  statsRows.forEach(row => {
     playerStats[row.player_id] = { points: row.points || 0, fouls: row.fouls || 0, onCourt: !!row.on_court };
   });
+  // Aplicar el número de camiseta específico de este partido (editado al iniciar o en una sustitución)
+  statsRows.forEach(row => {
+    if (row.player_number == null) return;
+    const p = [...rosterHome, ...rosterAway].find(pl => String(pl.id) === String(row.player_id));
+    if (p) p.number = row.player_number;
+  });
+  // Reconstruir "jugadores en el partido" a partir de quienes ya tienen fila en game_stats
+  gameRosterHome = new Set(rosterHome.filter(p => statsRows.some(r => String(r.player_id) === String(p.id))).map(p => String(p.id)));
+  gameRosterAway = new Set(rosterAway.filter(p => statsRows.some(r => String(r.player_id) === String(p.id))).map(p => String(p.id)));
   renderRosterUI();
 }
 
@@ -1397,7 +1474,8 @@ function toggleSubs(){
 }
 function renderSubOptions(){
   const side = document.getElementById('sub-team-select').value;
-  const players = side === 'home' ? rosterHome : rosterAway;
+  const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
+  const players = (side === 'home' ? rosterHome : rosterAway).filter(p => gameRoster.has(String(p.id)));
   const onCourt = players.filter(p => playerStats[p.id]?.onCourt);
   const bench = players.filter(p => !playerStats[p.id]?.onCourt);
   const outOpts = onCourt.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
