@@ -382,6 +382,43 @@
     <div class="section-lbl">Titulares · Visita (<span id="starters-away-count">0</span>/5)</div>
     <div class="starters-list" id="starters-away-list"></div>
 
+    <div class="section-lbl">Capitán, DT y ayudante técnico</div>
+    <div class="ref-panel" style="margin-bottom:16px;">
+      <div class="ref-panel-hint" style="margin-bottom:10px;">Opcional. El capitán debe ser un jugador del equipo; el DT y el ayudante pueden ser un jugador o un nombre escrito. Se puede corregir después desde la mesa de control.</div>
+      <div class="staff-grid">
+        <div class="staff-team-block">
+          <div class="staff-team-name" id="start-staff-home-name">Local</div>
+          <div class="staff-field">
+            <label class="staff-label">Capitán</label>
+            <div id="start-staff-home-captain-wrap"></div>
+          </div>
+          <div class="staff-field">
+            <label class="staff-label">Director Técnico</label>
+            <div id="start-staff-home-coach-wrap"></div>
+          </div>
+          <div class="staff-field">
+            <label class="staff-label">Ayudante Técnico</label>
+            <div id="start-staff-home-assistant-wrap"></div>
+          </div>
+        </div>
+        <div class="staff-team-block">
+          <div class="staff-team-name" id="start-staff-away-name">Visita</div>
+          <div class="staff-field">
+            <label class="staff-label">Capitán</label>
+            <div id="start-staff-away-captain-wrap"></div>
+          </div>
+          <div class="staff-field">
+            <label class="staff-label">Director Técnico</label>
+            <div id="start-staff-away-coach-wrap"></div>
+          </div>
+          <div class="staff-field">
+            <label class="staff-label">Ayudante Técnico</label>
+            <div id="start-staff-away-assistant-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <button class="start-btn" onclick="startGame()">🔴 Iniciar partido en vivo</button>
   </div>
 
@@ -906,6 +943,7 @@ async function openStart(){
   renderStartersList('away');
   updateStartersCount();
   updateGameRosterCount();
+  renderStartStaffPanel();
 }
 function renderPeriodChoices(){
   const opts = [8,10,12];
@@ -947,6 +985,7 @@ function toggleGameRoster(side, playerId){
   renderStartersList(side);
   updateGameRosterCount();
   updateStartersCount();
+  renderStartStaffPanel();
 }
 function updatePlayerNumber(side, playerId, value){
   const list = side === 'home' ? rosterHome : rosterAway;
@@ -1003,6 +1042,14 @@ async function startGame(){
   if (startersAway.size !== needAway){ showToast(`⚠ Selecciona ${needAway} titulares del equipo visita`, true); return; }
 
   const seconds = chosenPeriodMinutes * 60;
+  const staffPayload = {
+    home_captain: getStaffValue('start-','home','captain') || null,
+    away_captain: getStaffValue('start-','away','captain') || null,
+    home_coach: getStaffValue('start-','home','coach') || null,
+    away_coach: getStaffValue('start-','away','coach') || null,
+    home_assistant: getStaffValue('start-','home','assistant') || null,
+    away_assistant: getStaffValue('start-','away','assistant') || null,
+  };
   const payload = {
     type: 'live', quarter: 1,
     period_length_seconds: seconds, clock_seconds: seconds,
@@ -1010,6 +1057,7 @@ async function startGame(){
     home_score: 0, away_score: 0, home_fouls: 0, away_fouls: 0,
     shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
     possession_arrow: 'home', home_timeouts: 0, away_timeouts: 0,
+    ...staffPayload,
   };
   const { error } = await _supabase.from(divCfg().dbTable).update(payload).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
@@ -1033,6 +1081,9 @@ async function startGame(){
     clockRunning:false, clockStartedAt:null, homeScore:0, awayScore:0, homeFouls:0, awayFouls:0,
     shotClockSeconds:24, shotClockRunning:false, shotClockStartedAt:null,
     possessionArrow:'home', homeTimeouts:0, awayTimeouts:0,
+    homeCaptain: staffPayload.home_captain || '', awayCaptain: staffPayload.away_captain || '',
+    homeCoach: staffPayload.home_coach || '', awayCoach: staffPayload.away_coach || '',
+    homeAssistant: staffPayload.home_assistant || '', awayAssistant: staffPayload.away_assistant || '',
   });
   showToast('🔴 Partido iniciado en vivo');
   openBoard();
@@ -1214,7 +1265,7 @@ function renderRosterUI(){
 function playerOptionsHTML(players, value){
   return players.map(p => `<option value="${p.name}" ${p.name===value?'selected':''}>${p.name}</option>`).join('');
 }
-function renderStaffSelect(side, role, players, currentValue, opts){
+function renderStaffSelect(prefix, side, role, players, currentValue, opts){
   opts = opts || {};
   const isKnownPlayer = players.some(p => p.name === currentValue);
   const isCustom = !!(opts.allowCustom && currentValue && !isKnownPlayer);
@@ -1222,53 +1273,58 @@ function renderStaffSelect(side, role, players, currentValue, opts){
   optionsHTML += playerOptionsHTML(players, currentValue);
   if (opts.allowCustom) optionsHTML += `<option value="__other__" ${isCustom?'selected':''}>✏ Otro (escribir nombre)</option>`;
   const textInputHTML = opts.allowCustom
-    ? `<input type="text" id="staff-${side}-${role}-text" class="staff-text-input" placeholder="Nombre" value="${isCustom?currentValue:''}" ${isCustom?'':'hidden'}>`
+    ? `<input type="text" id="${prefix}staff-${side}-${role}-text" class="staff-text-input" placeholder="Nombre" value="${isCustom?currentValue:''}" ${isCustom?'':'hidden'}>`
     : '';
-  return `<select id="staff-${side}-${role}-select" ${opts.allowCustom?`onchange="onStaffSelectChange('${side}','${role}')"`:''}>${optionsHTML}</select>${textInputHTML}`;
+  return `<select id="${prefix}staff-${side}-${role}-select" ${opts.allowCustom?`onchange="onStaffSelectChange('${prefix}','${side}','${role}')"`:''}>${optionsHTML}</select>${textInputHTML}`;
 }
-function onStaffSelectChange(side, role){
-  const sel = document.getElementById(`staff-${side}-${role}-select`);
-  const txt = document.getElementById(`staff-${side}-${role}-text`);
+function onStaffSelectChange(prefix, side, role){
+  const sel = document.getElementById(`${prefix}staff-${side}-${role}-select`);
+  const txt = document.getElementById(`${prefix}staff-${side}-${role}-text`);
   if (!sel || !txt) return;
   txt.hidden = sel.value !== '__other__';
   if (sel.value === '__other__') txt.focus();
 }
-function getStaffValue(side, role){
-  const sel = document.getElementById(`staff-${side}-${role}-select`);
+function getStaffValue(prefix, side, role){
+  const sel = document.getElementById(`${prefix}staff-${side}-${role}-select`);
   if (!sel) return '';
   if (sel.value === '__other__'){
-    const txt = document.getElementById(`staff-${side}-${role}-text`);
+    const txt = document.getElementById(`${prefix}staff-${side}-${role}-text`);
     return txt ? txt.value.trim() : '';
   }
   return sel.value;
 }
-function renderStaffPanel(){
+function renderStaffPanelInto(prefix){
   const teams = divTeams();
   const home = teams[currentGame.home], away = teams[currentGame.away];
-  document.getElementById('staff-home-name').textContent = home?.name || currentGame.home;
-  document.getElementById('staff-away-name').textContent = away?.name || currentGame.away;
+  const homeNameEl = document.getElementById(`${prefix}staff-home-name`);
+  const awayNameEl = document.getElementById(`${prefix}staff-away-name`);
+  if (!homeNameEl || !awayNameEl) return;
+  homeNameEl.textContent = home?.name || currentGame.home;
+  awayNameEl.textContent = away?.name || currentGame.away;
 
   const homeInGame = rosterHome.filter(p => gameRosterHome.has(String(p.id)));
   const awayInGame = rosterAway.filter(p => gameRosterAway.has(String(p.id)));
   const homeList = homeInGame.length ? homeInGame : rosterHome;
   const awayList = awayInGame.length ? awayInGame : rosterAway;
 
-  document.getElementById('staff-home-captain-wrap').innerHTML = renderStaffSelect('home','captain', homeList, currentGame.homeCaptain, {});
-  document.getElementById('staff-home-coach-wrap').innerHTML = renderStaffSelect('home','coach', homeList, currentGame.homeCoach, { allowCustom:true });
-  document.getElementById('staff-home-assistant-wrap').innerHTML = renderStaffSelect('home','assistant', homeList, currentGame.homeAssistant, { allowCustom:true, allowNone:true });
+  document.getElementById(`${prefix}staff-home-captain-wrap`).innerHTML = renderStaffSelect(prefix,'home','captain', homeList, currentGame.homeCaptain, {});
+  document.getElementById(`${prefix}staff-home-coach-wrap`).innerHTML = renderStaffSelect(prefix,'home','coach', homeList, currentGame.homeCoach, { allowCustom:true });
+  document.getElementById(`${prefix}staff-home-assistant-wrap`).innerHTML = renderStaffSelect(prefix,'home','assistant', homeList, currentGame.homeAssistant, { allowCustom:true, allowNone:true });
 
-  document.getElementById('staff-away-captain-wrap').innerHTML = renderStaffSelect('away','captain', awayList, currentGame.awayCaptain, {});
-  document.getElementById('staff-away-coach-wrap').innerHTML = renderStaffSelect('away','coach', awayList, currentGame.awayCoach, { allowCustom:true });
-  document.getElementById('staff-away-assistant-wrap').innerHTML = renderStaffSelect('away','assistant', awayList, currentGame.awayAssistant, { allowCustom:true, allowNone:true });
+  document.getElementById(`${prefix}staff-away-captain-wrap`).innerHTML = renderStaffSelect(prefix,'away','captain', awayList, currentGame.awayCaptain, {});
+  document.getElementById(`${prefix}staff-away-coach-wrap`).innerHTML = renderStaffSelect(prefix,'away','coach', awayList, currentGame.awayCoach, { allowCustom:true });
+  document.getElementById(`${prefix}staff-away-assistant-wrap`).innerHTML = renderStaffSelect(prefix,'away','assistant', awayList, currentGame.awayAssistant, { allowCustom:true, allowNone:true });
 }
+function renderStaffPanel(){ renderStaffPanelInto(''); }
+function renderStartStaffPanel(){ renderStaffPanelInto('start-'); }
 async function saveStaff(){
   const payload = {
-    home_captain: getStaffValue('home','captain') || null,
-    away_captain: getStaffValue('away','captain') || null,
-    home_coach: getStaffValue('home','coach') || null,
-    away_coach: getStaffValue('away','coach') || null,
-    home_assistant: getStaffValue('home','assistant') || null,
-    away_assistant: getStaffValue('away','assistant') || null,
+    home_captain: getStaffValue('','home','captain') || null,
+    away_captain: getStaffValue('','away','captain') || null,
+    home_coach: getStaffValue('','home','coach') || null,
+    away_coach: getStaffValue('','away','coach') || null,
+    home_assistant: getStaffValue('','home','assistant') || null,
+    away_assistant: getStaffValue('','away','assistant') || null,
   };
   await persist(payload);
   Object.assign(currentGame, {
