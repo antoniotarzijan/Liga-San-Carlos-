@@ -693,7 +693,7 @@
       </div>
     </div>
 
-    <div class="save-hint">Los cambios se guardan automáticamente y se ven en vivo en la web · <a href="en-vivo.html" target="_blank" style="color:var(--gold);">Ver página en vivo →</a></div>
+    <div class="save-hint">Los cambios se guardan automáticamente y se ven en vivo en la web · <a href="envivo.html" target="_blank" style="color:var(--gold);">Ver página en vivo →</a></div>
   </div>
 </div>
 
@@ -708,15 +708,15 @@ const CONFIG = {
     primera: {
       label:'Primera División', dbTable:'games', playersTable:'players',
       teams: {
-        EXMAN:{ abbr:'EX-MAN',  name:'EX-Manquehue',            color:'#1E3A8A', logo:'logos/exman.png' },
-        OLDDS:{ abbr:'OLD-DS',  name:'Old-DS',                  color:'#065F46', logo:'logos/ols ds.png' },
-        INGUC:{ abbr:'INGUC',   name:'Ingeniería UC',           color:'#92400E', logo:'logos/ing.png' },
-        TRO:  { abbr:'TRO',     name:'Tropics',                 color:'#BE185D', logo:'logos/trop.png' },
-        SAL:  { abbr:'SAL',     name:'Salitre',                 color:'#1F2937', logo:'logos/salitre.png' },
-        BRI:  { abbr:'BRE',     name:'Brillante Resplandor',    color:'#F97316', logo:'logos/brillante.png' },
-        ABC:  { abbr:'ABC',     name:'ABC',                     color:'#A16207', logo:'' },
-        ATLMET:{ abbr:'ATL-MET',name:'Atlético Metropolitano',  color:'#B4C6D1', logo:'' },
-        DCO:  { abbr:'DCO',     name:'DCO',                     color:'#2563EB', logo:'' },
+        EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
+        ANANA:{ abbr:'ORTHO',  name:'Orthobullets',                  color:'#7C3AED', logo:'logos/anana.png' },
+        OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
+        INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
+        TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
+        SWD:  { abbr:'ATL-MET',    name:'Atlético Metropolitano', color:'#0E7490', logo:'logos/swd.png' },
+        SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
+        BAR:  { abbr:'EX-ABC',    name:'Ex-ABC',     color:'#D4A800', logo:'logos/abc.png' },
+        T2A:  { abbr:'BRE',    name:'Brillante Resplandor',   color:'#B91C1C', logo:'logos/brillante.png' },
       },
     },
     segunda: {
@@ -730,6 +730,7 @@ const CONFIG = {
         T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
         T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
         T2I:{ abbr:'PRO',name:'Provilocura',              color:'#1E1B4B', logo:'' },
+        T2J:{ abbr:'RIM', name:'Rimbreakers',              color:'#0891B2', logo:'logos/rimbreakers.png' },
       },
     },
   },
@@ -1339,6 +1340,16 @@ function renderStaffPanelInto(prefix){
   const homeNameEl = document.getElementById(`${prefix}staff-home-name`);
   const awayNameEl = document.getElementById(`${prefix}staff-away-name`);
   if (!homeNameEl || !awayNameEl) return;
+
+  if (document.getElementById(`${prefix}staff-home-captain-select`)){
+    currentGame.homeCaptain   = getStaffValue(prefix,'home','captain');
+    currentGame.homeCoach     = getStaffValue(prefix,'home','coach');
+    currentGame.homeAssistant = getStaffValue(prefix,'home','assistant');
+    currentGame.awayCaptain   = getStaffValue(prefix,'away','captain');
+    currentGame.awayCoach     = getStaffValue(prefix,'away','coach');
+    currentGame.awayAssistant = getStaffValue(prefix,'away','assistant');
+  }
+
   homeNameEl.textContent = home?.name || currentGame.home;
   awayNameEl.textContent = away?.name || currentGame.away;
 
@@ -1784,11 +1795,12 @@ async function adjustClock(deltaSeconds){
   await persist({ clock_seconds: Math.round(currentGame.clockSeconds) });
 }
 async function resetClock(){
-  currentGame.clockSeconds = currentGame.periodLen;
+  const newLen = currentGame.quarter > 4 ? OT_SECONDS : currentGame.periodLen;
+  currentGame.clockSeconds = newLen;
   currentGame.clockRunning = false;
   currentGame.clockStartedAt = null;
   renderBoard();
-  await persist({ clock_seconds: currentGame.periodLen, clock_running: false, clock_started_at: null });
+  await persist({ clock_seconds: newLen, clock_running: false, clock_started_at: null });
 }
 function editClock(){
   if (currentGame.clockRunning){ showToast('⚠ Pausa el cronómetro para editarlo', true); return; }

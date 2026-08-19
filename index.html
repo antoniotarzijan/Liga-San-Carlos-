@@ -996,7 +996,7 @@
 <nav>
   <div class="nav-logo" id="nav-abbr">LSC<span>·</span>2026</div>
   <div class="nav-links">
-    <a href="en-vivo.html" style="color:var(--red);display:flex;align-items:center;gap:6px;"><span style="width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;"></span>En Vivo</a>
+    <a href="envivo.html" style="color:var(--red);display:flex;align-items:center;gap:6px;"><span style="width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite;"></span>En Vivo</a>
     <a href="#games-root">Partidos</a>
     <a href="#standings-root">Posiciones</a>
     <a href="#teams-root">Equipos</a>
@@ -1052,9 +1052,9 @@ const CONFIG = {
         OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
         INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
         TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
-        SWD:  { abbr:'AM',    name:'Atlético Metropolitano', color:'#0E7490', logo:'logos/swd.png' },
+        SWD:  { abbr:'ATL-MET',    name:'Atlético Metropolitano', color:'#0E7490', logo:'logos/swd.png' },
         SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
-        BAR:  { abbr:'BAR',    name:'Ex-ABC',     color:'#D4A800', logo:'logos/abc.png' },
+        BAR:  { abbr:'EX-ABC',    name:'Ex-ABC',     color:'#D4A800', logo:'logos/abc.png' },
         T2A:  { abbr:'BRE',    name:'Brillante Resplandor',   color:'#B91C1C', logo:'logos/brillante.png' },
       },
     },
@@ -2048,17 +2048,12 @@ function closeAdmin() { document.getElementById('admin-panel').classList.remove(
 async function saveRound(){
   const val=+document.getElementById('admin-round-input').value;
   if(!val||val<1){showToast('⚠ Ingresa un número válido');return;}
-  
-  console.log('1. Intentando guardar jornada:', val, 'división:', activeDivision);
-  console.log('2. Key a guardar:', `round_${activeDivision}`);
-  
+
   const {data, error}=await _supabase.from('settings').upsert(
     {key:`round_${activeDivision}`,value:String(val)},
     {onConflict:'key'}
   ).select();
-  
-  console.log('3. Respuesta Supabase - data:', data, 'error:', error);
-  
+
   if(error){
     showToast('⚠ Error: '+error.message);
     return;
