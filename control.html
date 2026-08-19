@@ -198,6 +198,10 @@
     .stat-badge.pts{background:rgba(242,179,78,.15);color:var(--gold);}
     .stat-badge.fouls{background:rgba(248,113,113,.14);color:#F87171;}
     .stat-badge.fouls.out{background:var(--red);color:#fff;box-shadow:0 0 8px rgba(248,8,8,.5);}
+    .stat-badge.tech{background:rgba(242,179,78,.16);color:var(--gold);}
+    .stat-badge.tech.out{background:var(--gold);color:#000;box-shadow:0 0 8px rgba(242,179,78,.5);}
+    .stat-badge.unsp{background:rgba(251,146,60,.16);color:#FB923C;}
+    .stat-badge.unsp.out{background:#FB923C;color:#000;box-shadow:0 0 8px rgba(251,146,60,.5);}
     .foulout-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 7px;border-radius:4px;display:inline-block;}
     .roster-pt-btns{display:flex;gap:3px;width:100%;}
     .roster-pt-btn{flex:1;min-width:0;min-height:28px;border-radius:5px;border:none;font-family:'Bebas Neue',sans-serif;font-size:12px;cursor:pointer;background:rgba(255,255,255,.08);color:var(--text);padding:0;}
@@ -206,6 +210,8 @@
     .roster-foul-btns{display:flex;gap:3px;width:100%;}
     .roster-foul-btn{flex:1;min-height:24px;border-radius:5px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;cursor:pointer;background:rgba(248,113,113,.12);color:#F87171;padding:0;}
     .roster-foul-btn.minus{background:rgba(255,255,255,.06);color:var(--muted);}
+    .roster-foul-btn.tech{background:rgba(242,179,78,.16);color:var(--gold);}
+    .roster-foul-btn.unsp{background:rgba(251,146,60,.16);color:#FB923C;}
 
     /* ── SELECCIÓN DE TITULARES ── */
     .starters-list{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px;}
@@ -248,6 +254,19 @@
     .staff-field select,.staff-text-input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;padding:7px 8px;color:var(--text);font-size:12px;box-sizing:border-box;}
     .staff-text-input{margin-top:5px;}
     @media(max-width:480px){ .staff-grid{grid-template-columns:1fr;} }
+
+    /* ── FALTAS TÉCNICAS DEL BANCO (DT / AYUDANTE) ── */
+    .bench-tech-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);}
+    .bench-tech-row:first-of-type{border-top:none;}
+    .bench-tech-info{min-width:0;flex:1;}
+    .bench-tech-role{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+    .bench-tech-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .bench-tech-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .bench-tech-num{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:16px;text-align:center;color:var(--gold);}
+    .bench-tech-num.out{color:var(--red);}
+    .bench-tech-btn{width:26px;height:26px;border-radius:5px;border:none;background:rgba(242,179,78,.14);color:var(--gold);font-size:14px;cursor:pointer;}
+    .bench-tech-btn.minus{background:rgba(255,255,255,.06);color:var(--muted);}
+    .bench-dq-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:8px;letter-spacing:.5px;text-transform:uppercase;color:#fff;background:var(--red);padding:2px 5px;border-radius:3px;flex-shrink:0;}
 
     /* ── CORREGIR RESULTADO FINAL ── */
     .edit-score-panel{display:none;background:var(--card);border:1px solid rgba(251,191,36,.35);border-radius:10px;padding:12px;margin-bottom:8px;}
@@ -651,6 +670,16 @@
       <button class="ref-save-btn" style="width:100%;margin-top:10px;" onclick="saveStaff()">💾 Guardar capitán/DT/ayudante</button>
     </div>
 
+    <!-- FALTAS TÉCNICAS DEL BANCO (DT / AYUDANTE) -->
+    <div class="ref-panel">
+      <div class="ref-panel-title">🟨 Faltas técnicas del banco</div>
+      <div class="ref-panel-hint">Faltas técnicas al DT o ayudante técnico (no se acumulan con las de los jugadores). 2 faltas técnicas = expulsión del banco.</div>
+      <div class="staff-grid">
+        <div class="staff-team-block" id="bench-tech-home"></div>
+        <div class="staff-team-block" id="bench-tech-away"></div>
+      </div>
+    </div>
+
     <!-- OBSERVACIONES Y FIRMA DEL ÁRBITRO -->
     <div class="ref-panel">
       <div class="ref-panel-title">📝 Observaciones y firma del árbitro</div>
@@ -831,6 +860,8 @@ function rowToLive(row){
     homeCaptain: row.home_captain || '', awayCaptain: row.away_captain || '',
     homeCoach: row.home_coach || '', awayCoach: row.away_coach || '',
     homeAssistant: row.home_assistant || '', awayAssistant: row.away_assistant || '',
+    homeCoachTech: row.home_coach_technical || 0, awayCoachTech: row.away_coach_technical || 0,
+    homeAssistantTech: row.home_assistant_technical || 0, awayAssistantTech: row.away_assistant_technical || 0,
   };
 }
 
@@ -1057,6 +1088,8 @@ async function startGame(){
     home_score: 0, away_score: 0, home_fouls: 0, away_fouls: 0,
     shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
     possession_arrow: 'home', home_timeouts: 0, away_timeouts: 0,
+    home_coach_technical: 0, away_coach_technical: 0,
+    home_assistant_technical: 0, away_assistant_technical: 0,
     ...staffPayload,
   };
   const { error } = await _supabase.from(divCfg().dbTable).update(payload).eq('id', currentGame.id);
@@ -1072,7 +1105,8 @@ async function startGame(){
       game_id: currentGame.id, player_id: player.id, player_name: player.name,
       player_number: player.number ?? null,
       team: side === 'home' ? currentGame.home : currentGame.away,
-      points: 0, fouls: 0, played: onCourt, division: activeDivision, on_court: onCourt,
+      points: 0, fouls: 0, technical_fouls: 0, unsportsmanlike_fouls: 0,
+      played: onCourt, division: activeDivision, on_court: onCourt,
     }, { onConflict: 'game_id,player_id' });
   }));
 
@@ -1084,6 +1118,7 @@ async function startGame(){
     homeCaptain: staffPayload.home_captain || '', awayCaptain: staffPayload.away_captain || '',
     homeCoach: staffPayload.home_coach || '', awayCoach: staffPayload.away_coach || '',
     homeAssistant: staffPayload.home_assistant || '', awayAssistant: staffPayload.away_assistant || '',
+    homeCoachTech: 0, awayCoachTech: 0, homeAssistantTech: 0, awayAssistantTech: 0,
   });
   showToast('🔴 Partido iniciado en vivo');
   openBoard();
@@ -1241,7 +1276,11 @@ async function loadRosterAndStats(){
   playerStats = {};
   const statsRows = statsRes.data || [];
   statsRows.forEach(row => {
-    playerStats[row.player_id] = { points: row.points || 0, fouls: row.fouls || 0, onCourt: !!row.on_court };
+    playerStats[row.player_id] = {
+      points: row.points || 0, fouls: row.fouls || 0,
+      technicalFouls: row.technical_fouls || 0, unsportsmanlikeFouls: row.unsportsmanlike_fouls || 0,
+      onCourt: !!row.on_court,
+    };
   });
   // Aplicar el número de camiseta específico de este partido (editado al iniciar o en una sustitución)
   statsRows.forEach(row => {
@@ -1259,6 +1298,7 @@ async function loadRosterAndStats(){
 function renderRosterUI(){
   renderRosterSide('home', rosterHome, 'roster-list-home');
   renderRosterSide('away', rosterAway, 'roster-list-away');
+  renderBenchTechPanel();
 }
 
 /* ══ CAPITÁN / DT / AYUDANTE TÉCNICO ══ */
@@ -1317,6 +1357,71 @@ function renderStaffPanelInto(prefix){
 }
 function renderStaffPanel(){ renderStaffPanelInto(''); }
 function renderStartStaffPanel(){ renderStaffPanelInto('start-'); }
+
+/* ── FALTAS TÉCNICAS DEL BANCO (DT / AYUDANTE) ── */
+function benchTechRowHTML(side, role, label, name, count){
+  const n = count || 0;
+  const dq = n >= 2;
+  return `<div class="bench-tech-row">
+    <div class="bench-tech-info">
+      <div class="bench-tech-role">${label}</div>
+      <div class="bench-tech-name">${name || '— sin asignar —'}</div>
+    </div>
+    <div class="bench-tech-ctrl">
+      ${dq ? '<span class="bench-dq-tag">🚫 expulsado</span>' : ''}
+      <button class="bench-tech-btn minus" onclick="adjustStaffTechnical('${side}','${role}',-1)">−</button>
+      <span class="bench-tech-num ${dq?'out':''}">${n}</span>
+      <button class="bench-tech-btn" onclick="adjustStaffTechnical('${side}','${role}',1)">+</button>
+    </div>
+  </div>`;
+}
+function renderBenchTechPanel(){
+  if (!currentGame) return;
+  const teams = divTeams();
+  const home = teams[currentGame.home], away = teams[currentGame.away];
+  const homeEl = document.getElementById('bench-tech-home');
+  const awayEl = document.getElementById('bench-tech-away');
+  if (!homeEl || !awayEl) return;
+  homeEl.innerHTML =
+    `<div class="staff-team-name">${home?.name || currentGame.home}</div>` +
+    benchTechRowHTML('home','coach','Director Técnico', currentGame.homeCoach, currentGame.homeCoachTech) +
+    benchTechRowHTML('home','assistant','Ayudante Técnico', currentGame.homeAssistant, currentGame.homeAssistantTech);
+  awayEl.innerHTML =
+    `<div class="staff-team-name">${away?.name || currentGame.away}</div>` +
+    benchTechRowHTML('away','coach','Director Técnico', currentGame.awayCoach, currentGame.awayCoachTech) +
+    benchTechRowHTML('away','assistant','Ayudante Técnico', currentGame.awayAssistant, currentGame.awayAssistantTech);
+}
+async function adjustStaffTechnical(side, role, delta){
+  const key = side === 'home'
+    ? (role === 'coach' ? 'homeCoachTech' : 'homeAssistantTech')
+    : (role === 'coach' ? 'awayCoachTech' : 'awayAssistantTech');
+  const dbCol = side === 'home'
+    ? (role === 'coach' ? 'home_coach_technical' : 'home_assistant_technical')
+    : (role === 'coach' ? 'away_coach_technical' : 'away_assistant_technical');
+  const current = currentGame[key] || 0;
+  const updated = Math.max(0, current + delta);
+  const appliedDelta = updated - current;
+  if (appliedDelta === 0) return;
+  currentGame[key] = updated;
+
+  const foulKey = side === 'home' ? 'homeFouls' : 'awayFouls';
+  currentGame[foulKey] = Math.max(0, currentGame[foulKey] + appliedDelta);
+
+  renderBenchTechPanel();
+  renderBoard();
+  await persist({ [dbCol]: updated, [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] });
+
+  if (appliedDelta > 0){
+    const name = side === 'home'
+      ? (role === 'coach' ? currentGame.homeCoach : currentGame.homeAssistant)
+      : (role === 'coach' ? currentGame.awayCoach : currentGame.awayAssistant);
+    const teamId = side === 'home' ? currentGame.home : currentGame.away;
+    const roleLabel = role === 'coach' ? 'DT' : 'Ayudante técnico';
+    logGameEvent(teamId, 'technical_foul_staff', name || roleLabel, null, roleLabel);
+    if (updated >= 2) showToast(`🚫 ${name || roleLabel} expulsado del banco (2 faltas técnicas)`, true);
+    else showToast(`🟨 Falta técnica al banco: ${name || roleLabel}`);
+  }
+}
 async function saveStaff(){
   const payload = {
     home_captain: getStaffValue('','home','captain') || null,
@@ -1343,18 +1448,23 @@ function renderRosterSide(side, players, containerId){
     return;
   }
   container.innerHTML = onCourt.map(p => {
-    const st = playerStats[p.id] || { points: 0, fouls: 0 };
+    const st = playerStats[p.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
+    const techFouls = st.technicalFouls || 0, unspFouls = st.unsportsmanlikeFouls || 0;
     const numBadge = p.number != null ? ` #${p.number}` : '';
-    const fouledOut = st.fouls >= 5;
+    const dqByCombo = (techFouls + unspFouls) >= 2;
+    const fouledOut = st.fouls >= 5 || dqByCombo;
     return `<div class="roster-player-row ${fouledOut?'fouled-out':''}">
       <div class="roster-player-top">
         <div class="roster-player-name">${p.name}${numBadge}</div>
         <div class="roster-stat-badges">
           <span class="stat-badge pts">${st.points} pts</span>
-          <span class="stat-badge fouls ${fouledOut?'out':''}">${st.fouls} f</span>
+          <span class="stat-badge fouls ${st.fouls>=5?'out':''}">${st.fouls} f</span>
+          <span class="stat-badge tech ${dqByCombo?'out':''}">${techFouls} T</span>
+          <span class="stat-badge unsp ${dqByCombo?'out':''}">${unspFouls} AD</span>
         </div>
       </div>
-      ${fouledOut ? `<div class="foulout-tag">🚫 5 faltas — debe salir del partido</div>` : ''}
+      ${st.fouls >= 5 ? `<div class="foulout-tag">🚫 5 faltas personales — debe salir del partido</div>` : ''}
+      ${dqByCombo ? `<div class="foulout-tag">🚫 Expulsado (2 faltas técnicas/antideportivas)</div>` : ''}
       <div class="roster-pt-btns">
         <button class="roster-pt-btn minus" onclick="addPlayerPoints('${side}','${p.id}',-1)">−1</button>
         <button class="roster-pt-btn plus" onclick="addPlayerPoints('${side}','${p.id}',1)">+1</button>
@@ -1365,6 +1475,14 @@ function renderRosterSide(side, players, containerId){
         <button class="roster-foul-btn minus" onclick="addPlayerFoul('${side}','${p.id}',-1)">− falta</button>
         <button class="roster-foul-btn plus" onclick="addPlayerFoul('${side}','${p.id}',1)">🟨 +1 falta</button>
       </div>
+      <div class="roster-foul-btns">
+        <button class="roster-foul-btn tech" onclick="addPlayerTechnicalFoul('${side}','${p.id}',1)">🟨 +1 técnica</button>
+        <button class="roster-foul-btn unsp" onclick="addPlayerUnsportsmanlikeFoul('${side}','${p.id}',1)">🟧 +1 antidep.</button>
+      </div>
+      <div class="roster-foul-btns">
+        <button class="roster-foul-btn minus" onclick="addPlayerTechnicalFoul('${side}','${p.id}',-1)">− técnica</button>
+        <button class="roster-foul-btn minus" onclick="addPlayerUnsportsmanlikeFoul('${side}','${p.id}',-1)">− antidep.</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1374,12 +1492,13 @@ function findPlayer(side, playerId){
   return list.find(p => String(p.id) === String(playerId));
 }
 
-async function persistPlayerStat(side, player, points, fouls){
+async function persistPlayerStat(side, player, points, fouls, technicalFouls, unsportsmanlikeFouls){
   const payload = {
     game_id: currentGame.id, player_id: player.id,
     player_name: player.name, player_number: player.number ?? null,
     team: side === 'home' ? currentGame.home : currentGame.away,
     points, fouls, played: true, division: activeDivision,
+    technical_fouls: technicalFouls, unsportsmanlike_fouls: unsportsmanlikeFouls,
   };
   await runOrQueue({ table: 'game_stats', kind: 'upsert', payload, onConflict: 'game_id,player_id' });
 }
@@ -1397,7 +1516,7 @@ async function logGameEvent(teamId, eventType, playerName, value, detail){
 async function addPlayerPoints(side, playerId, delta){
   const player = findPlayer(side, playerId);
   if (!player) return;
-  const st = playerStats[player.id] || { points: 0, fouls: 0, onCourt: false };
+  const st = playerStats[player.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0, onCourt: false };
   const newPoints = Math.max(0, st.points + delta);
   const appliedDelta = newPoints - st.points;
   playerStats[player.id] = { ...st, points: newPoints };
@@ -1408,7 +1527,7 @@ async function addPlayerPoints(side, playerId, delta){
   renderRosterUI();
   renderBoard();
   await Promise.all([
-    persistPlayerStat(side, player, newPoints, st.fouls),
+    persistPlayerStat(side, player, newPoints, st.fouls, st.technicalFouls || 0, st.unsportsmanlikeFouls || 0),
     persist({ [side === 'home' ? 'home_score' : 'away_score']: currentGame[scoreKey] }),
   ]);
   const teamId = side === 'home' ? currentGame.home : currentGame.away;
@@ -1418,7 +1537,7 @@ async function addPlayerPoints(side, playerId, delta){
 async function addPlayerFoul(side, playerId, delta){
   const player = findPlayer(side, playerId);
   if (!player) return;
-  const st = playerStats[player.id] || { points: 0, fouls: 0, onCourt: false };
+  const st = playerStats[player.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0, onCourt: false };
   const newFouls = Math.max(0, st.fouls + delta);
   const appliedDelta = newFouls - st.fouls;
   playerStats[player.id] = { ...st, fouls: newFouls };
@@ -1429,12 +1548,53 @@ async function addPlayerFoul(side, playerId, delta){
   renderRosterUI();
   renderBoard();
   await Promise.all([
-    persistPlayerStat(side, player, st.points, newFouls),
+    persistPlayerStat(side, player, st.points, newFouls, st.technicalFouls || 0, st.unsportsmanlikeFouls || 0),
     persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] }),
   ]);
   if (appliedDelta > 0){
     const teamId = side === 'home' ? currentGame.home : currentGame.away;
     logGameEvent(teamId, 'foul', player.name);
+  }
+}
+
+/* ── Falta técnica / antideportiva a jugador ──
+   Ambas cuentan como falta personal (límite de 5) y como falta de equipo (bonus),
+   igual que una falta normal. Además se llevan por separado para saber si el
+   jugador acumula 2 (técnicas + antideportivas combinadas) y queda expulsado. */
+async function addPlayerTechnicalFoul(side, playerId, delta){
+  await addPlayerSpecialFoul(side, playerId, delta, 'technicalFouls', 'technical_foul', 'Falta técnica');
+}
+async function addPlayerUnsportsmanlikeFoul(side, playerId, delta){
+  await addPlayerSpecialFoul(side, playerId, delta, 'unsportsmanlikeFouls', 'unsportsmanlike_foul', 'Falta antideportiva');
+}
+async function addPlayerSpecialFoul(side, playerId, delta, statKey, eventType, label){
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  const st = playerStats[player.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0, onCourt: false };
+  const current = st[statKey] || 0;
+  const updated = Math.max(0, current + delta);
+  const appliedDelta = updated - current;
+  if (appliedDelta === 0) return;
+
+  const newFouls = Math.max(0, st.fouls + appliedDelta);
+  playerStats[player.id] = { ...st, [statKey]: updated, fouls: newFouls };
+
+  const foulKey = side === 'home' ? 'homeFouls' : 'awayFouls';
+  currentGame[foulKey] = Math.max(0, currentGame[foulKey] + appliedDelta);
+
+  renderRosterUI();
+  renderBoard();
+  const finalSt = playerStats[player.id];
+  await Promise.all([
+    persistPlayerStat(side, player, finalSt.points, finalSt.fouls, finalSt.technicalFouls || 0, finalSt.unsportsmanlikeFouls || 0),
+    persist({ [side === 'home' ? 'home_fouls' : 'away_fouls']: currentGame[foulKey] }),
+  ]);
+  const teamId = side === 'home' ? currentGame.home : currentGame.away;
+  if (appliedDelta > 0){
+    logGameEvent(teamId, eventType, player.name);
+    const dqByCombo = (finalSt.technicalFouls || 0) + (finalSt.unsportsmanlikeFouls || 0) >= 2;
+    if (dqByCombo) showToast(`🚫 ${player.name} expulsado (2 faltas técnicas/antideportivas)`, true);
+    else showToast(`🟨 ${label}: ${player.name}`);
   }
 }
 
@@ -1691,10 +1851,10 @@ async function registerSubstitution(){
   const teamId = side === 'home' ? currentGame.home : currentGame.away;
 
   if (playerOut){
-    const outSt = playerStats[playerOut.id] || { points: 0, fouls: 0 };
+    const outSt = playerStats[playerOut.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
     playerStats[playerOut.id] = { ...outSt, onCourt: false };
   }
-  const inSt = playerStats[playerIn.id] || { points: 0, fouls: 0 };
+  const inSt = playerStats[playerIn.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
   playerStats[playerIn.id] = { ...inSt, onCourt: true };
   renderRosterUI();
   renderSubOptions();
@@ -1705,6 +1865,8 @@ async function registerSubstitution(){
       game_id: currentGame.id, player_id: playerOut.id, player_name: playerOut.name,
       player_number: playerOut.number ?? null, team: teamId,
       points: playerStats[playerOut.id].points, fouls: playerStats[playerOut.id].fouls,
+      technical_fouls: playerStats[playerOut.id].technicalFouls || 0,
+      unsportsmanlike_fouls: playerStats[playerOut.id].unsportsmanlikeFouls || 0,
       played: true, division: activeDivision, on_court: false,
     }}, { silent: true }));
   }
@@ -1712,6 +1874,8 @@ async function registerSubstitution(){
     game_id: currentGame.id, player_id: playerIn.id, player_name: playerIn.name,
     player_number: playerIn.number ?? null, team: teamId,
     points: playerStats[playerIn.id].points, fouls: playerStats[playerIn.id].fouls,
+    technical_fouls: playerStats[playerIn.id].technicalFouls || 0,
+    unsportsmanlike_fouls: playerStats[playerIn.id].unsportsmanlikeFouls || 0,
     played: true, division: activeDivision, on_court: true,
   }}, { silent: true }));
   await Promise.all(writes);
