@@ -123,6 +123,32 @@
     .nav-cta{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;background:var(--red);color:#fff;padding:8px 18px;border-radius:2px;border:none;cursor:pointer;transition:background .15s;}
     .nav-cta:hover{background:#c8001a;}
 
+    /* ── BUSCADOR (equipos y jugadores) ── */
+    .nav-search-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;flex-shrink:0;}
+    .nav-search-btn:hover{color:var(--text);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.1);}
+    #search-modal{display:none;position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,.94);backdrop-filter:blur(20px);align-items:flex-start;justify-content:center;padding:90px 20px 20px;overflow-y:auto;}
+    #search-modal.open{display:flex;}
+    .search-box{width:560px;max-width:100%;}
+    .search-input-wrap{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0 16px;}
+    .search-input-wrap .search-icon{color:var(--muted);font-size:16px;margin-right:10px;flex-shrink:0;}
+    #search-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:17px;padding:16px 0;min-width:0;}
+    #search-input::placeholder{color:var(--muted);}
+    .search-close-btn{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;transition:color .15s;flex-shrink:0;}
+    .search-close-btn:hover{color:var(--text);}
+    .search-results{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow-y:auto;}
+    .search-group-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:12px 16px 6px;}
+    .search-result-row{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .15s;text-decoration:none;color:inherit;}
+    .search-result-row:hover{background:rgba(255,255,255,.05);}
+    .search-result-logo{width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .search-result-logo img{width:100%;height:100%;object-fit:contain;}
+    .search-result-logo-placeholder{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:10px;color:#fff;flex-shrink:0;}
+    .search-result-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--text);}
+    .search-result-sub{font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:1px;}
+    .search-result-div{margin-left:auto;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px;flex-shrink:0;}
+    .search-result-div.primera{background:rgba(248,8,8,.15);color:var(--red);}
+    .search-result-div.segunda{background:rgba(48,9,220,.15);color:#5b7fd6;}
+    .search-empty,.search-hint{padding:24px 16px;text-align:center;color:var(--muted);font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;}
+
     /* ── HERO ── */
     .hero{position:relative;min-height:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(64px,8vw,96px) clamp(24px,8vw,80px) 40px;overflow:hidden;}
     .hero-columns{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:32px;width:100%;max-width:1240px;}
@@ -512,6 +538,8 @@
     /* ── MOBILE ── */
     @media(max-width:768px){
       nav{padding:0 16px;height:56px;gap:8px;}
+      #search-modal{padding:70px 12px 16px;}
+      #search-input{font-size:15px;padding:14px 0;}
       #sched-strip{padding-top:56px;}
       .sched-card{flex-basis:160px;min-width:160px;padding:10px 12px;}
       .nav-links{display:none;}
@@ -1004,9 +1032,22 @@
     <a href="#sanctions-root">Sanciones</a>
   </div>
   <div class="nav-right">
+    <button class="nav-search-btn" onclick="openSearch()" title="Buscar equipo o jugador" aria-label="Buscar">🔍</button>
     <button class="div-badge primera" id="nav-div-badge" onclick="showDivisionSelector()">1° División</button>
   </div>
 </nav>
+
+<!-- ══ BUSCADOR ══ -->
+<div id="search-modal" onclick="if(event.target===this) closeSearch()">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Buscar equipo o jugador..." autocomplete="off" oninput="onSearchInput()">
+      <button class="search-close-btn" onclick="closeSearch()">✕</button>
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
 
 <div id="sched-strip"></div>
 
@@ -1763,10 +1804,112 @@ document.addEventListener('keydown',e=>{
   if (e.key==='Escape'){
     if (document.getElementById('share-modal').classList.contains('open')) closeShareModal();
     if (document.getElementById('game-detail-modal').classList.contains('open')) closeGameDetail();
-    if (document.getElementById('lightbox').classList.contains('open')) closeLightbox();
+    if (document.getElementById('lightbox')?.classList.contains('open')) closeLightbox();
     if (document.getElementById('instagram-modal').classList.contains('open')) closeInstagramModal();
+    if (document.getElementById('search-modal').classList.contains('open')) closeSearch();
   }
 });
+
+/* ══ BUSCADOR (equipos y jugadores, ambas divisiones) ══ */
+const normalizeSearch = s => (s||'').toString().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+let _allPlayersCache = null;
+async function getAllPlayersCache() {
+  if (_allPlayersCache) return _allPlayersCache;
+  const [{data:p1},{data:p2}] = await Promise.all([
+    _supabase.from(CONFIG.divisions.primera.playersTable).select('id,name,team'),
+    _supabase.from(CONFIG.divisions.segunda.playersTable).select('id,name,team'),
+  ]);
+  _allPlayersCache = { primera:p1||[], segunda:p2||[] };
+  return _allPlayersCache;
+}
+
+function searchTeams(q) {
+  const nq = normalizeSearch(q);
+  const results = [];
+  for (const [divKey, divObj] of Object.entries(CONFIG.divisions)) {
+    for (const [id, t] of Object.entries(divObj.teams)) {
+      if (normalizeSearch(t.name).includes(nq) || normalizeSearch(t.abbr).includes(nq)) {
+        results.push({ id, div:divKey, ...t });
+      }
+    }
+  }
+  return results;
+}
+
+async function searchPlayers(q) {
+  const nq = normalizeSearch(q);
+  const cache = await getAllPlayersCache();
+  const results = [];
+  for (const div of ['primera','segunda']) {
+    for (const p of cache[div]) {
+      if (normalizeSearch(p.name).includes(nq)) {
+        const t = CONFIG.divisions[div].teams[p.team] || {};
+        results.push({ id:p.id, name:p.name, div, teamName:t.name||'Sin equipo', teamColor:t.color||'#333', teamAbbr:t.abbr||'', logo:t.logo||'' });
+      }
+    }
+  }
+  return results;
+}
+
+let _searchToken = 0;
+let _searchDebounce = null;
+function onSearchInput() {
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => runSearch(document.getElementById('search-input').value), 200);
+}
+
+async function runSearch(rawQ) {
+  const q = rawQ.trim();
+  const box = document.getElementById('search-results');
+  if (q.length < 2) {
+    box.innerHTML = `<div class="search-hint">Escribe al menos 2 letras para buscar...</div>`;
+    return;
+  }
+  const myToken = ++_searchToken;
+  box.innerHTML = `<div class="search-hint">Buscando...</div>`;
+  const teamResults = searchTeams(q);
+  let playerResults = [];
+  try { playerResults = await searchPlayers(q); } catch (e) { console.error('Error buscando jugadores:', e); }
+  if (myToken !== _searchToken) return;
+  if (!teamResults.length && !playerResults.length) {
+    box.innerHTML = `<div class="search-empty">Sin resultados para "${q}"</div>`;
+    return;
+  }
+  let html = '';
+  if (teamResults.length) {
+    html += `<div class="search-group-label">Equipos</div>` + teamResults.map(t => `
+      <a class="search-result-row" href="team.html?id=${t.id}&div=${t.div}">
+        ${t.logo
+          ? `<div class="search-result-logo"><img src="${t.logo}" alt="${t.name}" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'search-result-logo-placeholder\\' style=\\'background:${t.color}\\'>${t.abbr}</div>'"></div>`
+          : `<div class="search-result-logo-placeholder" style="background:${t.color}">${t.abbr}</div>`}
+        <div><div class="search-result-name">${t.name}</div><div class="search-result-sub">${t.abbr}</div></div>
+        <span class="search-result-div ${t.div}">${t.div==='primera'?'1°':'2°'}</span>
+      </a>`).join('');
+  }
+  if (playerResults.length) {
+    html += `<div class="search-group-label">Jugadores</div>` + playerResults.map(p => `
+      <a class="search-result-row" href="player.html?id=${p.id}&div=${p.div}">
+        ${p.logo
+          ? `<div class="search-result-logo"><img src="${p.logo}" alt="${p.teamName}" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'search-result-logo-placeholder\\' style=\\'background:${p.teamColor}\\'>${p.teamAbbr}</div>'"></div>`
+          : `<div class="search-result-logo-placeholder" style="background:${p.teamColor}">${p.teamAbbr}</div>`}
+        <div><div class="search-result-name">${p.name}</div><div class="search-result-sub">${p.teamName}</div></div>
+        <span class="search-result-div ${p.div}">${p.div==='primera'?'1°':'2°'}</span>
+      </a>`).join('');
+  }
+  box.innerHTML = html;
+}
+
+function openSearch() {
+  document.getElementById('search-modal').classList.add('open');
+  const input = document.getElementById('search-input');
+  input.value = '';
+  document.getElementById('search-results').innerHTML = `<div class="search-hint">Escribe al menos 2 letras para buscar...</div>`;
+  setTimeout(() => input.focus(), 50);
+}
+function closeSearch() {
+  document.getElementById('search-modal').classList.remove('open');
+}
 
 /* ══ SCORERS ══ */
 async function renderScorers() {
