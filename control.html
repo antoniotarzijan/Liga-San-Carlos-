@@ -193,6 +193,7 @@
     .roster-player-row.fouled-out{background:rgba(248,8,8,.07);border-left:3px solid var(--red);}
     .roster-player-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;}
     .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+    .roster-player-num{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;color:var(--gold);margin-left:4px;}
     .roster-stat-badges{display:flex;gap:4px;flex-shrink:0;}
     .stat-badge{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.5px;padding:2px 7px;border-radius:9px;background:rgba(255,255,255,.07);color:var(--text);}
     .stat-badge.pts{background:rgba(242,179,78,.15);color:var(--gold);}
@@ -327,6 +328,7 @@
       .roster-block-head{padding:4px 7px;}
       .roster-player-row{padding:4px 7px;gap:3px;}
       .roster-player-name{font-size:11px;}
+      .roster-player-num{font-size:15px;}
       .stat-badge{font-size:10px;padding:1px 5px;}
       .roster-pt-btn{min-height:22px;font-size:10px;}
       .roster-foul-btns{margin-top:1px;}
@@ -713,7 +715,7 @@ const CONFIG = {
         OLDDS:{ abbr:'OLD-DS', name:'Old-DS',                 color:'#065F46', logo:'logos/ols ds.png' },
         INGUC:{ abbr:'INGUC',  name:'Ingeniería UC',          color:'#92400E', logo:'logos/ing.png' },
         TRO:  { abbr:'TRO',    name:'Tropics',                color:'#BE185D', logo:'logos/trop.png' },
-        SWD:  { abbr:'RAYO',    name:'Rayo Malayo', color:'#0E7490', logo:'logos/rayo.png' },
+        SWD:  { abbr:'ATL-MET',    name:'Atlético Metropolitano', color:'#0E7490', logo:'logos/swd.png' },
         SAL:  { abbr:'SAL',    name:'Salitre',                color:'#1F2937', logo:'logos/salitre.png' },
         BAR:  { abbr:'EX-ABC',    name:'Ex-ABC',     color:'#D4A800', logo:'logos/abc.png' },
         T2A:  { abbr:'BRE',    name:'Brillante Resplandor',   color:'#B91C1C', logo:'logos/brillante.png' },
@@ -729,7 +731,7 @@ const CONFIG = {
         T2F:{ abbr:'CSQ', name:'Cusqueños',            color:'#0F766E', logo:'logos/cusquenos.png' },
         T2G:{ abbr:'PIS', name:'Piscoliers',           color:'#BE185D', logo:'logos/piscoliers.png' },
         T2H:{ abbr:'CHC', name:'Chat HC',              color:'#78350F', logo:'logos/chat.png' },
-        T2I:{ abbr:'PRO',name:'Provilocura',              color:'#1E1B4B', logo:'logos/provilocura.png' },
+        T2I:{ abbr:'PRO',name:'Provilocura',              color:'#1E1B4B', logo:'' },
         T2J:{ abbr:'RIM', name:'Rimbreakers',              color:'#0891B2', logo:'logos/rimbreakers.png' },
       },
     },
@@ -1461,7 +1463,7 @@ function renderRosterSide(side, players, containerId){
   container.innerHTML = onCourt.map(p => {
     const st = playerStats[p.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
     const techFouls = st.technicalFouls || 0, unspFouls = st.unsportsmanlikeFouls || 0;
-    const numBadge = p.number != null ? ` #${p.number}` : '';
+    const numBadge = p.number != null ? ` <span class="roster-player-num">#${p.number}</span>` : '';
     const dqByCombo = (techFouls + unspFouls) >= 2;
     const fouledOut = st.fouls >= 5 || dqByCombo;
     return `<div class="roster-player-row ${fouledOut?'fouled-out':''}">
