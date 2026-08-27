@@ -600,6 +600,13 @@
       font-size: 10px;
       letter-spacing: 2px;
     }
+    .tag-live {
+      color: #F87171;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
 
     /* ── PLAYER SCORING ── */
     #player-scoring-section { display: none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
@@ -1374,12 +1381,14 @@ function renderAdminLists() {
   const upcoming = STATE.games.filter(g => g.type === 'upcoming' || g.type === 'live');
   upList.innerHTML = upcoming.length ? upcoming.map(g => {
     const h = teams[g.home]?.name || g.home, a = teams[g.away]?.name || g.away;
+    const isLive = g.type === 'live';
     return `<div class="game-admin-item">
       <div class="game-admin-item-info">
         <div class="game-admin-item-teams">J${g.round} · ${h} vs ${a}</div>
-        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="tag-upcoming">⏳ PRÓXIMO</span></div>
+        <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="${isLive ? 'tag-live' : 'tag-upcoming'}">${isLive ? '🔴 EN VIVO' : '⏳ PRÓXIMO'}</span></div>
       </div>
       <div class="game-admin-actions">
+        ${isLive ? `<button class="btn btn-outline" style="padding:6px 12px;font-size:11px;" onclick="revertGameToUpcoming(${g.id})">↩ Volver a próximo</button>` : ''}
         <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteGame(${g.id})">✕</button>
       </div>
     </div>`;
@@ -1651,6 +1660,42 @@ async function deleteGame(id) {
   if (error) { showToast('⚠ Error: ' + error.message); return; }
   await loadState();
   showToast('Partido eliminado');
+}
+
+async function revertGameToUpcoming(id) {
+  if (!confirm('¿Volver este partido a "Próximo"? Se borrará todo lo registrado en vivo: marcador, cuartos, faltas, puntos y faltas por jugador, sustituciones y capitán/DT/ayudante técnico.')) return;
+  if (!confirm('Confirma de nuevo: esta acción elimina permanentemente las estadísticas ya cargadas de este partido y no se puede deshacer. ¿Continuar?')) return;
+  const table = divCfg().dbTable;
+  const [statsRes, eventsRes, subsRes, updateRes] = await Promise.all([
+    _supabase.from('game_stats').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from('game_events').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from('substitutions').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from(table).update({
+      type: 'upcoming',
+      home_score: 0, away_score: 0,
+      quarter: 1,
+      period_length_seconds: null, clock_seconds: null,
+      clock_running: false, clock_started_at: null,
+      home_fouls: 0, away_fouls: 0,
+      shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
+      possession_arrow: 'home',
+      home_timeouts: 0, away_timeouts: 0,
+      referee_observations: null, referee_signature: null,
+      home_captain: null, away_captain: null,
+      home_coach: null, away_coach: null,
+      home_assistant: null, away_assistant: null,
+      home_coach_technical: 0, away_coach_technical: 0,
+      home_assistant_technical: 0, away_assistant_technical: 0,
+      mvp: null,
+    }).eq('id', id),
+  ]);
+  if (updateRes.error) { showToast('⚠ Error: ' + updateRes.error.message); return; }
+  if (statsRes.error || eventsRes.error || subsRes.error) {
+    showToast('⚠ El partido volvió a "Próximo" pero hubo un error borrando algunos datos asociados');
+  } else {
+    showToast('✓ Partido vuelto a "Próximo" — se borraron los datos en vivo');
+  }
+  await loadState();
 }
 
 /* ══ EDIT MODAL ══ */
