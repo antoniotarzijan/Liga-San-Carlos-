@@ -174,9 +174,17 @@
     .subs-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
     .subs-select{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:14px;}
     .subs-reg-btn{width:100%;padding:10px;border-radius:6px;border:none;background:var(--gold);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+    .subs-reg-btn.confirm{background:var(--green);margin-top:8px;}
     .subs-log{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
     .subs-log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;justify-content:space-between;gap:8px;}
     .subs-log-empty{padding:8px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;}
+
+    /* ── SUSTITUCIONES MÚLTIPLES (COLA PENDIENTE) ── */
+    .pending-subs-wrap[hidden]{display:none;}
+    .pending-subs-wrap{background:rgba(242,179,78,.06);border:1px solid rgba(242,179,78,.3);border-radius:10px;padding:10px;margin-bottom:8px;}
+    .pending-subs-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
+    .pending-sub-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .pending-sub-remove{flex-shrink:0;width:22px;height:22px;border-radius:5px;border:none;background:rgba(248,113,113,.15);color:#F87171;font-size:13px;cursor:pointer;line-height:1;}
 
     /* ── PUNTOS/FALTAS POR JUGADOR ── */
     .roster-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
@@ -617,6 +625,7 @@
       <button class="roster-toggle" id="subs-toggle-btn" onclick="toggleSubs()">🔄 Sustituciones ▾</button>
       <div class="subs-wrap" id="subs-wrap" hidden>
         <div class="subs-form">
+          <div class="ref-panel-hint" style="margin-bottom:8px;">Puedes agregar varios cambios a la lista y confirmarlos todos juntos con un solo clic.</div>
           <div class="subs-form-row">
             <select class="subs-select" id="sub-team-select" onchange="renderSubOptions()">
               <option value="home">Equipo local</option>
@@ -627,7 +636,12 @@
             <select class="subs-select" id="sub-out-select"></select>
             <select class="subs-select" id="sub-in-select"></select>
           </div>
-          <button class="subs-reg-btn" onclick="registerSubstitution()">Sale ↔ Entra: registrar cambio</button>
+          <button class="subs-reg-btn" onclick="addPendingSub()">➕ Agregar a la lista de cambios</button>
+        </div>
+        <div class="pending-subs-wrap" id="pending-subs-wrap" hidden>
+          <div class="section-lbl" style="margin-top:0;">Cambios por confirmar (<span id="pending-subs-count">0</span>)</div>
+          <div class="pending-subs-list" id="pending-subs-list"></div>
+          <button class="subs-reg-btn confirm" onclick="confirmPendingSubs()" id="confirm-subs-btn">✅ Confirmar todos los cambios</button>
         </div>
         <div class="subs-log" id="subs-log"></div>
       </div>
@@ -820,6 +834,7 @@ let rosterHome = [];
 let rosterAway = [];
 let playerStats = {};         // playerId -> { points, fouls }
 let subsLog = [];
+let pendingSubs = [];
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
@@ -888,7 +903,7 @@ function setView(id){
 async function goToList(){
   stopTicker();
   currentGame = null;
-  rosterHome = []; rosterAway = []; playerStats = {}; subsLog = [];
+  rosterHome = []; rosterAway = []; playerStats = {}; subsLog = []; pendingSubs = [];
   const rosterWrap = document.getElementById('roster-wrap');
   if (rosterWrap) rosterWrap.hidden = true;
   const subsWrap = document.getElementById('subs-wrap');
@@ -1822,14 +1837,27 @@ function toggleSubs(){
   wrap.hidden = !wrap.hidden;
   document.getElementById('subs-toggle-btn').textContent =
     wrap.hidden ? '🔄 Sustituciones ▾' : '🔄 Sustituciones ▴';
-  if (!wrap.hidden) renderSubOptions();
+  if (!wrap.hidden){ renderSubOptions(); renderPendingSubs(); }
 }
+
+/* Estado "en cancha" considerando los cambios que aún no se confirman,
+   para que los selects no vuelvan a ofrecer un jugador ya puesto en la cola. */
+function effectiveOnCourt(side, playerId){
+  let val = !!playerStats[playerId]?.onCourt;
+  for (const s of pendingSubs){
+    if (s.side !== side) continue;
+    if (s.playerOut && String(s.playerOut.id) === String(playerId)) val = false;
+    if (String(s.playerIn.id) === String(playerId)) val = true;
+  }
+  return val;
+}
+
 function renderSubOptions(){
   const side = document.getElementById('sub-team-select').value;
   const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
   const players = (side === 'home' ? rosterHome : rosterAway).filter(p => gameRoster.has(String(p.id)));
-  const onCourt = players.filter(p => playerStats[p.id]?.onCourt);
-  const bench = players.filter(p => !playerStats[p.id]?.onCourt);
+  const onCourt = players.filter(p => effectiveOnCourt(side, p.id));
+  const bench = players.filter(p => !effectiveOnCourt(side, p.id));
   const outOpts = onCourt.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
   const inOpts = bench.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
   document.getElementById('sub-out-select').innerHTML =
@@ -1853,7 +1881,25 @@ function renderSubsLog(){
     return `<div class="subs-log-item"><span>C${s.quarter} · ${teamName}</span><span>🔻 ${s.player_out_name || '—'} · 🔺 ${s.player_in_name || '—'}</span></div>`;
   }).join('');
 }
-async function registerSubstitution(){
+
+/* ── Cola de sustituciones pendientes (permite armar varios cambios y confirmarlos juntos) ── */
+function renderPendingSubs(){
+  const wrap = document.getElementById('pending-subs-wrap');
+  const list = document.getElementById('pending-subs-list');
+  const countEl = document.getElementById('pending-subs-count');
+  if (!wrap || !list || !countEl) return;
+  wrap.hidden = pendingSubs.length === 0;
+  countEl.textContent = pendingSubs.length;
+  const teams = divTeams();
+  list.innerHTML = pendingSubs.map((s, i) => {
+    const teamName = teams[s.teamId]?.abbr || s.teamId;
+    return `<div class="pending-sub-item">
+      <span>${teamName} · 🔻 ${s.playerOut ? s.playerOut.name : '—'} · 🔺 ${s.playerIn.name}</span>
+      <button class="pending-sub-remove" onclick="removePendingSub(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function addPendingSub(){
   const side = document.getElementById('sub-team-select').value;
   const outId = document.getElementById('sub-out-select').value;
   const inId = document.getElementById('sub-in-select').value;
@@ -1863,45 +1909,65 @@ async function registerSubstitution(){
   const playerIn = findPlayer(side, inId);
   if (!playerIn) return;
   const teamId = side === 'home' ? currentGame.home : currentGame.away;
+  pendingSubs.push({ side, teamId, playerOut, playerIn });
+  renderSubOptions();
+  renderPendingSubs();
+  showToast('✓ Cambio agregado a la lista');
+}
+function removePendingSub(index){
+  pendingSubs.splice(index, 1);
+  renderSubOptions();
+  renderPendingSubs();
+}
+async function confirmPendingSubs(){
+  if (!pendingSubs.length) return;
+  const btn = document.getElementById('confirm-subs-btn');
+  if (btn){ btn.disabled = true; btn.textContent = '⏳ Confirmando...'; }
+  const toApply = pendingSubs.slice();
 
-  if (playerOut){
-    const outSt = playerStats[playerOut.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
-    playerStats[playerOut.id] = { ...outSt, onCourt: false };
-  }
-  const inSt = playerStats[playerIn.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
-  playerStats[playerIn.id] = { ...inSt, onCourt: true };
+  // Aplicar todos los cambios en orden antes de escribir, para que una cadena
+  // (A sale, B entra; luego B sale, C entra) quede con el estado final correcto
+  // y cada jugador se escriba una sola vez (evita condiciones de carrera en Supabase).
+  const touched = new Map(); // playerId -> { player, teamId }
+  toApply.forEach(s => {
+    if (s.playerOut){
+      const outSt = playerStats[s.playerOut.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
+      playerStats[s.playerOut.id] = { ...outSt, onCourt: false };
+      touched.set(String(s.playerOut.id), { player: s.playerOut, teamId: s.teamId });
+    }
+    const inSt = playerStats[s.playerIn.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
+    playerStats[s.playerIn.id] = { ...inSt, onCourt: true };
+    touched.set(String(s.playerIn.id), { player: s.playerIn, teamId: s.teamId });
+  });
   renderRosterUI();
   renderSubOptions();
 
   const writes = [];
-  if (playerOut){
+  touched.forEach(({ player, teamId }, playerId) => {
+    const st = playerStats[playerId];
     writes.push(runOrQueue({ table: 'game_stats', kind: 'upsert', onConflict: 'game_id,player_id', payload: {
-      game_id: currentGame.id, player_id: playerOut.id, player_name: playerOut.name,
-      player_number: playerOut.number ?? null, team: teamId,
-      points: playerStats[playerOut.id].points, fouls: playerStats[playerOut.id].fouls,
-      technical_fouls: playerStats[playerOut.id].technicalFouls || 0,
-      unsportsmanlike_fouls: playerStats[playerOut.id].unsportsmanlikeFouls || 0,
-      played: true, division: activeDivision, on_court: false,
+      game_id: currentGame.id, player_id: player.id, player_name: player.name,
+      player_number: player.number ?? null, team: teamId,
+      points: st.points, fouls: st.fouls,
+      technical_fouls: st.technicalFouls || 0,
+      unsportsmanlike_fouls: st.unsportsmanlikeFouls || 0,
+      played: true, division: activeDivision, on_court: st.onCourt,
     }}, { silent: true }));
-  }
-  writes.push(runOrQueue({ table: 'game_stats', kind: 'upsert', onConflict: 'game_id,player_id', payload: {
-    game_id: currentGame.id, player_id: playerIn.id, player_name: playerIn.name,
-    player_number: playerIn.number ?? null, team: teamId,
-    points: playerStats[playerIn.id].points, fouls: playerStats[playerIn.id].fouls,
-    technical_fouls: playerStats[playerIn.id].technicalFouls || 0,
-    unsportsmanlike_fouls: playerStats[playerIn.id].unsportsmanlikeFouls || 0,
-    played: true, division: activeDivision, on_court: true,
-  }}, { silent: true }));
+  });
+  toApply.forEach(s => {
+    writes.push(runOrQueue({ table: 'substitutions', kind: 'insert', payload: {
+      game_id: currentGame.id, division: activeDivision,
+      team: s.teamId, quarter: currentGame.quarter,
+      player_out_name: s.playerOut?.name || null, player_in_name: s.playerIn.name,
+    }}, { silent: true }));
+    logGameEvent(s.teamId, 'substitution', s.playerIn.name, null, s.playerOut ? `Sale: ${s.playerOut.name}` : null);
+  });
   await Promise.all(writes);
 
-  const payload = {
-    game_id: currentGame.id, division: activeDivision,
-    team: teamId, quarter: currentGame.quarter,
-    player_out_name: playerOut?.name || null, player_in_name: playerIn.name,
-  };
-  await runOrQueue({ table: 'substitutions', kind: 'insert', payload }, { silent: true });
-  logGameEvent(teamId, 'substitution', playerIn.name, null, playerOut ? `Sale: ${playerOut.name}` : null);
-  showToast('✓ Sustitución registrada');
+  pendingSubs = [];
+  renderPendingSubs();
+  if (btn){ btn.disabled = false; btn.textContent = '✅ Confirmar todos los cambios'; }
+  showToast(`✓ ${toApply.length} sustitución${toApply.length > 1 ? 'es' : ''} registrada${toApply.length > 1 ? 's' : ''}`);
   loadSubstitutions();
 }
 
