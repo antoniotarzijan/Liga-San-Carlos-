@@ -91,6 +91,7 @@
     .board-top-actions{display:flex;gap:6px;flex-shrink:0;}
     .finish-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid rgba(248,113,113,.35);background:rgba(248,113,113,.1);color:#F87171;cursor:pointer;}
     .ot-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid rgba(242,179,78,.4);background:rgba(242,179,78,.1);color:var(--gold);cursor:pointer;white-space:nowrap;}
+    .revert-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 12px;border-radius:4px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;white-space:nowrap;}
 
     /* ── ENCABEZADO COMPACTO (siempre visible) ── */
     .compact-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:8px;}
@@ -240,7 +241,8 @@
     #view-board.finished-mode .clock-shot-row,
     #view-board.finished-mode .role-section,
     #view-board.finished-mode .finish-btn,
-    #view-board.finished-mode .ot-btn{display:none!important;}
+    #view-board.finished-mode .ot-btn,
+    #view-board.finished-mode .revert-btn{display:none!important;}
 
     /* ── OBSERVACIONES Y FIRMA DEL ÁRBITRO ── */
     .ref-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:4px;margin-bottom:8px;}
@@ -457,6 +459,7 @@
     <div class="board-top">
       <div class="board-round" id="board-round">Jornada —</div>
       <div class="board-top-actions">
+        <button class="revert-btn" onclick="revertGameToUpcoming()">↩ Volver a próximo</button>
         <button class="ot-btn" onclick="startOvertime()">➕ Tiempo Extra</button>
         <button class="finish-btn" onclick="finishGame()">🏁 Finalizar partido</button>
       </div>
@@ -2100,6 +2103,44 @@ async function finishGame(){
   }
 
   showToast(`✓ Partido finalizado${mvpName ? ' · MVP: ' + mvpName : ''}`);
+  goToList();
+}
+
+/* ── VOLVER UN PARTIDO EN VIVO A "PRÓXIMO" ── */
+async function revertGameToUpcoming(){
+  if (!confirm('¿Volver este partido a "Próximo"? Se borrará todo lo registrado en vivo: marcador, cuartos, faltas, puntos y faltas por jugador, sustituciones y capitán/DT/ayudante técnico.')) return;
+  if (!confirm('Confirma de nuevo: esta acción elimina permanentemente las estadísticas ya cargadas de este partido y no se puede deshacer. ¿Continuar?')) return;
+  stopTicker();
+  const id = currentGame.id;
+  const [statsRes, eventsRes, subsRes, updateRes] = await Promise.all([
+    _supabase.from('game_stats').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from('game_events').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from('substitutions').delete().eq('game_id', id).eq('division', activeDivision),
+    _supabase.from(divCfg().dbTable).update({
+      type: 'upcoming',
+      home_score: 0, away_score: 0,
+      quarter: 1,
+      period_length_seconds: null, clock_seconds: null,
+      clock_running: false, clock_started_at: null,
+      home_fouls: 0, away_fouls: 0,
+      shot_clock_seconds: 24, shot_clock_running: false, shot_clock_started_at: null,
+      possession_arrow: 'home',
+      home_timeouts: 0, away_timeouts: 0,
+      referee_observations: null, referee_signature: null,
+      home_captain: null, away_captain: null,
+      home_coach: null, away_coach: null,
+      home_assistant: null, away_assistant: null,
+      home_coach_technical: 0, away_coach_technical: 0,
+      home_assistant_technical: 0, away_assistant_technical: 0,
+      mvp: null,
+    }).eq('id', id),
+  ]);
+  if (updateRes.error){ showToast('⚠ Error: ' + updateRes.error.message, true); return; }
+  if (statsRes.error || eventsRes.error || subsRes.error){
+    showToast('⚠ El partido volvió a "Próximo" pero hubo un error borrando algunos datos asociados', true);
+  } else {
+    showToast('✓ Partido vuelto a "Próximo" — se borraron los datos en vivo');
+  }
   goToList();
 }
 </script>
