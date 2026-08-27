@@ -668,21 +668,31 @@
         <div class="roster-block" id="jersey-edit-away"></div>
       </div>
 
-      <button class="roster-toggle" id="addplayer-toggle-btn" onclick="toggleAddPlayer()">➕ Agregar jugador nuevo ▾</button>
+      <button class="roster-toggle" id="addplayer-toggle-btn" onclick="toggleAddPlayer()">➕ Agregar jugador al partido ▾</button>
       <div class="subs-wrap" id="addplayer-wrap" hidden>
         <div class="subs-form">
-          <div class="ref-panel-hint" style="margin-bottom:8px;">Para un jugador que no estaba en la nómina y llega después de iniciado el partido. Queda agregado a la ficha del equipo y disponible para ingresar por Sustituciones.</div>
-          <div class="subs-form-row">
-            <select class="subs-select" id="addplayer-team-select">
-              <option value="home">Equipo local</option>
-              <option value="away">Equipo visita</option>
-            </select>
+          <div class="quick-sub-tabs">
+            <button class="quick-sub-tab active" id="addplayer-mode-roster" onclick="setAddPlayerMode('roster')">De la nómina</button>
+            <button class="quick-sub-tab" id="addplayer-mode-new" onclick="setAddPlayerMode('new')">Jugador nuevo</button>
           </div>
-          <div class="subs-form-row">
-            <input type="text" class="subs-select" id="addplayer-name" placeholder="Nombre del jugador">
-            <input type="number" class="subs-select" id="addplayer-number" placeholder="# (opcional)" min="0" max="99">
+          <div class="quick-sub-tabs">
+            <button class="quick-sub-tab active" id="addplayer-team-home" onclick="setAddPlayerTeam('home')">Equipo local</button>
+            <button class="quick-sub-tab" id="addplayer-team-away" onclick="setAddPlayerTeam('away')">Equipo visita</button>
           </div>
-          <button class="subs-reg-btn" onclick="addLatePlayer()" id="addplayer-btn">➕ Agregar al partido</button>
+
+          <div id="addplayer-roster-panel">
+            <div class="ref-panel-hint" style="margin-bottom:8px;">Jugadores de la nómina que aún no están en este partido. Tócalo para sumarlo directo, en banca.</div>
+            <div class="quick-sub-grid" id="addplayer-roster-grid"></div>
+          </div>
+
+          <div id="addplayer-new-panel" hidden>
+            <div class="ref-panel-hint" style="margin-bottom:8px;">Solo para un jugador que no estaba inscrito en la nómina del equipo.</div>
+            <div class="subs-form-row">
+              <input type="text" class="subs-select" id="addplayer-name" placeholder="Nombre del jugador">
+              <input type="number" class="subs-select" id="addplayer-number" placeholder="# (opcional)" min="0" max="99">
+            </div>
+            <button class="subs-reg-btn" onclick="addLatePlayer()" id="addplayer-btn">➕ Crear e ingresar al partido</button>
+          </div>
         </div>
       </div>
     </div>
@@ -877,6 +887,8 @@ let subsLog = [];
 let pendingSubs = [];
 let subsTeamSide = 'home';
 let pendingOutPick = null; // { side, player } — jugador tocado en "Salen", esperando quién entra
+let addPlayerTeamSide = 'home';
+let addPlayerMode = 'roster'; // 'roster' (jugador ya inscrito) | 'new' (crea ficha nueva)
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
@@ -947,6 +959,7 @@ async function goToList(){
   currentGame = null;
   rosterHome = []; rosterAway = []; playerStats = {}; subsLog = []; pendingSubs = [];
   subsTeamSide = 'home'; pendingOutPick = null;
+  addPlayerTeamSide = 'home'; addPlayerMode = 'roster';
   const rosterWrap = document.getElementById('roster-wrap');
   if (rosterWrap) rosterWrap.hidden = true;
   const subsWrap = document.getElementById('subs-wrap');
@@ -958,7 +971,7 @@ async function goToList(){
   const addPlayerWrap = document.getElementById('addplayer-wrap');
   if (addPlayerWrap) addPlayerWrap.hidden = true;
   const addPlayerBtn = document.getElementById('addplayer-toggle-btn');
-  if (addPlayerBtn) addPlayerBtn.textContent = '➕ Agregar jugador nuevo ▾';
+  if (addPlayerBtn) addPlayerBtn.textContent = '➕ Agregar jugador al partido ▾';
   setView('view-list');
   updateDivPill();
   const [activeRes, finishedRes] = await Promise.all([
@@ -1442,10 +1455,66 @@ function toggleAddPlayer(){
   const wrap = document.getElementById('addplayer-wrap');
   wrap.hidden = !wrap.hidden;
   document.getElementById('addplayer-toggle-btn').textContent =
-    wrap.hidden ? '➕ Agregar jugador nuevo ▾' : '➕ Agregar jugador nuevo ▴';
+    wrap.hidden ? '➕ Agregar jugador al partido ▾' : '➕ Agregar jugador al partido ▴';
+  if (!wrap.hidden) renderAddPlayerRosterGrid();
+}
+function setAddPlayerMode(mode){
+  addPlayerMode = mode;
+  document.getElementById('addplayer-mode-roster').classList.toggle('active', mode === 'roster');
+  document.getElementById('addplayer-mode-new').classList.toggle('active', mode === 'new');
+  document.getElementById('addplayer-roster-panel').hidden = mode !== 'roster';
+  document.getElementById('addplayer-new-panel').hidden = mode !== 'new';
+  if (mode === 'roster') renderAddPlayerRosterGrid();
+}
+function setAddPlayerTeam(side){
+  addPlayerTeamSide = side;
+  document.getElementById('addplayer-team-home').classList.toggle('active', side === 'home');
+  document.getElementById('addplayer-team-away').classList.toggle('active', side === 'away');
+  renderAddPlayerRosterGrid();
+}
+function renderAddPlayerRosterGrid(){
+  const grid = document.getElementById('addplayer-roster-grid');
+  if (!grid) return;
+  const side = addPlayerTeamSide;
+  const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
+  const list = (side === 'home' ? rosterHome : rosterAway).filter(p => !gameRoster.has(String(p.id)));
+  if (!list.length){
+    grid.innerHTML = '<div class="quick-sub-empty">No hay más jugadores de la nómina disponibles para agregar — usa "Jugador nuevo" si falta inscribir a alguien.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p =>
+    `<button class="quick-sub-btn" onclick="addRosterPlayerToGame('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`
+  ).join('');
+}
+async function addRosterPlayerToGame(playerId){
+  const side = addPlayerTeamSide;
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
+  if (gameRoster.has(String(playerId))) return;
+  if (gameRoster.size >= 12){ showToast('⚠ Ya hay 12 jugadores en el partido para este equipo', true); return; }
+
+  const teamId = side === 'home' ? currentGame.home : currentGame.away;
+  gameRoster.add(String(player.id));
+  playerStats[player.id] = { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0, onCourt: false };
+
+  await runOrQueue({ table: 'game_stats', kind: 'upsert', onConflict: 'game_id,player_id', payload: {
+    game_id: currentGame.id, player_id: player.id, player_name: player.name,
+    player_number: player.number ?? null, team: teamId,
+    points: 0, fouls: 0, technical_fouls: 0, unsportsmanlike_fouls: 0,
+    played: false, division: activeDivision, on_court: false,
+  }}, { silent: true });
+  logGameEvent(teamId, 'roster_add', player.name, null, 'Se incorporó al partido ya iniciado (estaba en la nómina)');
+
+  renderRosterUI();
+  renderSubOptions();
+  renderStaffPanel();
+  renderJerseyEditUI();
+  renderAddPlayerRosterGrid();
+  showToast(`✓ ${player.name} agregado al partido — ya puede ingresar por Sustituciones`);
 }
 async function addLatePlayer(){
-  const side = document.getElementById('addplayer-team-select').value;
+  const side = addPlayerTeamSide;
   const nameInput = document.getElementById('addplayer-name');
   const numberInput = document.getElementById('addplayer-number');
   const name = nameInput.value.trim();
@@ -1468,7 +1537,7 @@ async function addLatePlayer(){
   const { data: player, error } = await _supabase.from(divCfg().playersTable)
     .insert([{ name, team: teamId, number, points: 0, games: 0, position: null }])
     .select().single();
-  btn.disabled = false; btn.textContent = '➕ Agregar al partido';
+  btn.disabled = false; btn.textContent = '➕ Crear e ingresar al partido';
   if (error || !player){ showToast('⚠ Error al crear el jugador: ' + (error?.message || 'revisa la consola'), true); return; }
 
   (side === 'home' ? rosterHome : rosterAway).push(player);
