@@ -180,6 +180,18 @@
     .subs-log-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;justify-content:space-between;gap:8px;}
     .subs-log-empty{padding:8px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;}
 
+    /* ── SUSTITUCIONES RÁPIDAS (TOQUE DIRECTO, SIN SELECTS) ── */
+    .quick-sub-tabs{display:flex;gap:6px;margin-bottom:10px;}
+    .quick-sub-tab{flex:1;padding:9px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+    .quick-sub-tab.active{background:var(--gold);border-color:var(--gold);color:#000;}
+    .quick-sub-col{margin-bottom:10px;}
+    .quick-sub-col:last-child{margin-bottom:0;}
+    .quick-sub-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .quick-sub-grid{display:flex;flex-wrap:wrap;gap:6px;}
+    .quick-sub-btn{padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;cursor:pointer;}
+    .quick-sub-btn.out-pending{background:var(--red);border-color:var(--red);color:#fff;}
+    .quick-sub-empty{padding:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;}
+
     /* ── SUSTITUCIONES MÚLTIPLES (COLA PENDIENTE) ── */
     .pending-subs-wrap[hidden]{display:none;}
     .pending-subs-wrap{background:rgba(242,179,78,.06);border:1px solid rgba(242,179,78,.3);border-radius:10px;padding:10px;margin-bottom:8px;}
@@ -628,18 +640,19 @@
       <button class="roster-toggle" id="subs-toggle-btn" onclick="toggleSubs()">🔄 Sustituciones ▾</button>
       <div class="subs-wrap" id="subs-wrap" hidden>
         <div class="subs-form">
-          <div class="ref-panel-hint" style="margin-bottom:8px;">Puedes agregar varios cambios a la lista y confirmarlos todos juntos con un solo clic.</div>
-          <div class="subs-form-row">
-            <select class="subs-select" id="sub-team-select" onchange="renderSubOptions()">
-              <option value="home">Equipo local</option>
-              <option value="away">Equipo visita</option>
-            </select>
+          <div class="ref-panel-hint" style="margin-bottom:8px;">Toca al que sale y luego al que entra: el cambio se agrega solo a la lista. Si tocas directo a alguien de "Entran" sin marcar a nadie de "Salen", entra sin sacar a otro.</div>
+          <div class="quick-sub-tabs">
+            <button class="quick-sub-tab active" id="quick-sub-tab-home" onclick="setSubsTeam('home')">Equipo local</button>
+            <button class="quick-sub-tab" id="quick-sub-tab-away" onclick="setSubsTeam('away')">Equipo visita</button>
           </div>
-          <div class="subs-form-row">
-            <select class="subs-select" id="sub-out-select"></select>
-            <select class="subs-select" id="sub-in-select"></select>
+          <div class="quick-sub-col">
+            <div class="quick-sub-label">Salen (en cancha)</div>
+            <div class="quick-sub-grid" id="quick-sub-out"></div>
           </div>
-          <button class="subs-reg-btn" onclick="addPendingSub()">➕ Agregar a la lista de cambios</button>
+          <div class="quick-sub-col">
+            <div class="quick-sub-label">Entran (banca)</div>
+            <div class="quick-sub-grid" id="quick-sub-in"></div>
+          </div>
         </div>
         <div class="pending-subs-wrap" id="pending-subs-wrap" hidden>
           <div class="section-lbl" style="margin-top:0;">Cambios por confirmar (<span id="pending-subs-count">0</span>)</div>
@@ -862,6 +875,8 @@ let rosterAway = [];
 let playerStats = {};         // playerId -> { points, fouls }
 let subsLog = [];
 let pendingSubs = [];
+let subsTeamSide = 'home';
+let pendingOutPick = null; // { side, player } — jugador tocado en "Salen", esperando quién entra
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
@@ -931,6 +946,7 @@ async function goToList(){
   stopTicker();
   currentGame = null;
   rosterHome = []; rosterAway = []; playerStats = {}; subsLog = []; pendingSubs = [];
+  subsTeamSide = 'home'; pendingOutPick = null;
   const rosterWrap = document.getElementById('roster-wrap');
   if (rosterWrap) rosterWrap.hidden = true;
   const subsWrap = document.getElementById('subs-wrap');
@@ -2009,17 +2025,58 @@ function effectiveOnCourt(side, playerId){
   return val;
 }
 
+function setSubsTeam(side){
+  subsTeamSide = side;
+  pendingOutPick = null;
+  document.getElementById('quick-sub-tab-home').classList.toggle('active', side === 'home');
+  document.getElementById('quick-sub-tab-away').classList.toggle('active', side === 'away');
+  renderSubOptions();
+}
+
 function renderSubOptions(){
-  const side = document.getElementById('sub-team-select').value;
+  const side = subsTeamSide;
   const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
   const players = (side === 'home' ? rosterHome : rosterAway).filter(p => gameRoster.has(String(p.id)));
   const onCourt = players.filter(p => effectiveOnCourt(side, p.id));
   const bench = players.filter(p => !effectiveOnCourt(side, p.id));
-  const outOpts = onCourt.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
-  const inOpts = bench.map(p => `<option value="${p.id}">${p.name}${p.number != null ? ' #' + p.number : ''}</option>`).join('');
-  document.getElementById('sub-out-select').innerHTML =
-    '<option value="">— Nadie (agregar sin sacar) —</option>' + outOpts;
-  document.getElementById('sub-in-select').innerHTML = inOpts || '<option value="">— Sin jugadores en banca —</option>';
+
+  const outEl = document.getElementById('quick-sub-out');
+  const inEl = document.getElementById('quick-sub-in');
+  if (!outEl || !inEl) return;
+
+  outEl.innerHTML = onCourt.length ? onCourt.map(p => {
+    const isPending = pendingOutPick && pendingOutPick.side === side && String(pendingOutPick.player.id) === String(p.id);
+    return `<button class="quick-sub-btn ${isPending ? 'out-pending' : ''}" onclick="quickSubTapOut('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`;
+  }).join('') : '<div class="quick-sub-empty">Sin jugadores en cancha.</div>';
+
+  inEl.innerHTML = bench.length ? bench.map(p =>
+    `<button class="quick-sub-btn" onclick="quickSubTapIn('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`
+  ).join('') : '<div class="quick-sub-empty">Sin jugadores en banca.</div>';
+}
+
+function quickSubTapOut(playerId){
+  const side = subsTeamSide;
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  if (pendingOutPick && pendingOutPick.side === side && String(pendingOutPick.player.id) === String(playerId)){
+    pendingOutPick = null; // toca de nuevo al mismo jugador: cancela la selección
+  } else {
+    pendingOutPick = { side, player };
+  }
+  renderSubOptions();
+}
+
+function quickSubTapIn(playerId){
+  const side = subsTeamSide;
+  const playerIn = findPlayer(side, playerId);
+  if (!playerIn) return;
+  const teamId = side === 'home' ? currentGame.home : currentGame.away;
+  const playerOut = (pendingOutPick && pendingOutPick.side === side) ? pendingOutPick.player : null;
+  pendingSubs.push({ side, teamId, playerOut, playerIn });
+  pendingOutPick = null;
+  renderSubOptions();
+  renderPendingSubs();
+  showToast(playerOut ? `✓ ${playerOut.name} → ${playerIn.name}` : `✓ ${playerIn.name} entra`);
 }
 async function loadSubstitutions(){
   const { data, error } = await _supabase.from('substitutions').select('*')
@@ -2055,21 +2112,6 @@ function renderPendingSubs(){
       <button class="pending-sub-remove" onclick="removePendingSub(${i})">✕</button>
     </div>`;
   }).join('');
-}
-function addPendingSub(){
-  const side = document.getElementById('sub-team-select').value;
-  const outId = document.getElementById('sub-out-select').value;
-  const inId = document.getElementById('sub-in-select').value;
-  if (!inId){ showToast('⚠ Selecciona el jugador que entra', true); return; }
-  if (outId && outId === inId){ showToast('⚠ Selecciona jugadores distintos', true); return; }
-  const playerOut = outId ? findPlayer(side, outId) : null;
-  const playerIn = findPlayer(side, inId);
-  if (!playerIn) return;
-  const teamId = side === 'home' ? currentGame.home : currentGame.away;
-  pendingSubs.push({ side, teamId, playerOut, playerIn });
-  renderSubOptions();
-  renderPendingSubs();
-  showToast('✓ Cambio agregado a la lista');
 }
 function removePendingSub(index){
   pendingSubs.splice(index, 1);
