@@ -1162,6 +1162,7 @@ const divTeams = () => divCfg().teams;
 function selectDivision(div) {
   activeDivision = div;
   STATE.games    = [];
+  sessionStorage.setItem('activeDivision', div);
   document.getElementById('division-selector').classList.add('hidden');
   document.getElementById('roster-root').style.display = 'none';
   const badge = document.getElementById('nav-div-badge');
@@ -1177,6 +1178,11 @@ function showDivisionSelector() {
   sel.classList.remove('hidden');
   sel.scrollTop = 0;
   window.scrollTo(0, 0);
+}
+
+const _savedDivision = sessionStorage.getItem('activeDivision');
+if (_savedDivision === 'primera' || _savedDivision === 'segunda') {
+  selectDivision(_savedDivision);
 }
 
 /* ══ FRANJA DE PARTIDOS (próximos + en vivo, división activa) ══ */
@@ -1221,7 +1227,7 @@ async function renderSchedStrip() {
   wrap.classList.add('show');
 }
 
-renderSchedStrip();
+if (!_savedDivision) renderSchedStrip();
 setInterval(renderSchedStrip, 15000);
 
 function rowToGame(row) {
