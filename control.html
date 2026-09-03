@@ -190,6 +190,7 @@
     .quick-sub-grid{display:flex;flex-wrap:wrap;gap:6px;}
     .quick-sub-btn{padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;cursor:pointer;}
     .quick-sub-btn.out-pending{background:var(--red);border-color:var(--red);color:#fff;}
+    .quick-sub-num{display:inline-block;margin-left:5px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.5px;color:#04222e;background:#38BDF8;padding:1px 6px;border-radius:4px;vertical-align:middle;}
     .quick-sub-empty{padding:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;}
 
     /* ── SUSTITUCIONES MÚLTIPLES (COLA PENDIENTE) ── */
@@ -1484,7 +1485,7 @@ function renderAddPlayerRosterGrid(){
     return;
   }
   grid.innerHTML = list.map(p =>
-    `<button class="quick-sub-btn" onclick="addRosterPlayerToGame('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`
+    `<button class="quick-sub-btn" onclick="addRosterPlayerToGame('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`
   ).join('');
 }
 async function addRosterPlayerToGame(playerId){
@@ -2119,11 +2120,11 @@ function renderSubOptions(){
 
   outEl.innerHTML = onCourt.length ? onCourt.map(p => {
     const isPending = pendingOutPick && pendingOutPick.side === side && String(pendingOutPick.player.id) === String(p.id);
-    return `<button class="quick-sub-btn ${isPending ? 'out-pending' : ''}" onclick="quickSubTapOut('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`;
+    return `<button class="quick-sub-btn ${isPending ? 'out-pending' : ''}" onclick="quickSubTapOut('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`;
   }).join('') : '<div class="quick-sub-empty">Sin jugadores en cancha.</div>';
 
   inEl.innerHTML = bench.length ? bench.map(p =>
-    `<button class="quick-sub-btn" onclick="quickSubTapIn('${p.id}')">${p.name}${p.number != null ? ' #' + p.number : ''}</button>`
+    `<button class="quick-sub-btn" onclick="quickSubTapIn('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`
   ).join('') : '<div class="quick-sub-empty">Sin jugadores en banca.</div>';
 }
 
