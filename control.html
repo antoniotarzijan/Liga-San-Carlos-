@@ -213,8 +213,9 @@
     .roster-player-row:last-child{border-bottom:none;}
     .roster-player-row.fouled-out{background:rgba(248,8,8,.07);border-left:3px solid var(--red);}
     .roster-player-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+    .roster-player-title{display:flex;align-items:center;gap:7px;min-width:0;flex:1;}
     .roster-player-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
-    .roster-player-num{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;color:var(--gold);margin-left:4px;}
+    .roster-player-num{flex-shrink:0;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;line-height:1;color:#000;background:var(--gold);padding:3px 9px 2px;border-radius:6px;box-shadow:0 1px 5px rgba(242,179,78,.4);}
     .roster-stat-badges{display:flex;gap:4px;flex-shrink:0;}
     .stat-badge{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.5px;padding:2px 7px;border-radius:9px;background:rgba(255,255,255,.07);color:var(--text);}
     .stat-badge.pts{background:rgba(242,179,78,.15);color:var(--gold);}
@@ -350,7 +351,7 @@
       .roster-block-head{padding:4px 7px;}
       .roster-player-row{padding:4px 7px;gap:3px;}
       .roster-player-name{font-size:11px;}
-      .roster-player-num{font-size:15px;}
+      .roster-player-num{font-size:18px;padding:2px 7px 1px;}
       .stat-badge{font-size:10px;padding:1px 5px;}
       .roster-pt-btn{min-height:22px;font-size:10px;}
       .roster-foul-btns{margin-top:1px;}
@@ -1720,12 +1721,15 @@ function renderRosterSide(side, players, containerId){
   container.innerHTML = onCourt.map(p => {
     const st = playerStats[p.id] || { points: 0, fouls: 0, technicalFouls: 0, unsportsmanlikeFouls: 0 };
     const techFouls = st.technicalFouls || 0, unspFouls = st.unsportsmanlikeFouls || 0;
-    const numBadge = p.number != null ? ` <span class="roster-player-num">#${p.number}</span>` : '';
+    const numBadge = p.number != null ? `<span class="roster-player-num">#${p.number}</span>` : '';
     const dqByCombo = (techFouls + unspFouls) >= 2;
     const fouledOut = st.fouls >= 5 || dqByCombo;
     return `<div class="roster-player-row ${fouledOut?'fouled-out':''}">
       <div class="roster-player-top">
-        <div class="roster-player-name">${p.name}${numBadge}</div>
+        <div class="roster-player-title">
+          <div class="roster-player-name">${p.name}</div>
+          ${numBadge}
+        </div>
         <div class="roster-stat-badges">
           <span class="stat-badge pts">${st.points} pts</span>
           <span class="stat-badge fouls ${st.fouls>=5?'out':''}">${st.fouls} f</span>
