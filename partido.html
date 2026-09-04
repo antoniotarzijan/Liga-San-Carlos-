@@ -244,11 +244,16 @@ function quarterLabel(q){
 
 function buildTimelineHTML(events, row, teams){
   if (!events.length) return '<div class="timeline-empty">Aún no hay jugadas registradas.</div>';
+  // Preferir la foto del marcador guardada junto al evento (home_score/away_score),
+  // que ya incluye correcciones (−1, "Corregir resultado final"). Si un evento antiguo
+  // no la tiene, seguimos sumando como respaldo para no dejar la línea sin marcador.
   let h = 0, a = 0;
   const rows = events.map(ev => {
     if (ev.event_type === 'points'){
       if (ev.team === row.home) h += (ev.value||0); else a += (ev.value||0);
     }
+    const hasSnapshot = ev.home_score != null && ev.away_score != null;
+    const scoreLabel = hasSnapshot ? `${ev.home_score}-${ev.away_score}` : `${h}-${a}`;
     const team = teams[ev.team];
     const color = team?.color || '#666';
     let desc;
@@ -264,7 +269,7 @@ function buildTimelineHTML(events, row, teams){
         <span class="timeline-q">C${ev.quarter||1}${timeLabel?` · ${timeLabel}`:''}</span>
         <span class="timeline-dot" style="background:${color};"></span>
         <span class="timeline-desc"><span class="team-tag">${team?.abbr||ev.team}</span>${desc}</span>
-        <span class="timeline-score">${h}-${a}</span>
+        <span class="timeline-score">${scoreLabel}</span>
       </div>`,
     };
   });
