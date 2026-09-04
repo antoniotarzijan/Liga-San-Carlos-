@@ -244,7 +244,8 @@
     .starter-row.selected{background:rgba(242,179,78,.08);}
     .starter-check{width:18px;height:18px;flex-shrink:0;accent-color:#f2b34e;pointer-events:none;}
     .starter-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;flex:1;}
-    .jersey-input{width:46px;flex-shrink:0;text-align:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;padding:6px 2px;color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:14px;}
+    .jersey-input{width:52px;flex-shrink:0;text-align:center;background:#38BDF8;border:none;border-radius:6px;padding:4px 3px 3px;color:#04222e;font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:700;box-shadow:0 1px 5px rgba(56,189,248,.4);}
+    .jersey-input::placeholder{color:rgba(4,34,46,.5);}
 
     .save-hint{text-align:center;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;padding-bottom:12px;margin-top:4px;}
 
@@ -278,6 +279,9 @@
     .staff-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
     .staff-field select,.staff-text-input{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;padding:7px 8px;color:var(--text);font-size:12px;box-sizing:border-box;}
     .staff-text-input{margin-top:5px;}
+    .staff-select-row{display:flex;align-items:center;gap:6px;}
+    .staff-select-row select{width:auto;flex:1;min-width:0;}
+    .staff-num-badge{font-size:16px;padding:3px 8px 2px;}
     @media(max-width:480px){ .staff-grid{grid-template-columns:1fr;} }
 
     /* ── FALTAS TÉCNICAS DEL BANCO (DT / AYUDANTE) ── */
@@ -1125,10 +1129,11 @@ function renderStartersList(side){
   }
   container.innerHTML = players.map(p => {
     const checked = set.has(String(p.id));
-    const numBadge = p.number != null ? ` #${p.number}` : '';
+    const numBadge = p.number != null ? `<span class="roster-player-num">#${p.number}</span>` : '';
     return `<div class="starter-row ${checked?'selected':''}" onclick="toggleStarter('${side}','${p.id}')">
       <input type="checkbox" class="starter-check" ${checked?'checked':''}>
-      <div class="starter-name">${p.name}${numBadge}</div>
+      <div class="starter-name">${p.name}</div>
+      ${numBadge}
     </div>`;
   }).join('');
 }
@@ -1565,7 +1570,10 @@ async function addLatePlayer(){
 
 /* ══ CAPITÁN / DT / AYUDANTE TÉCNICO ══ */
 function playerOptionsHTML(players, value){
-  return players.map(p => `<option value="${p.name}" ${p.name===value?'selected':''}>${p.name}</option>`).join('');
+  return players.map(p => {
+    const label = p.number != null ? `#${p.number} · ${p.name}` : p.name;
+    return `<option value="${p.name}" ${p.name===value?'selected':''}>${label}</option>`;
+  }).join('');
 }
 function renderStaffSelect(prefix, side, role, players, currentValue, opts){
   opts = opts || {};
@@ -1577,14 +1585,44 @@ function renderStaffSelect(prefix, side, role, players, currentValue, opts){
   const textInputHTML = opts.allowCustom
     ? `<input type="text" id="${prefix}staff-${side}-${role}-text" class="staff-text-input" placeholder="Nombre" value="${isCustom?currentValue:''}" ${isCustom?'':'hidden'}>`
     : '';
-  return `<select id="${prefix}staff-${side}-${role}-select" ${opts.allowCustom?`onchange="onStaffSelectChange('${prefix}','${side}','${role}')"`:''}>${optionsHTML}</select>${textInputHTML}`;
+  const selectedPlayer = players.find(p => p.name === currentValue);
+  const numBadge = (selectedPlayer && selectedPlayer.number != null)
+    ? `<span class="roster-player-num staff-num-badge" id="${prefix}staff-${side}-${role}-numbadge">#${selectedPlayer.number}</span>` : '';
+  return `<div class="staff-select-row">
+    <select id="${prefix}staff-${side}-${role}-select" onchange="onStaffSelectChange('${prefix}','${side}','${role}')">${optionsHTML}</select>
+    ${numBadge}
+  </div>${textInputHTML}`;
 }
 function onStaffSelectChange(prefix, side, role){
   const sel = document.getElementById(`${prefix}staff-${side}-${role}-select`);
+  if (!sel) return;
   const txt = document.getElementById(`${prefix}staff-${side}-${role}-text`);
-  if (!sel || !txt) return;
-  txt.hidden = sel.value !== '__other__';
-  if (sel.value === '__other__') txt.focus();
+  if (txt){
+    txt.hidden = sel.value !== '__other__';
+    if (sel.value === '__other__') txt.focus();
+  }
+  updateStaffNumBadge(prefix, side, role);
+}
+function updateStaffNumBadge(prefix, side, role){
+  const sel = document.getElementById(`${prefix}staff-${side}-${role}-select`);
+  if (!sel) return;
+  const list = side === 'home' ? rosterHome : rosterAway;
+  const player = list.find(p => p.name === sel.value);
+  const num = (player && player.number != null) ? `#${player.number}` : '';
+  const badge = document.getElementById(`${prefix}staff-${side}-${role}-numbadge`);
+  if (badge){
+    if (num) badge.textContent = num;
+    else badge.remove();
+  } else if (num) {
+    const row = sel.closest('.staff-select-row');
+    if (row){
+      const span = document.createElement('span');
+      span.className = 'roster-player-num staff-num-badge';
+      span.id = `${prefix}staff-${side}-${role}-numbadge`;
+      span.textContent = num;
+      row.appendChild(span);
+    }
+  }
 }
 function getStaffValue(prefix, side, role){
   const sel = document.getElementById(`${prefix}staff-${side}-${role}-select`);
