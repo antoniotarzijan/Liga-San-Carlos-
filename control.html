@@ -1784,6 +1784,10 @@ async function logGameEvent(teamId, eventType, playerName, value, detail){
     team: teamId, event_type: eventType, player_name: playerName || null,
     value: value ?? null, detail: detail || null,
     clock_seconds: Math.round(remainingSeconds()),
+    // Foto del marcador real al momento del evento — así el historial (partido.html)
+    // no se desfasa si después se corrige un punto con "−1" o con "Corregir resultado final"
+    // (esas correcciones no generan un evento propio, solo mueven el marcador).
+    home_score: currentGame.homeScore, away_score: currentGame.awayScore,
   };
   await runOrQueue({ table: 'game_events', kind: 'insert', payload }, { silent: true });
 }
