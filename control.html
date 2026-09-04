@@ -189,16 +189,31 @@
     .quick-sub-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
     .quick-sub-grid{display:flex;flex-wrap:wrap;gap:6px;}
     .quick-sub-btn{padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px;cursor:pointer;}
-    .quick-sub-btn.out-pending{background:var(--red);border-color:var(--red);color:#fff;}
     .quick-sub-num{display:inline-block;margin-left:5px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.5px;color:#04222e;background:#38BDF8;padding:1px 6px;border-radius:4px;vertical-align:middle;}
     .quick-sub-empty{padding:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;}
+    .quick-sub-target[hidden]{display:none;}
+    .quick-sub-target{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;color:var(--gold);margin:-2px 0 6px;}
 
     /* ── SUSTITUCIONES MÚLTIPLES (COLA PENDIENTE) ── */
     .pending-subs-wrap[hidden]{display:none;}
     .pending-subs-wrap{background:rgba(242,179,78,.06);border:1px solid rgba(242,179,78,.3);border-radius:10px;padding:10px;margin-bottom:8px;}
-    .pending-subs-list{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
-    .pending-sub-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-    .pending-sub-remove{flex-shrink:0;width:22px;height:22px;border-radius:5px;border:none;background:rgba(248,113,113,.15);color:#F87171;font-size:13px;cursor:pointer;line-height:1;}
+    .pending-subs-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+    .pending-sub-item{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;display:flex;flex-direction:column;gap:6px;position:relative;}
+    .pending-sub-item.incomplete{border-color:rgba(242,179,78,.5);}
+    .pending-sub-item.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;}
+    .pending-sub-main{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-right:24px;}
+    .pending-sub-team{color:var(--muted);font-weight:700;flex-shrink:0;}
+    .pending-sub-in{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pending-sub-out-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .pending-sub-out{color:#4ADE80;flex:1;min-width:0;}
+    .pending-sub-out-slot{flex:1;min-width:120px;text-align:left;padding:7px 9px;border-radius:5px;border:1px dashed rgba(242,179,78,.5);background:rgba(242,179,78,.06);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.3px;cursor:pointer;}
+    .pending-sub-out-slot.active{background:rgba(242,179,78,.2);border-style:solid;}
+    .pending-sub-noout{flex-shrink:0;padding:7px 9px;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.3px;cursor:pointer;white-space:nowrap;}
+    .pending-sub-unassign{flex-shrink:0;width:22px;height:22px;border-radius:5px;border:none;background:rgba(255,255,255,.06);color:var(--text);font-size:12px;cursor:pointer;line-height:1;}
+    .pending-sub-remove{position:absolute;top:8px;right:8px;flex-shrink:0;width:20px;height:20px;border-radius:5px;border:none;background:rgba(248,113,113,.15);color:#F87171;font-size:12px;cursor:pointer;line-height:1;}
+    .pending-subs-hint[hidden]{display:none;}
+    .pending-subs-hint{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.5px;color:var(--gold);text-align:center;padding:4px 0 8px;}
+    .subs-reg-btn.confirm[hidden]{display:none;}
 
     /* ── PUNTOS/FALTAS POR JUGADOR ── */
     .roster-toggle{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(242,179,78,.3);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;}
@@ -646,13 +661,14 @@
       <button class="roster-toggle" id="subs-toggle-btn" onclick="toggleSubs()">🔄 Sustituciones ▾</button>
       <div class="subs-wrap" id="subs-wrap" hidden>
         <div class="subs-form">
-          <div class="ref-panel-hint" style="margin-bottom:8px;">Toca al que sale y luego al que entra: el cambio se agrega solo a la lista. Si tocas directo a alguien de "Entran" sin marcar a nadie de "Salen", entra sin sacar a otro.</div>
+          <div class="ref-panel-hint" style="margin-bottom:8px;">1) Toca a los que ENTRAN (banca) — puedes marcar varios sin indicar todavía quién sale. 2) Luego toca en "Salen" para asociar quién sale por cada uno. 3) Cuando todos los cambios tengan entra y sale, confirma para aplicarlos juntos.</div>
           <div class="quick-sub-tabs">
             <button class="quick-sub-tab active" id="quick-sub-tab-home" onclick="setSubsTeam('home')">Equipo local</button>
             <button class="quick-sub-tab" id="quick-sub-tab-away" onclick="setSubsTeam('away')">Equipo visita</button>
           </div>
           <div class="quick-sub-col">
             <div class="quick-sub-label">Salen (en cancha)</div>
+            <div class="quick-sub-target" id="quick-sub-target" hidden></div>
             <div class="quick-sub-grid" id="quick-sub-out"></div>
           </div>
           <div class="quick-sub-col">
@@ -663,6 +679,7 @@
         <div class="pending-subs-wrap" id="pending-subs-wrap" hidden>
           <div class="section-lbl" style="margin-top:0;">Cambios por confirmar (<span id="pending-subs-count">0</span>)</div>
           <div class="pending-subs-list" id="pending-subs-list"></div>
+          <div class="pending-subs-hint" id="pending-subs-hint" hidden></div>
           <button class="subs-reg-btn confirm" onclick="confirmPendingSubs()" id="confirm-subs-btn">✅ Confirmar todos los cambios</button>
         </div>
         <div class="subs-log" id="subs-log"></div>
@@ -892,7 +909,7 @@ let playerStats = {};         // playerId -> { points, fouls }
 let subsLog = [];
 let pendingSubs = [];
 let subsTeamSide = 'home';
-let pendingOutPick = null; // { side, player } — jugador tocado en "Salen", esperando quién entra
+let activeSubRow = null; // índice en pendingSubs seleccionado explícitamente para asociarle quién sale
 let addPlayerTeamSide = 'home';
 let addPlayerMode = 'roster'; // 'roster' (jugador ya inscrito) | 'new' (crea ficha nueva)
 
@@ -964,7 +981,7 @@ async function goToList(){
   stopTicker();
   currentGame = null;
   rosterHome = []; rosterAway = []; playerStats = {}; subsLog = []; pendingSubs = [];
-  subsTeamSide = 'home'; pendingOutPick = null;
+  subsTeamSide = 'home'; activeSubRow = null;
   addPlayerTeamSide = 'home'; addPlayerMode = 'roster';
   const rosterWrap = document.getElementById('roster-wrap');
   if (rosterWrap) rosterWrap.hidden = true;
@@ -2129,21 +2146,20 @@ function toggleSubs(){
   if (!wrap.hidden){ renderSubOptions(); renderPendingSubs(); }
 }
 
-/* Estado "en cancha" considerando los cambios que aún no se confirman,
-   para que los selects no vuelvan a ofrecer un jugador ya puesto en la cola. */
-function effectiveOnCourt(side, playerId){
-  let val = !!playerStats[playerId]?.onCourt;
-  for (const s of pendingSubs){
-    if (s.side !== side) continue;
-    if (s.playerOut && String(s.playerOut.id) === String(playerId)) val = false;
-    if (String(s.playerIn.id) === String(playerId)) val = true;
+/* Índice del cambio pendiente (del lado indicado) al que se le asociará
+   el próximo jugador tocado en "Salen": el elegido a mano (activeSubRow)
+   si sigue incompleto, o si no, el primero incompleto en orden (FIFO). */
+function getSubTargetIndex(side){
+  if (activeSubRow != null){
+    const row = pendingSubs[activeSubRow];
+    if (row && row.side === side && !row.playerOut && !row.noOut) return activeSubRow;
   }
-  return val;
+  return pendingSubs.findIndex(s => s.side === side && !s.playerOut && !s.noOut);
 }
 
 function setSubsTeam(side){
   subsTeamSide = side;
-  pendingOutPick = null;
+  activeSubRow = null;
   document.getElementById('quick-sub-tab-home').classList.toggle('active', side === 'home');
   document.getElementById('quick-sub-tab-away').classList.toggle('active', side === 'away');
   renderSubOptions();
@@ -2153,33 +2169,32 @@ function renderSubOptions(){
   const side = subsTeamSide;
   const gameRoster = side === 'home' ? gameRosterHome : gameRosterAway;
   const players = (side === 'home' ? rosterHome : rosterAway).filter(p => gameRoster.has(String(p.id)));
-  const onCourt = players.filter(p => effectiveOnCourt(side, p.id));
-  const bench = players.filter(p => !effectiveOnCourt(side, p.id));
+
+  // Ya elegidos como "entra" o "sale" en algún cambio pendiente: no se ofrecen de nuevo.
+  const pendingInIds = new Set(pendingSubs.filter(s => s.side === side).map(s => String(s.playerIn.id)));
+  const pendingOutIds = new Set(pendingSubs.filter(s => s.side === side && s.playerOut).map(s => String(s.playerOut.id)));
+
+  const outCandidates = players.filter(p => playerStats[p.id]?.onCourt && !pendingOutIds.has(String(p.id)));
+  const inCandidates = players.filter(p => !playerStats[p.id]?.onCourt && !pendingInIds.has(String(p.id)));
 
   const outEl = document.getElementById('quick-sub-out');
   const inEl = document.getElementById('quick-sub-in');
+  const targetEl = document.getElementById('quick-sub-target');
   if (!outEl || !inEl) return;
 
-  outEl.innerHTML = onCourt.length ? onCourt.map(p => {
-    const isPending = pendingOutPick && pendingOutPick.side === side && String(pendingOutPick.player.id) === String(p.id);
-    return `<button class="quick-sub-btn ${isPending ? 'out-pending' : ''}" onclick="quickSubTapOut('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`;
-  }).join('') : '<div class="quick-sub-empty">Sin jugadores en cancha.</div>';
+  const targetIdx = getSubTargetIndex(side);
+  if (targetEl){
+    targetEl.hidden = targetIdx < 0;
+    targetEl.textContent = targetIdx >= 0 ? `👉 Toca quién sale por: ${pendingSubs[targetIdx].playerIn.name}` : '';
+  }
 
-  inEl.innerHTML = bench.length ? bench.map(p =>
+  outEl.innerHTML = outCandidates.length ? outCandidates.map(p =>
+    `<button class="quick-sub-btn" onclick="quickSubTapOut('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`
+  ).join('') : '<div class="quick-sub-empty">Sin jugadores en cancha.</div>';
+
+  inEl.innerHTML = inCandidates.length ? inCandidates.map(p =>
     `<button class="quick-sub-btn" onclick="quickSubTapIn('${p.id}')">${p.name}${p.number != null ? `<span class="quick-sub-num">#${p.number}</span>` : ''}</button>`
   ).join('') : '<div class="quick-sub-empty">Sin jugadores en banca.</div>';
-}
-
-function quickSubTapOut(playerId){
-  const side = subsTeamSide;
-  const player = findPlayer(side, playerId);
-  if (!player) return;
-  if (pendingOutPick && pendingOutPick.side === side && String(pendingOutPick.player.id) === String(playerId)){
-    pendingOutPick = null; // toca de nuevo al mismo jugador: cancela la selección
-  } else {
-    pendingOutPick = { side, player };
-  }
-  renderSubOptions();
 }
 
 function quickSubTapIn(playerId){
@@ -2187,12 +2202,58 @@ function quickSubTapIn(playerId){
   const playerIn = findPlayer(side, playerId);
   if (!playerIn) return;
   const teamId = side === 'home' ? currentGame.home : currentGame.away;
-  const playerOut = (pendingOutPick && pendingOutPick.side === side) ? pendingOutPick.player : null;
-  pendingSubs.push({ side, teamId, playerOut, playerIn });
-  pendingOutPick = null;
+  pendingSubs.push({ side, teamId, playerIn, playerOut: null, noOut: false });
   renderSubOptions();
   renderPendingSubs();
-  showToast(playerOut ? `✓ ${playerOut.name} → ${playerIn.name}` : `✓ ${playerIn.name} entra`);
+  showToast(`✓ ${playerIn.name} entra — falta indicar quién sale`);
+}
+
+function quickSubTapOut(playerId){
+  const side = subsTeamSide;
+  const player = findPlayer(side, playerId);
+  if (!player) return;
+  const targetIdx = getSubTargetIndex(side);
+  if (targetIdx < 0){
+    showToast('⚠ Primero toca quién entra', true);
+    return;
+  }
+  pendingSubs[targetIdx].playerOut = player;
+  pendingSubs[targetIdx].noOut = false;
+  const enteredName = pendingSubs[targetIdx].playerIn.name;
+  activeSubRow = null;
+  renderSubOptions();
+  renderPendingSubs();
+  showToast(`✓ ${player.name} → ${enteredName}`);
+}
+
+/* Selecciona a mano a qué cambio pendiente (incompleto) se le asociará
+   el próximo jugador tocado en "Salen", por si hay varios a la vez. */
+function selectPendingRow(index){
+  const row = pendingSubs[index];
+  if (!row || row.playerOut || row.noOut) return;
+  activeSubRow = (activeSubRow === index) ? null : index;
+  if (subsTeamSide !== row.side) setSubsTeam(row.side);
+  else renderSubOptions();
+  renderPendingSubs();
+}
+
+function unassignPendingOut(index){
+  const row = pendingSubs[index];
+  if (!row) return;
+  row.playerOut = null;
+  row.noOut = false;
+  renderSubOptions();
+  renderPendingSubs();
+}
+
+function markNoOut(index){
+  const row = pendingSubs[index];
+  if (!row) return;
+  row.noOut = true;
+  row.playerOut = null;
+  if (activeSubRow === index) activeSubRow = null;
+  renderSubOptions();
+  renderPendingSubs();
 }
 async function loadSubstitutions(){
   const { data, error } = await _supabase.from('substitutions').select('*')
@@ -2217,25 +2278,50 @@ function renderPendingSubs(){
   const wrap = document.getElementById('pending-subs-wrap');
   const list = document.getElementById('pending-subs-list');
   const countEl = document.getElementById('pending-subs-count');
+  const hintEl = document.getElementById('pending-subs-hint');
+  const confirmBtn = document.getElementById('confirm-subs-btn');
   if (!wrap || !list || !countEl) return;
   wrap.hidden = pendingSubs.length === 0;
   countEl.textContent = pendingSubs.length;
   const teams = divTeams();
+  const missing = pendingSubs.filter(s => !s.playerOut && !s.noOut).length;
+
   list.innerHTML = pendingSubs.map((s, i) => {
     const teamName = teams[s.teamId]?.abbr || s.teamId;
-    return `<div class="pending-sub-item">
-      <span>${teamName} · 🔻 ${s.playerOut ? s.playerOut.name : '—'} · 🔺 ${s.playerIn.name}</span>
+    const incomplete = !s.playerOut && !s.noOut;
+    const isActive = activeSubRow === i;
+    const outHTML = s.playerOut
+      ? `<span class="pending-sub-out">🔻 ${s.playerOut.name}</span><button class="pending-sub-unassign" onclick="unassignPendingOut(${i})" title="Quitar quién sale">↺</button>`
+      : s.noOut
+      ? `<span class="pending-sub-out">🔻 sin sacar a nadie</span><button class="pending-sub-unassign" onclick="unassignPendingOut(${i})" title="Deshacer">↺</button>`
+      : `<button class="pending-sub-out-slot ${isActive ? 'active' : ''}" onclick="selectPendingRow(${i})">👉 Toca en «Salen» para asociar</button>
+         <button class="pending-sub-noout" onclick="markNoOut(${i})">Sin sacar a nadie</button>`;
+    return `<div class="pending-sub-item ${incomplete ? 'incomplete' : ''} ${isActive ? 'active' : ''}">
+      <div class="pending-sub-main">
+        <span class="pending-sub-team">${teamName}</span>
+        <span class="pending-sub-in">🔺 ${s.playerIn.name}</span>
+      </div>
+      <div class="pending-sub-out-row">${outHTML}</div>
       <button class="pending-sub-remove" onclick="removePendingSub(${i})">✕</button>
     </div>`;
   }).join('');
+
+  if (hintEl) hintEl.hidden = missing === 0;
+  if (hintEl && missing > 0) hintEl.textContent = `Faltan ${missing} cambio${missing > 1 ? 's' : ''} por asociar quién sale`;
+  if (confirmBtn) confirmBtn.hidden = pendingSubs.length === 0 || missing > 0;
 }
 function removePendingSub(index){
   pendingSubs.splice(index, 1);
+  activeSubRow = null;
   renderSubOptions();
   renderPendingSubs();
 }
 async function confirmPendingSubs(){
   if (!pendingSubs.length) return;
+  if (pendingSubs.some(s => !s.playerOut && !s.noOut)){
+    showToast('⚠ Faltan cambios por asociar quién sale', true);
+    return;
+  }
   const btn = document.getElementById('confirm-subs-btn');
   if (btn){ btn.disabled = true; btn.textContent = '⏳ Confirmando...'; }
   const toApply = pendingSubs.slice();
@@ -2280,6 +2366,7 @@ async function confirmPendingSubs(){
   await Promise.all(writes);
 
   pendingSubs = [];
+  activeSubRow = null;
   renderPendingSubs();
   if (btn){ btn.disabled = false; btn.textContent = '✅ Confirmar todos los cambios'; }
   showToast(`✓ ${toApply.length} sustitución${toApply.length > 1 ? 'es' : ''} registrada${toApply.length > 1 ? 's' : ''}`);
