@@ -1844,7 +1844,18 @@ async function logGameEvent(teamId, eventType, playerName, value, detail){
     // (esas correcciones no generan un evento propio, solo mueven el marcador).
     home_score: currentGame.homeScore, away_score: currentGame.awayScore,
   };
-  await runOrQueue({ table: 'game_events', kind: 'insert', payload }, { silent: true });
+  const { error } = await _supabase.from('game_events').insert(payload);
+  if (!error) return;
+  if (looksLikeNetworkError(error)){
+    await runOrQueue({ table: 'game_events', kind: 'insert', payload }, { silent: true });
+    return;
+  }
+  // Si la tabla aún no tiene las columnas home_score/away_score (u otra columna nueva),
+  // no perdamos la jugada: reintentamos sin la foto del marcador. partido.html ya sabe
+  // reconstruir el marcador sumando puntos cuando el evento no trae la foto.
+  console.warn('game_events insert con marcador falló, reintentando sin snapshot', error);
+  const { home_score, away_score, ...fallbackPayload } = payload;
+  await runOrQueue({ table: 'game_events', kind: 'insert', payload: fallbackPayload }, { silent: true });
 }
 
 async function addPlayerPoints(side, playerId, delta){
