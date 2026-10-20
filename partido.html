@@ -330,7 +330,7 @@ async function load(){
     return;
   }
   const { data: row, error } = await _supabase.from(divCfg().dbTable).select('*').eq('id', gameId).single();
-  if (error || !row){
+  if (error || !row || row.type === 'scheduled'){
     document.getElementById('root').innerHTML = emptyStateHTML('Partido no encontrado', 'Puede que haya sido eliminado o el enlace esté mal escrito.');
     return;
   }
