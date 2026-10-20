@@ -897,6 +897,7 @@
 
       <!-- TAB PARTIDOS -->
       <div id="tab-games" class="admin-pane">
+        <a href="fixture.html" class="btn btn-gold" style="display:block;text-align:center;text-decoration:none;margin-bottom:24px;">📅 Fixture automático · suspender, intercambiar, cargar →</a>
         <p class="section-subtitle">Jornada actual</p>
         <div class="round-box">
           <div class="round-box-label">Número de jornada que se muestra en el sitio</div>
@@ -1238,6 +1239,7 @@ function rowToGame(row) {
     venue:row.venue||'Colegio Cumbres',
     homeScore:row.home_score, awayScore:row.away_score,
     mvp:row.mvp||'',
+    rescheduled:!!row.rescheduled,
   };
 }
 
@@ -1505,7 +1507,7 @@ function renderGames() {
 
     if (g.type==='upcoming') return `
       <div class="game-card upcoming reveal">
-        <div class="game-card-header"><span class="game-round">Próximo · Jornada ${g.round}</span><span class="game-date">${g.date}</span></div>
+        <div class="game-card-header"><span class="game-round">Próximo · Jornada ${g.round}${g.rescheduled?' · Reprogramado':''}</span><span class="game-date">${g.date}</span></div>
         <div class="game-body">
           <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="vs-label">VS</div></div>
           <div class="team-score-row" style="--team-color:${away.color}">${rowAway}</div>
