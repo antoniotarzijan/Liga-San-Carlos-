@@ -196,6 +196,35 @@
     .section-tag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);padding:4px 10px;border:1px solid var(--red);border-radius:2px;}
     .section-line{flex:1;height:1px;background:var(--border);}
 
+    /* ── RÉCORDS ── */
+    .rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .rec{position:relative;background:color-mix(in srgb,var(--tc,#666) 10%,var(--card));border:1px solid color-mix(in srgb,var(--tc,#666) 35%,var(--border));border-radius:10px;padding:18px 18px 16px;overflow:hidden;display:flex;flex-direction:column;gap:10px;min-height:170px;}
+    .rec::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--tc,#666) 30%,transparent),transparent 70%);pointer-events:none;}
+    .rec.rec-hero{grid-column:span 2;grid-row:span 2;min-height:354px;padding:26px;}
+    .rec-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;}
+    .rec-label .ico{font-size:15px;}
+    .rec-value{font-family:'Bebas Neue',sans-serif;font-size:54px;line-height:.9;color:var(--gold);letter-spacing:.5px;}
+    .rec.rec-hero .rec-value{font-size:132px;}
+    .rec-value small{font-size:.35em;color:var(--muted);margin-left:6px;letter-spacing:1px;}
+    .rec-who{display:flex;align-items:center;gap:10px;margin-top:auto;}
+    .rec-logo{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .rec-logo img{width:100%;height:100%;object-fit:contain;}
+    .rec.rec-hero .rec-logo{width:56px;height:56px;}
+    .rec-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;line-height:1.1;}
+    .rec-name .vs{color:var(--muted);font-weight:500;font-size:.8em;margin:0 3px;}
+    .rec.rec-hero .rec-name{font-size:26px;}
+    .rec-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+    .rec.rec-hero .rec-sub{font-size:14px;}
+    .rec-badge{position:absolute;top:16px;right:16px;z-index:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#000;background:var(--gold);padding:4px 9px;border-radius:2px;}
+    .rec-streak{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+    .rec-chip{width:20px;height:20px;border-radius:3px;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.35);color:#4ADE80;font-family:'Bebas Neue',sans-serif;font-size:13px;display:flex;align-items:center;justify-content:center;}
+    .rec-live{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#4ADE80;margin-left:6px;}
+    .rec-ranks{margin-top:6px;display:flex;flex-direction:column;gap:8px;z-index:1;}
+    .rec-rank{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--muted);}
+    .rec-rank b{color:var(--text);}
+    .rec-rank .p{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);}
+    .rec-foot{margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--muted);}
+
     /* ── INSTAGRAM BTN ── */
     .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
     .ig-gen-btn:hover{background:rgba(242,179,78,.18);border-color:rgba(242,179,78,.55);transform:translateY(-1px);}
@@ -559,6 +588,11 @@
       .playoff-bracket-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
       .ig-gen-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
       section{padding:48px 16px;}
+      .rec-grid{grid-template-columns:1fr;}
+      .rec{min-height:0;}
+      .rec.rec-hero{grid-column:auto;grid-row:auto;min-height:0;}
+      .rec.rec-hero .rec-value{font-size:96px;}
+      .rec-badge{position:static;align-self:flex-start;margin-bottom:-2px;}
       .section-header{flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:center;}
       .section-title{font-size:clamp(28px,8vw,40px);}
       .section-line{display:none;}
@@ -1030,6 +1064,7 @@
     <a href="#standings-root">Posiciones</a>
     <a href="#teams-root">Equipos</a>
     <a href="#scorers-root">Anotadores</a>
+    <a href="#records-root">Récords</a>
     <a href="#sanctions-root">Sanciones</a>
   </div>
   <div class="nav-right">
@@ -1059,6 +1094,7 @@
   <section id="teams-root"></section>
   <section id="roster-root"></section>
   <section id="scorers-root"></section>
+  <section id="records-root"></section>
   <section id="instagram-root"></section>
   <section id="sanctions-root"></section>
   <div class="sponsors-banner" id="sponsors-banner">
@@ -1348,6 +1384,7 @@ const smallLogo = id => { const t=divTeams()[id]; if(!t) return ''; return `<div
 async function render() {
   renderHero(); renderStandings(); renderTeams(); renderGames();
   await renderScorers(); 
+  await renderRecords();
   renderInstagram();
   await renderSanctions(); renderFooter();
   document.getElementById('nav-abbr').innerHTML = `${league.abbr}<span>·</span>${league.season}`;
@@ -1952,6 +1989,135 @@ async function renderScorers() {
       </div>
       ${rows||'<p style="padding:20px;color:var(--muted);">Aún no hay jugadores con partidos registrados.</p>'}
     </div>`;
+}
+
+/* ══ RÉCORDS ══ */
+// Se calculan solos con los resultados (games) y los puntos por jugador (game_stats).
+// Ante empate, se queda el que lo consiguió primero.
+async function renderRecords() {
+  const root = document.getElementById('records-root');
+  const teams = divTeams();
+  const byOrder = (a, b) => a.round - b.round || a.id - b.id;
+  const finished = STATE.games.filter(g => g.type === 'finished').sort(byOrder);
+  if (!finished.length) { root.innerHTML = ''; return; }
+
+  const gameById = Object.fromEntries(finished.map(g => [g.id, g]));
+  const lastRound = finished[finished.length - 1].round;
+  const shortDate = g => (g.date && g.date !== 'Por definir') ? g.date.split('·')[0].trim() : '';
+  const tname = id => teams[id]?.name || id;
+  const logo = id => `<div class="rec-logo">${logoInner(id)}</div>`;
+  const pickFirst = (list, better) => list.reduce((best, x) => better(x, best) ? x : best, list[0]);
+
+  // ── Jugadores (game_stats de partidos terminados) ──
+  const [{ data: statsData }, { data: playersData }] = await Promise.all([
+    _supabase.from('game_stats').select('*').eq('division', activeDivision).gt('points', 0),
+    _supabase.from(divCfg().playersTable).select('*').gt('games', 0),
+  ]);
+  const performances = (statsData || [])
+    .filter(s => gameById[s.game_id])
+    .map(s => ({ ...s, game: gameById[s.game_id] }))
+    .sort((a, b) => b.points - a.points || byOrder(a.game, b.game));
+
+  const cards = [];
+
+  if (performances.length) {
+    const [top, ...rest] = performances.slice(0, 3);
+    const opp = top.team === top.game.home ? top.game.away : top.game.home;
+    const isNew = top.game.round === lastRound;
+    cards.push(`<div class="rec rec-hero reveal" style="--tc:${teams[top.team]?.color || '#666'}">
+      ${isNew ? `<span class="rec-badge">Nuevo récord · J${top.game.round}</span>` : ''}
+      <div class="rec-label"><span class="ico">🔥</span>Más puntos en un partido</div>
+      <div class="rec-value">${top.points}<small>PTS</small></div>
+      ${rest.length ? `<div class="rec-ranks">${rest.map((r, i) => `<div class="rec-rank"><span>${i + 2}</span><span><b>${r.player_name}</b> · ${tname(r.team)} · J${r.game.round}</span><span class="p">${r.points}</span></div>`).join('')}</div>` : ''}
+      <div class="rec-who">${logo(top.team)}<div>
+        <div class="rec-name">${top.player_name} · ${tname(top.team)}</div>
+        <div class="rec-sub">vs ${tname(opp)} · Jornada ${top.game.round}${shortDate(top.game) ? ' · ' + shortDate(top.game) : ''}</div>
+      </div></div>
+    </div>`);
+  }
+
+  // ── Equipos ──
+  const sides = finished.flatMap(g => [
+    { team: g.home, opp: g.away, pts: +g.homeScore, game: g },
+    { team: g.away, opp: g.home, pts: +g.awayScore, game: g },
+  ]);
+  const bestTeam = pickFirst(sides, (x, b) => x.pts > b.pts);
+  cards.push(`<div class="rec reveal" style="--tc:${teams[bestTeam.team]?.color || '#666'}">
+    <div class="rec-label"><span class="ico">🏆</span>Más puntos de un equipo</div>
+    <div class="rec-value">${bestTeam.pts}<small>PTS</small></div>
+    <div class="rec-who">${logo(bestTeam.team)}<div>
+      <div class="rec-name">${tname(bestTeam.team)}</div>
+      <div class="rec-sub">vs ${tname(bestTeam.opp)} · J${bestTeam.game.round}</div>
+    </div></div>
+  </div>`);
+
+  const margin = g => Math.abs(+g.homeScore - +g.awayScore);
+  const matchCard = (g, ico, label) => {
+    const homeWon = +g.homeScore > +g.awayScore;
+    const [w, l] = homeWon ? [g.home, g.away] : [g.away, g.home];
+    const [ws, ls] = homeWon ? [g.homeScore, g.awayScore] : [g.awayScore, g.homeScore];
+    return `<div class="rec reveal" style="--tc:${teams[w]?.color || '#666'}">
+      <div class="rec-label"><span class="ico">${ico}</span>${label}</div>
+      <div class="rec-value">${ws}–${ls}</div>
+      <div class="rec-who">${logo(w)}<div>
+        <div class="rec-name">${tname(w)} <span class="vs">vs</span> ${tname(l)}</div>
+        <div class="rec-sub">Jornada ${g.round}</div>
+      </div></div>
+    </div>`;
+  };
+  cards.push(matchCard(pickFirst(finished, (x, b) => margin(x) > margin(b)), '💥', 'Paliza más grande'));
+  cards.push(matchCard(pickFirst(finished, (x, b) => margin(x) < margin(b)), '😰', 'Partido más apretado'));
+
+  // ── Racha de victorias (la mejor de la temporada; si sigue viva, "En curso") ──
+  let streak = null;
+  Object.keys(teams).forEach(id => {
+    let run = 0;
+    finished.filter(g => g.home === id || g.away === id).forEach(g => {
+      const won = g.home === id ? +g.homeScore > +g.awayScore : +g.awayScore > +g.homeScore;
+      run = won ? run + 1 : 0;
+      if (run > 0 && (!streak || run > streak.n || (run === streak.n && streak.team !== id && byOrder(g, streak.game) < 0))) {
+        streak = { team: id, n: run, game: g };
+      }
+    });
+    if (streak?.team === id) streak.active = run === streak.n;
+  });
+  if (streak && streak.n >= 2) {
+    cards.push(`<div class="rec reveal" style="--tc:${teams[streak.team]?.color || '#666'}">
+      <div class="rec-label"><span class="ico">📈</span>Mejor racha</div>
+      <div class="rec-value">${streak.n}<small>VICTORIAS</small></div>
+      <div class="rec-who">${logo(streak.team)}<div>
+        <div class="rec-name">${tname(streak.team)}${streak.active ? '<span class="rec-live">● En curso</span>' : ''}</div>
+        <div class="rec-streak">${'<span class="rec-chip">G</span>'.repeat(Math.min(streak.n, 9))}</div>
+      </div></div>
+    </div>`);
+  }
+
+  // ── Mejor promedio (mínimo la mitad de los partidos del que más ha jugado) ──
+  const players = playersData || [];
+  if (players.length) {
+    const minGames = Math.max(1, Math.ceil(Math.max(...players.map(p => p.games)) / 2));
+    const eligible = players.filter(p => p.games >= minGames).map(p => ({ ...p, ppg: p.points / p.games }));
+    if (eligible.length) {
+      const best = pickFirst(eligible, (x, b) => x.ppg > b.ppg || (x.ppg === b.ppg && x.points > b.points));
+      cards.push(`<div class="rec reveal" style="--tc:${teams[best.team]?.color || '#666'}">
+        <div class="rec-label"><span class="ico">🎯</span>Mejor promedio</div>
+        <div class="rec-value">${best.ppg.toFixed(1)}<small>PPG</small></div>
+        <div class="rec-who">${logo(best.team)}<div>
+          <div class="rec-name"><a href="player.html?id=${best.id}&div=${activeDivision}" style="color:inherit;text-decoration:none;">${best.name}</a></div>
+          <div class="rec-sub">${tname(best.team)} · ${best.points} pts en ${best.games} PJ</div>
+        </div></div>
+      </div>`);
+    }
+  }
+
+  root.innerHTML = `
+    <div class="section-header reveal">
+      <h2 class="section-title">Récords</h2>
+      <span class="section-tag">Temporada ${league.season} · ${activeDivision === 'primera' ? 'Primera' : 'Segunda'}</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="rec-grid">${cards.join('')}</div>
+    <p class="rec-foot">Se actualiza solo con cada resultado cargado</p>`;
 }
 
 /* ══ NEWS ══ */
