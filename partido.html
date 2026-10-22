@@ -159,8 +159,47 @@
     .timeline-score{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--gold);flex-shrink:0;white-space:nowrap;}
     .timeline-empty{padding:20px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
 
+    /* ── PREVIA ── */
+    .preview-compare{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .compare-head,.compare-row{display:grid;grid-template-columns:1fr minmax(110px,auto) 1fr;align-items:center;gap:10px;padding:11px 16px;}
+    .compare-head{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;}
+    .compare-head span:first-child,.compare-row .cv:first-child{text-align:left;}
+    .compare-head span:last-child,.compare-row .cv:last-child{text-align:right;}
+    .compare-row{border-bottom:1px solid rgba(255,255,255,.04);}
+    .compare-row:last-child{border-bottom:none;}
+    .compare-label{text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+    .cv{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:var(--muted);}
+    .cv.better{color:var(--gold);}
+    .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .preview-team{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .preview-team-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:color-mix(in srgb, var(--tc,#666) 30%, var(--card));border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+    .streak-text{font-size:11px;letter-spacing:1px;color:var(--text);opacity:.85;}
+    .form-chips{display:flex;gap:6px;padding:14px 16px 4px;}
+    .form-chip{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;}
+    .form-chip.w{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+    .form-chip.l{background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.3);}
+    .recent-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13px;text-decoration:none;color:var(--text);}
+    .recent-row:last-child{border-bottom:none;}
+    .recent-row:hover{background:rgba(255,255,255,.03);}
+    .recent-res{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;white-space:nowrap;}
+    .recent-res.w{color:var(--green);}
+    .recent-res.l{color:#F87171;}
+    .recent-opp{color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .recent-opp b{color:var(--text);font-weight:700;}
+    .key-player{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;color:var(--text);}
+    .key-player:last-child{border-bottom:none;}
+    .key-player:hover{background:rgba(255,255,255,.03);}
+    .key-num{font-size:11px;color:var(--muted);}
+    .key-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .key-sub{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.5px;}
+    .key-ppg{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);text-align:right;line-height:1;}
+    .key-ppg small{display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:1px;color:var(--muted);}
+    .preview-empty{padding:16px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;}
+    .preview-note{text-align:center;color:var(--muted);font-size:13px;margin:26px 0 0;}
+    .preview-note a{color:var(--gold);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+
     @media(max-width:640px){
-      .boxscore-grid{grid-template-columns:1fr;}
+      .boxscore-grid,.preview-grid{grid-template-columns:1fr;}
       .score-hero{grid-template-columns:1fr;gap:18px;}
       .hero-center{order:2;}
       .hero-team:nth-child(1){order:1;}
@@ -202,7 +241,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label:'Primera División', dbTable:'games',
+      label:'Primera División', dbTable:'games', playersTable:'players',
       teams: {
         EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA:{ abbr:'ORTHO',  name:'Orthobullets',                  color:'#7A1F3D', logo:'logos/anana.png' },
@@ -216,7 +255,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label:'Segunda División', dbTable:'games_segunda',
+      label:'Segunda División', dbTable:'games_segunda', playersTable:'players_segunda',
       teams: {
         T2B:{ abbr:'DYN', name:'Dynamos',              color:'#7C1D1D', logo:'logos/dynamos.png' },
         T2C:{ abbr:'DER', name:'Derazzo',              color:'#B33A3A', logo:'logos/derazzo.png' },
@@ -336,7 +375,7 @@ async function load(){
   }
 
   if (row.type === 'upcoming'){
-    renderUpcoming(row);
+    await renderUpcoming(row);
     return;
   }
 
@@ -363,7 +402,7 @@ function emptyStateHTML(title, sub){
   </div>`;
 }
 
-function renderUpcoming(row){
+async function renderUpcoming(row){
   const teams = divTeams();
   const home = teams[row.home], away = teams[row.away];
   document.getElementById('root').innerHTML = `
@@ -386,11 +425,171 @@ function renderUpcoming(row){
         </div>
       </div>
     </div>
-    <div class="empty-state">
-      <div class="empty-title">Este partido aún no comienza</div>
-      <div>Vuelve cuando arranque para ver el marcador en vivo.</div>
-      <a href="index.html#games-root" class="empty-cta">Ver todos los partidos →</a>
+    <div id="preview-root"><div class="loading">Cargando la previa...</div></div>`;
+  document.getElementById('preview-root').innerHTML = await buildPreviewHTML(row);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PREVIA DEL PARTIDO (solo con datos ya cargados: resultados y nómina)
+══════════════════════════════════════════════════════════════ */
+
+// Misma regla que computeStandings() en index.html: 2 pts por victoria, 1 por derrota;
+// desempate por diferencial, duelo directo y puntos anotados.
+function computeStandings(finished){
+  const rows = {};
+  Object.keys(divTeams()).forEach(id => {
+    rows[id] = { teamId:id, gp:0, w:0, l:0, diff:0, pointsFor:0, pointsAgainst:0, tablePoints:0 };
+  });
+  finished.forEach(g => {
+    if (!rows[g.home] || !rows[g.away]) return;
+    const hs = +g.home_score, as = +g.away_score;
+    const h = rows[g.home], a = rows[g.away];
+    h.gp++; a.gp++;
+    h.pointsFor += hs; a.pointsFor += as;
+    h.pointsAgainst += as; a.pointsAgainst += hs;
+    h.diff += hs - as; a.diff += as - hs;
+    const [win, loss] = hs > as ? [h, a] : [a, h];
+    win.w++; win.tablePoints += 2;
+    loss.l++; loss.tablePoints += 1;
+  });
+  const headToHead = (idA, idB) => {
+    let wA = 0, wB = 0;
+    finished.forEach(g => {
+      if (g.home === idA && g.away === idB) { if (+g.home_score > +g.away_score) wA++; else wB++; }
+      else if (g.home === idB && g.away === idA) { if (+g.home_score > +g.away_score) wB++; else wA++; }
+    });
+    return wA > wB ? 1 : wB > wA ? -1 : 0;
+  };
+  return Object.values(rows).sort((a, b) => {
+    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
+    if (bp !== ap) return bp - ap;
+    if (b.tablePoints !== a.tablePoints) return b.tablePoints - a.tablePoints;
+    if (b.diff !== a.diff) return b.diff - a.diff;
+    const h2h = headToHead(a.teamId, b.teamId);
+    if (h2h !== 0) return -h2h;
+    return b.pointsFor - a.pointsFor;
+  });
+}
+
+// Partidos jugados por un equipo, del más antiguo al más reciente, desde su punto de vista.
+function teamResults(finished, teamId){
+  return finished
+    .filter(g => g.home === teamId || g.away === teamId)
+    .map(g => {
+      const isHome = g.home === teamId;
+      const own = +(isHome ? g.home_score : g.away_score), opp = +(isHome ? g.away_score : g.home_score);
+      return { id:g.id, round:g.round, opp:isHome ? g.away : g.home, isHome, own, oppScore:opp, won:own > opp };
+    });
+}
+
+function streakText(results){
+  if (!results.length) return '';
+  const last = results[results.length - 1].won;
+  let n = 0;
+  for (let i = results.length - 1; i >= 0 && results[i].won === last; i--) n++;
+  if (n < 2) return last ? 'Viene de ganar' : 'Viene de perder';
+  return `${n} ${last ? 'victorias' : 'derrotas'} seguidas`;
+}
+
+async function buildPreviewHTML(row){
+  const teams = divTeams();
+  const [gamesRes, playersRes] = await Promise.all([
+    _supabase.from(divCfg().dbTable).select('*').eq('type', 'finished')
+      .order('round', { ascending: true }).order('id', { ascending: true }),
+    _supabase.from(divCfg().playersTable).select('*').in('team', [row.home, row.away]).gt('games', 0),
+  ]);
+  const finished = gamesRes.data || [];
+  const players = playersRes.data || [];
+
+  const standings = computeStandings(finished);
+  const pos = id => standings.findIndex(r => r.teamId === id) + 1;
+  const st = id => standings.find(r => r.teamId === id);
+  const H = st(row.home), A = st(row.away);
+  const anyPlayed = H.gp > 0 || A.gp > 0;
+
+  // ── Comparación ──
+  const avg = (n, gp) => gp ? n / gp : null;
+  const fmt1 = v => v == null ? '—' : v.toFixed(1);
+  const signed = v => v > 0 ? `+${v}` : `${v}`;
+  // better: 1 = mayor es mejor, -1 = menor es mejor
+  const metrics = [
+    { label:'Posición',       h:H.gp ? pos(row.home) : null, a:A.gp ? pos(row.away) : null, fmt:v => v == null ? '—' : `${v}°`, better:-1 },
+    { label:'Récord (G-P)',   h:H.gp ? H.w : null,  a:A.gp ? A.w : null,  fmt:(v, t) => v == null ? '—' : `${t.w}-${t.l}`, better:1 },
+    { label:'Pts. de tabla',  h:H.tablePoints,      a:A.tablePoints,      fmt:v => `${v}`, better:1 },
+    { label:'Anota x partido',h:avg(H.pointsFor, H.gp),     a:avg(A.pointsFor, A.gp),     fmt:fmt1, better:1 },
+    { label:'Recibe x partido',h:avg(H.pointsAgainst, H.gp),a:avg(A.pointsAgainst, A.gp), fmt:fmt1, better:-1 },
+    { label:'Diferencial',    h:H.gp ? H.diff : null, a:A.gp ? A.diff : null, fmt:v => v == null ? '—' : signed(v), better:1 },
+  ];
+  const cls = (mine, theirs, better) =>
+    mine == null || theirs == null || mine === theirs ? '' : ((mine - theirs) * better > 0 ? 'better' : '');
+  const compareHTML = `
+    <div class="section-title">Cara a cara</div>
+    <div class="preview-compare">
+      <div class="compare-head"><span>${teams[row.home]?.name || row.home}</span><span></span><span>${teams[row.away]?.name || row.away}</span></div>
+      ${metrics.map(m => `<div class="compare-row">
+        <span class="cv ${cls(m.h, m.a, m.better)}">${m.fmt(m.h, H)}</span>
+        <span class="compare-label">${m.label}</span>
+        <span class="cv ${cls(m.a, m.h, m.better)}">${m.fmt(m.a, A)}</span>
+      </div>`).join('')}
     </div>`;
+
+  // ── Enfrentamiento previo (en una liga a una vuelta normalmente no hay) ──
+  const meetings = finished.filter(g =>
+    (g.home === row.home && g.away === row.away) || (g.home === row.away && g.away === row.home));
+  const meetingsHTML = meetings.length ? `
+    <div class="section-title">Enfrentamientos esta temporada</div>
+    <div class="preview-compare">${meetings.map(g => {
+      const homeWon = +g.home_score > +g.away_score;
+      return `<a class="recent-row" href="partido.html?div=${activeDivision}&id=${g.id}">
+        <span class="recent-opp">J${g.round} · <b>${teams[g.home]?.name || g.home}</b> vs <b>${teams[g.away]?.name || g.away}</b></span>
+        <span class="recent-res">${g.home_score}–${g.away_score} · gana ${teams[homeWon ? g.home : g.away]?.abbr || ''}</span>
+      </a>`;
+    }).join('')}</div>` : '';
+
+  // ── Momento de cada equipo ──
+  const formBlock = teamId => {
+    const t = teams[teamId];
+    const res = teamResults(finished, teamId);
+    const last5 = res.slice(-5);
+    const recent = res.slice(-3).reverse();
+    return `<div class="preview-team" style="--tc:${t?.color || '#666'}">
+      <div class="preview-team-head"><span>${t?.name || teamId}</span><span class="streak-text">${streakText(res)}</span></div>
+      ${res.length ? `
+        <div class="form-chips">${last5.map(r => `<span class="form-chip ${r.won ? 'w' : 'l'}" title="J${r.round} vs ${teams[r.opp]?.name || r.opp}: ${r.own}–${r.oppScore}">${r.won ? 'G' : 'P'}</span>`).join('')}</div>
+        ${recent.map(r => `<a class="recent-row" href="partido.html?div=${activeDivision}&id=${r.id}">
+          <span class="recent-opp">J${r.round} · ${r.isHome ? 'vs' : '@'} <b>${teams[r.opp]?.name || r.opp}</b></span>
+          <span class="recent-res ${r.won ? 'w' : 'l'}">${r.won ? 'G' : 'P'} ${r.own}–${r.oppScore}</span>
+        </a>`).join('')}`
+      : '<div class="preview-empty">Aún no juega esta temporada.</div>'}
+    </div>`;
+  };
+
+  // ── Jugadores a seguir: top 3 por promedio de puntos ──
+  const keyBlock = teamId => {
+    const t = teams[teamId];
+    const top = players.filter(p => p.team === teamId)
+      .map(p => ({ ...p, ppg: p.points / p.games }))
+      .sort((a, b) => b.ppg - a.ppg || b.points - a.points)
+      .slice(0, 3);
+    return `<div class="preview-team" style="--tc:${t?.color || '#666'}">
+      <div class="preview-team-head"><span>${t?.name || teamId}</span></div>
+      ${top.length ? top.map(p => `<a class="key-player" href="player.html?id=${p.id}&div=${activeDivision}">
+          <span class="key-num">${p.number != null ? '#' + p.number : ''}</span>
+          <span class="key-name">${p.name}<span class="key-sub">${p.points} pts en ${p.games} PJ</span></span>
+          <span class="key-ppg">${p.ppg.toFixed(1)}<small>PPG</small></span>
+        </a>`).join('')
+      : '<div class="preview-empty">Sin puntos registrados todavía.</div>'}
+    </div>`;
+  };
+
+  return `
+    ${anyPlayed ? compareHTML : ''}
+    ${meetingsHTML}
+    <div class="section-title">Cómo llegan</div>
+    <div class="preview-grid">${formBlock(row.home)}${formBlock(row.away)}</div>
+    <div class="section-title">Jugadores a seguir</div>
+    <div class="preview-grid">${keyBlock(row.home)}${keyBlock(row.away)}</div>
+    <p class="preview-note">El marcador en vivo aparece aquí cuando arranque el partido · <a href="index.html#games-root">Ver todos los partidos →</a></p>`;
 }
 
 async function renderGame(row){
