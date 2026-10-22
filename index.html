@@ -223,7 +223,6 @@
     .rec-rank{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--muted);}
     .rec-rank b{color:var(--text);}
     .rec-rank .p{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);}
-    .rec-foot{margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--muted);}
 
     /* ── INSTAGRAM BTN ── */
     .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
@@ -2116,8 +2115,7 @@ async function renderRecords() {
       <span class="section-tag">Temporada ${league.season} · ${activeDivision === 'primera' ? 'Primera' : 'Segunda'}</span>
       <div class="section-line"></div>
     </div>
-    <div class="rec-grid">${cards.join('')}</div>
-    <p class="rec-foot">Se actualiza solo con cada resultado cargado</p>`;
+    <div class="rec-grid">${cards.join('')}</div>`;
 }
 
 /* ══ NEWS ══ */
