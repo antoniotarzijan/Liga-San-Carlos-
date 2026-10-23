@@ -2476,13 +2476,15 @@ async function finishGame(){
   if (!confirm('¿Finalizar este partido? El marcador y los puntos por jugador quedarán guardados como resultado final.')) return;
   stopTicker();
 
+  // MVP: el que más puntos anotó del equipo ganador.
   let mvpName = null, topPts = 0;
+  const winnerRoster = currentGame.homeScore > currentGame.awayScore ? rosterHome : rosterAway;
   const playersWithActivity = [];
   [...rosterHome, ...rosterAway].forEach(p => {
     const st = playerStats[p.id];
     if (!st || (st.points === 0 && st.fouls === 0)) return;
     playersWithActivity.push({ player: p, points: st.points });
-    if (st.points > topPts) { topPts = st.points; mvpName = p.name; }
+    if (winnerRoster.includes(p) && st.points > topPts) { topPts = st.points; mvpName = p.name; }
   });
 
   const { error } = await _supabase.from(divCfg().dbTable).update({

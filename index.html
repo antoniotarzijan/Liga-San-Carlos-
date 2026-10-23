@@ -895,8 +895,8 @@
           <div class="form-group"><label>Fecha jugado</label><input type="text" id="res-date" placeholder="ej: Martes 8 Abr" /></div>
         </div>
         <div id="score-form" style="display:none;">
-          <div class="score-row"><div class="score-team-name" id="sf-home-name">—</div><input type="number" id="sf-home-score" placeholder="0" min="0" /></div>
-          <div class="score-row"><div class="score-team-name" id="sf-away-name">—</div><input type="number" id="sf-away-score" placeholder="0" min="0" /></div>
+          <div class="score-row"><div class="score-team-name" id="sf-home-name">—</div><input type="number" id="sf-home-score" placeholder="0" min="0" oninput="onPlayerPtsInput()" /></div>
+          <div class="score-row"><div class="score-team-name" id="sf-away-name">—</div><input type="number" id="sf-away-score" placeholder="0" min="0" oninput="onPlayerPtsInput()" /></div>
           <div id="player-scoring-section">
             <div class="player-scoring-header">
               <div class="player-scoring-title">🏀 Puntos por jugador</div>
@@ -2542,7 +2542,12 @@ function onPlayerPtsInput(){
       if (inp.dataset.team===game.home) homeTotal+=pts;
       else awayTotal+=pts;
     }
-    if (pts>topPts){topPts=pts;topPlayer=inp.dataset.playerName;}
+  });
+  // MVP: el que más puntos anotó del equipo ganador
+  const winner=game?winnerTeam(game,homeTotal,awayTotal):null;
+  allInputs.forEach(inp=>{
+    const pts=parseInt(inp.value)||0;
+    if (inp.dataset.team===winner&&pts>topPts){topPts=pts;topPlayer=inp.dataset.playerName;}
   });
   const homeBox=document.getElementById('home-team-total');
   const awayBox=document.getElementById('away-team-total');
@@ -2596,8 +2601,16 @@ function collectPlayerScores(prefix,players){
   });
 }
 
-function calcMvp(homeScores,awayScores){
-  const all=[...homeScores,...awayScores].filter(s=>s.pts>0);
+// Ganador según el marcador del formulario; si aún no está completo, según los puntos por jugador.
+function winnerTeam(game,homeTotal,awayTotal){
+  const hs=document.getElementById('sf-home-score').value, as=document.getElementById('sf-away-score').value;
+  const [h,a]=(hs!==''&&as!==''&&+hs!==+as)?[+hs,+as]:[homeTotal,awayTotal];
+  return h===a?null:(h>a?game.home:game.away);
+}
+
+// MVP: el que más puntos anotó del equipo ganador.
+function calcMvp(homeScores,awayScores,hs,as){
+  const all=(+hs>+as?homeScores:awayScores).filter(s=>s.pts>0);
   if(!all.length) return null;
   return all.reduce((best,s)=>s.pts>best.pts?s:best,all[0]);
 }
@@ -2703,7 +2716,7 @@ async function saveResult(){
 
   const homeScores=collectPlayerScores('home',_scoringHomePlayers);
   const awayScores=collectPlayerScores('away',_scoringAwayPlayers);
-  const autoMvp=calcMvp(homeScores,awayScores);
+  const autoMvp=calcMvp(homeScores,awayScores,hs,as);
   const mvpFinal=manualMvp||(autoMvp?autoMvp.name:null);
 
   const {error:gameErr}=await _supabase.from(divCfg().dbTable).update({
