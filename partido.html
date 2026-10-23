@@ -433,7 +433,7 @@ async function renderUpcoming(row){
    PREVIA DEL PARTIDO (solo con datos ya cargados: resultados y nómina)
 ══════════════════════════════════════════════════════════════ */
 
-// Misma regla que computeStandings() en index.html: 2 pts por victoria, 1 por derrota;
+// Misma regla que computeStandings() en index.html: 2 pts por victoria, 1 por derrota (0 si es por W.O.);
 // desempate por diferencial, duelo directo y puntos anotados.
 function computeStandings(finished){
   const rows = {};
@@ -450,7 +450,7 @@ function computeStandings(finished){
     h.diff += hs - as; a.diff += as - hs;
     const [win, loss] = hs > as ? [h, a] : [a, h];
     win.w++; win.tablePoints += 2;
-    loss.l++; loss.tablePoints += 1;
+    loss.l++; loss.tablePoints += g.walkover ? 0 : 1;
   });
   const headToHead = (idA, idB) => {
     let wA = 0, wB = 0;
@@ -478,7 +478,7 @@ function teamResults(finished, teamId){
     .map(g => {
       const isHome = g.home === teamId;
       const own = +(isHome ? g.home_score : g.away_score), opp = +(isHome ? g.away_score : g.home_score);
-      return { id:g.id, round:g.round, opp:isHome ? g.away : g.home, isHome, own, oppScore:opp, won:own > opp };
+      return { id:g.id, round:g.round, opp:isHome ? g.away : g.home, isHome, own, oppScore:opp, won:own > opp, wo:!!g.walkover };
     });
 }
 
@@ -558,7 +558,7 @@ async function buildPreviewHTML(row){
         <div class="form-chips">${last5.map(r => `<span class="form-chip ${r.won ? 'w' : 'l'}" title="J${r.round} vs ${teams[r.opp]?.name || r.opp}: ${r.own}–${r.oppScore}">${r.won ? 'G' : 'P'}</span>`).join('')}</div>
         ${recent.map(r => `<a class="recent-row" href="partido.html?div=${activeDivision}&id=${r.id}">
           <span class="recent-opp">J${r.round} · ${r.isHome ? 'vs' : '@'} <b>${teams[r.opp]?.name || r.opp}</b></span>
-          <span class="recent-res ${r.won ? 'w' : 'l'}">${r.won ? 'G' : 'P'} ${r.own}–${r.oppScore}</span>
+          <span class="recent-res ${r.won ? 'w' : 'l'}">${r.won ? 'G' : 'P'} ${r.wo ? 'W.O.' : `${r.own}–${r.oppScore}`}</span>
         </a>`).join('')}`
       : '<div class="preview-empty">Aún no juega esta temporada.</div>'}
     </div>`;
@@ -653,7 +653,7 @@ async function renderGame(row){
   document.getElementById('root').innerHTML = `
     <div class="hero-bar">
       <div class="status-row">
-        ${isLive ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span>` : `<span class="status-badge finished">✓ FINALIZADO</span>`}
+        ${isLive ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span>` : `<span class="status-badge finished">✓ FINALIZADO${row.walkover ? ` · W.O. (no se presentó ${teams[row.walkover]?.name || row.walkover})` : ''}</span>`}
       </div>
       <div class="hero-meta-line">Jornada ${row.round} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
 

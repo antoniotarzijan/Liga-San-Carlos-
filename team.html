@@ -594,6 +594,7 @@ async function init() {
     venue: r.venue || 'Colegio Cumbres',
     homeScore: r.home_score, awayScore: r.away_score,
     mvp: r.mvp || '',
+    walkover: r.walkover || null,
   }));
 
   const players = playersRes.data || [];
@@ -625,13 +626,14 @@ function computeStandings() {
     rows[g.home].pf += hs; rows[g.away].pf += as;
     rows[g.home].pa += as; rows[g.away].pa += hs;
     rows[g.home].diff += hs - as; rows[g.away].diff += as - hs;
+    // Perder por W.O. (no presentarse) da 0 puntos de tabla en vez de 1.
     if (hs > as) {
       rows[g.home].w++; rows[g.away].l++;
-      rows[g.home].pts += 2; rows[g.away].pts += 1;
+      rows[g.home].pts += 2; rows[g.away].pts += g.walkover ? 0 : 1;
       rows[g.home].form.push('w'); rows[g.away].form.push('l');
     } else {
       rows[g.away].w++; rows[g.home].l++;
-      rows[g.away].pts += 2; rows[g.home].pts += 1;
+      rows[g.away].pts += 2; rows[g.home].pts += g.walkover ? 0 : 1;
       rows[g.away].form.push('w'); rows[g.home].form.push('l');
     }
   });

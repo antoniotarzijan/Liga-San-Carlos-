@@ -1275,6 +1275,7 @@ function rowToGame(row) {
     homeScore:row.home_score, awayScore:row.away_score,
     mvp:row.mvp||'',
     rescheduled:!!row.rescheduled,
+    walkover:row.walkover||null,
   };
 }
 
@@ -1320,13 +1321,14 @@ function computeStandings() {
     rows[g.home].pointsAgainst += as; rows[g.away].pointsAgainst += hs;
     rows[g.home].diff          += hs - as; rows[g.away].diff     += as - hs;
 
+    // Perder por W.O. (no presentarse) da 0 puntos de tabla en vez de 1.
     if (hs > as) {
       rows[g.home].w++;  rows[g.away].l++;
-      rows[g.home].tablePoints += 2; rows[g.away].tablePoints += 1;
+      rows[g.home].tablePoints += 2; rows[g.away].tablePoints += g.walkover ? 0 : 1;
       rows[g.home].form.push('w');   rows[g.away].form.push('l');
     } else {
       rows[g.away].w++;  rows[g.home].l++;
-      rows[g.away].tablePoints += 2; rows[g.home].tablePoints += 1;
+      rows[g.away].tablePoints += 2; rows[g.home].tablePoints += g.walkover ? 0 : 1;
       rows[g.away].form.push('w');   rows[g.home].form.push('l');
     }
   });
@@ -1558,7 +1560,7 @@ function renderGames() {
     return `
       <div class="game-card finished reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
         <div class="game-card-header">
-          <span class="game-round">Jornada ${g.round}</span>
+          <span class="game-round">Jornada ${g.round}${g.walkover?' · W.O.':''}</span>
           <span class="game-date">✓ ${g.date}</span>
         </div>
         <div class="game-body">
@@ -1992,12 +1994,12 @@ async function renderScorers() {
 
 /* ══ RÉCORDS ══ */
 // Se calculan solos con los resultados (games) y los puntos por jugador (game_stats).
-// Ante empate, se queda el que lo consiguió primero.
+// Ante empate, se queda el que lo consiguió primero. Los W.O. no cuentan.
 async function renderRecords() {
   const root = document.getElementById('records-root');
   const teams = divTeams();
   const byOrder = (a, b) => a.round - b.round || a.id - b.id;
-  const finished = STATE.games.filter(g => g.type === 'finished').sort(byOrder);
+  const finished = STATE.games.filter(g => g.type === 'finished' && !g.walkover).sort(byOrder);
   if (!finished.length) { root.innerHTML = ''; return; }
 
   const gameById = Object.fromEntries(finished.map(g => [g.id, g]));
