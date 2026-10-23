@@ -144,6 +144,19 @@
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
     .modal-error { font-size: 13px; color: #F87171; min-height: 18px; margin-bottom: 8px; }
 
+    .wo-tag { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; color: #F87171; border: 1px solid rgba(248,113,113,.4); border-radius: 2px; padding: 2px 6px; margin-left: 8px; vertical-align: middle; }
+    .wo-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .wo-team { padding: 12px; border: 1px solid var(--border); border-radius: 4px; background: rgba(255,255,255,.03); color: var(--text); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; text-align: center; }
+    .wo-team.selected { border-color: #F87171; background: rgba(248,113,113,.12); }
+    .wo-team small { display: block; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+    .wo-players { max-height: 40vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 10px; }
+    .wo-player { display: grid; grid-template-columns: 1fr 80px; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .wo-player:last-child { border-bottom: none; }
+    .wo-player input { padding: 6px 8px; text-align: center; }
+    .wo-sum { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; font-size: 14px; margin-bottom: 10px; }
+    .wo-sum.ok { color: var(--green); }
+    .wo-sum.bad { color: var(--gold); }
+
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(90px); background: var(--green); color: #000; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; padding: 12px 24px; border-radius: 4px; transition: transform .3s; z-index: 9999; max-width: calc(100vw - 32px); }
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.err { background: #F87171; }
@@ -269,6 +282,26 @@
   </div>
 </div>
 
+<!-- ══ MODAL W.O. ══ -->
+<div class="modal" id="wo-modal">
+  <div class="modal-box">
+    <h3 id="wo-title">Walk over</h3>
+    <p>El equipo que no se presenta pierde 20–0 y recibe 0 puntos en la tabla. Reparte los 20 puntos entre jugadores del ganador: los que reciban puntos suman un partido jugado.</p>
+    <label>¿Qué equipo no se presentó?</label>
+    <div class="wo-teams" id="wo-teams"></div>
+    <div id="wo-dist" style="display:none;">
+      <label id="wo-dist-label">Puntos para el ganador</label>
+      <div class="wo-players" id="wo-players"></div>
+      <div class="wo-sum" id="wo-sum"></div>
+    </div>
+    <div class="modal-error" id="wo-err"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('wo-modal')">Cancelar</button>
+      <button class="btn btn-red" id="wo-save" onclick="saveWalkover()" disabled>Registrar W.O.</button>
+    </div>
+  </div>
+</div>
+
 <datalist id="time-options"><option value="19:30"><option value="20:30"></datalist>
 <datalist id="court-options"><option value="Cancha 1"><option value="Cancha 2"></datalist>
 
@@ -283,7 +316,7 @@ const CONFIG = {
   league: { season:'2026', venue:'Colegio Cumbres' },
   divisions: {
     primera: {
-      label:'Primera División', dbTable:'games', gameDay:4,
+      label:'Primera División', dbTable:'games', playersTable:'players', gameDay:4,
       teams: {
         EXMAN:{ abbr:'EX-MAN', name:'EX-Manquehue' },
         ANANA:{ abbr:'ORTHO',  name:'Orthobullets' },
@@ -297,7 +330,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label:'Segunda División', dbTable:'games_segunda', gameDay:2,
+      label:'Segunda División', dbTable:'games_segunda', playersTable:'players_segunda', gameDay:2,
       teams: {
         T2B:{ abbr:'DYN', name:'Dynamos' },
         T2C:{ abbr:'DER', name:'Derazzo' },
@@ -608,11 +641,13 @@ function matchHTML(g) {
     : g.type === 'live' ? '<span class="vs" style="color:#F87171;">EN VIVO</span>' : '<span class="vs">vs</span>';
   return `<div class="match">
     <div class="match-slot">${hora}<span>${canchaCorta(g.venue) || '—'}</span></div>
-    <div class="match-teams">${teamName(g.home)}${middle}${teamName(g.away)}</div>
+    <div class="match-teams">${teamName(g.home)}${middle}${teamName(g.away)}${g.walkover ? `<span class="wo-tag" title="No se presentó ${teamName(g.walkover)}">W.O.</span>` : ''}</div>
     <div class="match-actions">${editable ? `
       <button class="btn btn-outline btn-sm" onclick="openEdit(${g.id})" title="Editar">✏</button>
       <button class="btn btn-outline btn-sm" onclick="openSwap(${g.id})" title="Intercambiar">⇅</button>
+      ${g.type === 'upcoming' ? `<button class="btn btn-danger btn-sm" onclick="openWalkover(${g.id})" title="Equipo no se presentó">W.O.</button>` : ''}
       ${g.type === 'scheduled' ? `<button class="btn btn-danger btn-sm" onclick="deleteScheduled(${g.id})" title="Eliminar">✕</button>` : ''}` : ''}
+      ${g.walkover ? `<button class="btn btn-outline btn-sm" onclick="undoWalkover(${g.id})">Deshacer W.O.</button>` : ''}
     </div>
   </div>`;
 }
@@ -776,6 +811,113 @@ async function deleteScheduled(id) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   WALK OVER: el que no se presenta pierde 20-0 (0 pts de tabla).
+   Los 20 puntos se reparten entre jugadores del ganador; quienes
+   reciben puntos suman un partido jugado (game_stats + nómina).
+══════════════════════════════════════════════════════════════ */
+const WO_POINTS = 20;
+let woGameId = null, woAbsent = null, woPlayers = [];
+
+function openWalkover(id) {
+  const g = GAMES.find(x => x.id === id); if (!g) return;
+  woGameId = id; woAbsent = null; woPlayers = [];
+  document.getElementById('wo-title').textContent = `W.O. · J${g.round} · ${teamName(g.home)} vs ${teamName(g.away)}`;
+  document.getElementById('wo-teams').innerHTML = [g.home, g.away].map(t =>
+    `<button class="wo-team" data-team="${t}" onclick="selectWalkoverAbsent('${t}')">${teamName(t)}<small>No se presentó</small></button>`).join('');
+  document.getElementById('wo-dist').style.display = 'none';
+  document.getElementById('wo-err').textContent = '';
+  document.getElementById('wo-save').disabled = true;
+  openModal('wo-modal');
+}
+
+async function selectWalkoverAbsent(team) {
+  const g = GAMES.find(x => x.id === woGameId); if (!g) return;
+  woAbsent = team;
+  const winner = team === g.home ? g.away : g.home;
+  document.querySelectorAll('.wo-team').forEach(b => b.classList.toggle('selected', b.dataset.team === team));
+  const { data, error } = await _supabase.from(divCfg().playersTable).select('*').eq('team', winner).order('name');
+  if (error) { document.getElementById('wo-err').textContent = 'Error: ' + error.message; return; }
+  woPlayers = data || [];
+  document.getElementById('wo-dist-label').textContent = `Puntos para ${teamName(winner)} (deben sumar ${WO_POINTS})`;
+  document.getElementById('wo-players').innerHTML = woPlayers.length
+    ? woPlayers.map(p => `<div class="wo-player">
+        <span>${p.number != null ? '#' + p.number + ' · ' : ''}${esc(p.name)}</span>
+        <input type="number" min="0" max="${WO_POINTS}" value="" placeholder="0" data-player="${p.id}" oninput="updateWalkoverSum()" />
+      </div>`).join('')
+    : '<p class="empty" style="padding:12px;">Este equipo no tiene jugadores en la nómina.</p>';
+  document.getElementById('wo-dist').style.display = '';
+  updateWalkoverSum();
+}
+
+function walkoverPoints() {
+  return [...document.querySelectorAll('#wo-players input')]
+    .map(inp => ({ player: woPlayers.find(p => p.id === +inp.dataset.player), pts: parseInt(inp.value, 10) || 0 }))
+    .filter(x => x.player && x.pts > 0);
+}
+
+function updateWalkoverSum() {
+  const total = walkoverPoints().reduce((n, x) => n + x.pts, 0);
+  const el = document.getElementById('wo-sum');
+  el.textContent = total === WO_POINTS ? `✓ ${total} de ${WO_POINTS} puntos repartidos` : `${total} de ${WO_POINTS} puntos repartidos`;
+  el.className = `wo-sum ${total === WO_POINTS ? 'ok' : 'bad'}`;
+  document.getElementById('wo-save').disabled = total !== WO_POINTS || !woAbsent;
+}
+
+async function saveWalkover() {
+  const g = GAMES.find(x => x.id === woGameId); if (!g || !woAbsent) return;
+  const dist = walkoverPoints();
+  if (dist.reduce((n, x) => n + x.pts, 0) !== WO_POINTS) return;
+  const winner = woAbsent === g.home ? g.away : g.home;
+  if (!confirm(`¿Registrar W.O.?\n\n${teamName(woAbsent)} no se presentó: ${teamName(winner)} gana ${WO_POINTS}–0.`)) return;
+  const btn = document.getElementById('wo-save'); btn.disabled = true;
+
+  const { error } = await _supabase.from(divCfg().dbTable).update({
+    type: 'finished', walkover: woAbsent, mvp: null,
+    home_score: g.home === winner ? WO_POINTS : 0,
+    away_score: g.away === winner ? WO_POINTS : 0,
+  }).eq('id', g.id);
+  if (error) { document.getElementById('wo-err').textContent = 'Error: ' + error.message; btn.disabled = false; return; }
+
+  await _supabase.from('game_stats').delete().eq('game_id', g.id).eq('division', activeDivision);
+  const { error: statsErr } = await _supabase.from('game_stats').insert(dist.map(({ player, pts }) => ({
+    game_id: g.id, player_id: player.id, player_name: player.name, player_number: player.number ?? null,
+    team: winner, points: pts, played: true, division: activeDivision,
+  })));
+  if (statsErr) showToast('⚠ W.O. guardado, pero falló el detalle por jugador: ' + statsErr.message, true);
+
+  for (const { player, pts } of dist) {
+    const { error: plErr } = await _supabase.from(divCfg().playersTable)
+      .update({ points: (player.points || 0) + pts, games: (player.games || 0) + 1 }).eq('id', player.id);
+    if (plErr) showToast(`⚠ No se actualizó ${player.name}: ${plErr.message}`, true);
+  }
+
+  closeModal('wo-modal');
+  await loadGames();
+  showToast(`✓ W.O. registrado: ${teamName(winner)} ${WO_POINTS}–0`);
+}
+
+async function undoWalkover(id) {
+  const g = GAMES.find(x => x.id === id); if (!g || !g.walkover) return;
+  if (!confirm(`¿Deshacer el W.O. de ${teamName(g.home)} vs ${teamName(g.away)}?\n\nEl partido vuelve a quedar pendiente y se descuentan los puntos y partidos jugados que se repartieron.`)) return;
+
+  const { data: stats } = await _supabase.from('game_stats').select('*').eq('game_id', id).eq('division', activeDivision);
+  for (const s of stats || []) {
+    const { data: p } = await _supabase.from(divCfg().playersTable).select('points,games').eq('id', s.player_id).single();
+    if (p) await _supabase.from(divCfg().playersTable).update({
+      points: Math.max(0, (p.points || 0) - (s.points || 0)),
+      games:  Math.max(0, (p.games || 0) - 1),
+    }).eq('id', s.player_id);
+  }
+  await _supabase.from('game_stats').delete().eq('game_id', id).eq('division', activeDivision);
+
+  const { error } = await _supabase.from(divCfg().dbTable)
+    .update({ type: 'upcoming', walkover: null, home_score: null, away_score: null, mvp: null }).eq('id', id);
+  if (error) { showToast('⚠ Error: ' + error.message, true); return; }
+  await loadGames();
+  showToast('✓ W.O. deshecho; el partido vuelve a estar pendiente');
+}
+
+/* ══════════════════════════════════════════════════════════════
    IMPORTAR FIXTURE
 ══════════════════════════════════════════════════════════════ */
 const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -869,7 +1011,7 @@ function showToast(msg, isErr = false) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal('edit-modal'); closeModal('swap-modal'); }
+  if (e.key === 'Escape') { closeModal('edit-modal'); closeModal('swap-modal'); closeModal('wo-modal'); }
 });
 </script>
 </body>
