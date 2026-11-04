@@ -1626,19 +1626,12 @@ function renderStandings() {
    Mini bracket con los partidos de playoffs (round 100+); antes de confirmar
    los cruces, la proyección según la tabla. Durante los playoffs la sección
    sube arriba de la portada. */
-function renderPlayoffsSection() {
-  const root = document.getElementById('playoffs-root');
-  const teams = divTeams();
+// Cruces de la división activa: los partidos de playoffs (round 100+) o, antes de
+// confirmarlos, la proyección según la tabla. Lo usan la portada y la imagen de Instagram.
+function playoffBracket() {
   const po = STATE.games.filter(g => g.bracketSlot);
-  const started = po.some(g => g.type !== 'scheduled');
   const table = computeStandings();
   const projected = !po.length;
-  if (projected && !table.some(r => r.gp > 0)) { root.innerHTML = ''; return; }
-
-  // Posición de la sección: arriba durante los playoffs, debajo de la tabla antes.
-  const main = root.parentElement;
-  main.insertBefore(root, document.getElementById(started ? 'games-root' : 'teams-root'));
-
   const slot = id => {
     if (projected) {
       const q = quarterFinalsFrom(table).find(x => x.slot === id);
@@ -1653,6 +1646,25 @@ function renderPlayoffsSection() {
       winner: g.type === 'finished' ? (+g.homeScore > +g.awayScore ? g.home : g.away) : null,
     };
   };
+  return {
+    projected, slot,
+    started: po.some(g => g.type !== 'scheduled'),
+    empty: projected && !table.some(r => r.gp > 0),
+    champ: slot('F1').winner || null,
+    pendingRounds: new Set(STATE.games.filter(g => !isPlayoff(g) && g.type !== 'finished').map(g => g.round)).size,
+  };
+}
+
+function renderPlayoffsSection() {
+  const root = document.getElementById('playoffs-root');
+  const teams = divTeams();
+  const { projected, started, empty, champ, pendingRounds: pending, slot } = playoffBracket();
+  if (empty) { root.innerHTML = ''; return; }
+
+  // Posición de la sección: arriba durante los playoffs, debajo de la tabla antes.
+  const main = root.parentElement;
+  main.insertBefore(root, document.getElementById(started ? 'games-root' : 'teams-root'));
+
   const teamRow = (m, side) => {
     const id = side === 0 ? m.home : m.away;
     if (!id) return '<div class="mb-team tbd"><span class="seed"></span><span class="lg"></span><span class="nm">Por definir</span><span class="sc"></span></div>';
@@ -1666,8 +1678,6 @@ function renderPlayoffsSection() {
     const tag = m.id ? 'a' : 'div', href = m.id ? ` href="partido.html?div=${activeDivision}&id=${m.id}"` : '';
     return `<${tag}${href} class="mb-match ${extra}">${m.live ? '<div class="mb-live">● EN VIVO</div>' : ''}${teamRow(m, 0)}${teamRow(m, 1)}</${tag}>`;
   };
-  const champ = slot('F1').winner;
-  const pending = new Set(STATE.games.filter(g => !isPlayoff(g) && g.type !== 'finished').map(g => g.round)).size;
   const tag = champ ? `Campeón ${league.season}` : started ? 'En curso' : projected ? 'Si terminara hoy' : 'Cruces confirmados';
 
   root.innerHTML = `
@@ -1675,6 +1685,7 @@ function renderPlayoffsSection() {
       <h2 class="section-title">Playoffs</h2>
       <span class="section-tag">${tag}</span>
       <div class="section-line"></div>
+      <button class="ig-gen-btn" onclick="openInstagramModal('bracket')">📸 Para Instagram</button>
       <a href="playoff.html" class="playoff-bracket-btn"><span class="pb-icon">🏆</span>Cuadro completo<span class="pb-arrow">→</span></a>
     </div>
     ${projected ? `<div class="mb-banner reveal"><strong>📊 Proyección</strong> · ${pending
@@ -3394,7 +3405,10 @@ function showToast(msg){
    GENERADOR TABLA INSTAGRAM
 ══════════════════════════════════════════════════════════════ */
 
-async function openInstagramModal() {
+let _igKind = 'table';   // 'table' | 'bracket'
+
+async function openInstagramModal(kind = 'table') {
+  _igKind = kind;
   const modal = document.getElementById('instagram-modal');
   const canvas = document.getElementById('ig-canvas');
   const loading = document.getElementById('ig-loading');
@@ -3406,12 +3420,12 @@ async function openInstagramModal() {
   actions.style.display = 'none';
   hint.style.display = 'none';
   loading.style.display = 'block';
-  loading.textContent = 'Generando tabla...';
+  loading.textContent = kind === 'bracket' ? 'Generando bracket...' : 'Generando tabla...';
 
   modal.classList.add('open');
 
   try {
-    await drawInstagramTable();
+    await (kind === 'bracket' ? drawInstagramBracket() : drawInstagramTable());
     loading.style.display = 'none';
     canvas.style.display = 'block';
     actions.style.display = 'flex';
@@ -3432,7 +3446,9 @@ function downloadInstagramTable() {
   btn.disabled = true;
   btn.textContent = '⏳ Preparando...';
   const link = document.createElement('a');
-  link.download = `tabla-posiciones-lsc-j${divCfg().round}-${Date.now()}.png`;
+  link.download = _igKind === 'bracket'
+    ? `playoffs-lsc-${activeDivision}-${Date.now()}.png`
+    : `tabla-posiciones-lsc-j${divCfg().round}-${Date.now()}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
   setTimeout(() => {
@@ -3465,21 +3481,7 @@ async function drawInstagramTable() {
   const CARD2   = '#161920';
   const PURPLE_BAR = '#3730a3';
 
-  // ── Fondo ──
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, W, H);
-
-  const gR = ctx.createRadialGradient(W*0.85, 0, 0, W*0.85, 0, W*0.6);
-  gR.addColorStop(0, 'rgba(248,8,8,0.18)'); gR.addColorStop(1, 'transparent');
-  ctx.fillStyle = gR; ctx.fillRect(0, 0, W, H);
-
-  const gB = ctx.createRadialGradient(W*0.15, H, 0, W*0.15, H, W*0.5);
-  gB.addColorStop(0, 'rgba(48,9,220,0.14)'); gB.addColorStop(1, 'transparent');
-  ctx.fillStyle = gB; ctx.fillRect(0, 0, W, H);
-
-  // Franja lateral rojo/azul
-  ctx.fillStyle = RED;  ctx.fillRect(0, 0, 8, H/2);
-  ctx.fillStyle = BLUE; ctx.fillRect(0, H/2, 8, H/2);
+  igDrawBackground(ctx, W, H);
 
   // ── Logo ──
   const logoSize = 90;
@@ -3615,7 +3617,138 @@ ctx.fillText('Clasifican a Playoffs (Top 8)', PAD + 33, legY + 16);
   ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W/2, H - 26);
 }
 
+/* ══ BRACKET DE PLAYOFFS PARA INSTAGRAM (1080×1080) ══ */
+async function drawInstagramBracket() {
+  const canvas = document.getElementById('ig-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+  canvas.width = W; canvas.height = H;
+  await document.fonts.ready;
+
+  const teams = divTeams();
+  const { projected, started, champ, slot } = playoffBracket();
+  const RED = '#f80808', GOLD = '#f2b34e', MUTED = '#6B7280', MUTED2 = '#9CA3AF', TEXT = '#E8EAF0', GREEN = '#4ADE80';
+  const divLabel = activeDivision === 'primera' ? 'PRIMERA DIVISIÓN' : 'SEGUNDA DIVISIÓN';
+  const state = champ ? 'CAMPEÓN' : started ? 'EN CURSO' : projected ? 'SI LA FASE REGULAR TERMINARA HOY' : 'CRUCES CONFIRMADOS';
+
+  igDrawBackground(ctx, W, H);
+  await drawImgSafe(ctx, league.logo, W / 2 - 40, 30, 80, 80, null, null);
+
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center'; ctx.fillStyle = TEXT;
+  ctx.font = '700 60px "Bebas Neue", "Barlow Condensed", sans-serif'; ctx.letterSpacing = '5px';
+  ctx.fillText(`PLAYOFFS ${league.season}`, W / 2, 172);
+  const gl = ctx.createLinearGradient(W / 2 - 180, 0, W / 2 + 180, 0);
+  gl.addColorStop(0, 'transparent'); gl.addColorStop(0.3, RED); gl.addColorStop(0.7, RED); gl.addColorStop(1, 'transparent');
+  ctx.strokeStyle = gl; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(W / 2 - 180, 184); ctx.lineTo(W / 2 + 180, 184); ctx.stroke();
+  ctx.font = '700 22px "Barlow Condensed", sans-serif'; ctx.fillStyle = RED; ctx.letterSpacing = '2px';
+  ctx.fillText(`${divLabel}  ·  ${state}`, W / 2, 218);
+
+  // Columnas: cuartos | semis | final + campeón
+  const BOX_H = 100, ROW_H = 50;
+  const COL = { qf: { x: 40, w: 370 }, sf: { x: 450, w: 290 }, f: { x: 780, w: 260 } };
+  const qfY = [372, 548, 724, 900];                       // centros
+  const sfY = [(qfY[0] + qfY[1]) / 2, (qfY[2] + qfY[3]) / 2];
+  const fY = (sfY[0] + sfY[1]) / 2;
+
+  const label = (txt, x, y, color = MUTED2) => {
+    ctx.textAlign = 'center'; ctx.font = '700 17px "Barlow Condensed", sans-serif';
+    ctx.letterSpacing = '3px'; ctx.fillStyle = color; ctx.fillText(txt, x, y);
+  };
+  label('CUARTOS DE FINAL', COL.qf.x + COL.qf.w / 2, 296);
+  label('SEMIFINALES', COL.sf.x + COL.sf.w / 2, 296);
+  label('FINAL', COL.f.x + COL.f.w / 2, fY - BOX_H / 2 - 16, GOLD);
+
+  // Conectores
+  ctx.strokeStyle = 'rgba(255,255,255,0.14)'; ctx.lineWidth = 2; ctx.setLineDash([]);
+  const elbow = (x1, ya, yb, x2, ymid) => {
+    const xm = (x1 + x2) / 2;
+    ctx.beginPath();
+    ctx.moveTo(x1, ya); ctx.lineTo(xm, ya); ctx.lineTo(xm, yb); ctx.lineTo(x1, yb);
+    ctx.moveTo(xm, ymid); ctx.lineTo(x2, ymid); ctx.stroke();
+  };
+  elbow(COL.qf.x + COL.qf.w, qfY[0], qfY[1], COL.sf.x, sfY[0]);
+  elbow(COL.qf.x + COL.qf.w, qfY[2], qfY[3], COL.sf.x, sfY[1]);
+  elbow(COL.sf.x + COL.sf.w, sfY[0], sfY[1], COL.f.x, fY);
+
+  const box = async (id, col, cy, final = false) => {
+    const m = slot(id), x = col.x, y = cy - BOX_H / 2, w = col.w;
+    igRoundRect(ctx, x, y, w, BOX_H, 8); ctx.fillStyle = '#111318'; ctx.fill();
+    ctx.setLineDash(projected ? [8, 6] : []);
+    ctx.strokeStyle = final ? 'rgba(242,179,78,0.6)' : 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.setLineDash([]);
+    if (m.live) { ctx.textAlign = 'left'; ctx.font = '700 15px "Barlow Condensed", sans-serif'; ctx.letterSpacing = '2px'; ctx.fillStyle = RED; ctx.fillText('● EN VIVO', x + 4, y - 8); }
+    for (const side of [0, 1]) {
+      const id2 = side === 0 ? m.home : m.away, ry = y + side * ROW_H, mid = ry + ROW_H / 2;
+      const win = m.winner && m.winner === id2, lose = m.winner && m.winner !== id2;
+      if (win) { igRoundRect(ctx, x + 1, ry + 1, w - 2, ROW_H - 2, 7); ctx.fillStyle = 'rgba(74,222,128,0.08)'; ctx.fill(); }
+      if (side === 1) { ctx.beginPath(); ctx.moveTo(x + 10, ry); ctx.lineTo(x + w - 10, ry); ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke(); }
+      ctx.letterSpacing = '0px'; ctx.textAlign = 'left';
+      if (!id2) {
+        ctx.font = 'italic 500 22px "Barlow Condensed", sans-serif'; ctx.fillStyle = MUTED;
+        ctx.fillText('Por definir', x + 56, mid + 8); continue;
+      }
+      const t = teams[id2];
+      ctx.font = '700 15px "Barlow Condensed", sans-serif'; ctx.fillStyle = MUTED; ctx.textAlign = 'center';
+      ctx.fillText(`${m.seeds?.[side] ?? ''}`, x + 16, mid + 6);
+      await drawImgSafe(ctx, t?.logo, x + 30, mid - 17, 34, 34, t?.color, t?.abbr);
+      const sc = side === 0 ? m.hs : m.as;
+      ctx.textAlign = 'left'; ctx.font = '700 24px "Barlow Condensed", sans-serif';
+      ctx.fillStyle = lose ? MUTED2 : TEXT;
+      ctx.fillText(igClipText(ctx, t?.name || id2, w - 130), x + 74, mid + 8);
+      if (sc != null) {
+        ctx.textAlign = 'right'; ctx.font = '400 32px "Bebas Neue", sans-serif';
+        ctx.fillStyle = win ? TEXT : MUTED2; ctx.fillText(`${sc}`, x + w - 14, mid + 11);
+      }
+    }
+  };
+  for (let i = 0; i < 4; i++) await box(`QF${i + 1}`, COL.qf, qfY[i]);
+  await box('SF1', COL.sf, sfY[0]); await box('SF2', COL.sf, sfY[1]);
+  await box('F1', COL.f, fY, true);
+
+  // Campeón
+  const cx = COL.f.x, cy = 268, cw = COL.f.w, ch = 210;
+  igRoundRect(ctx, cx, cy + 20, cw, ch, 10);
+  const gc = ctx.createRadialGradient(cx + cw / 2, cy + 20, 0, cx + cw / 2, cy + 20, ch);
+  gc.addColorStop(0, 'rgba(242,179,78,0.22)'); gc.addColorStop(1, 'rgba(17,19,24,1)');
+  ctx.fillStyle = gc; ctx.fill(); ctx.strokeStyle = 'rgba(242,179,78,0.55)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.textAlign = 'center'; ctx.font = '44px serif'; ctx.fillText('🏆', cx + cw / 2, cy + 80);
+  ctx.font = '700 17px "Barlow Condensed", sans-serif'; ctx.letterSpacing = '3px'; ctx.fillStyle = GOLD;
+  ctx.fillText('CAMPEÓN', cx + cw / 2, cy + 110);
+  if (champ) {
+    const t = teams[champ];
+    await drawImgSafe(ctx, t?.logo, cx + cw / 2 - 30, cy + 122, 60, 60, t?.color, t?.abbr);
+    ctx.font = '400 30px "Bebas Neue", sans-serif'; ctx.letterSpacing = '1px'; ctx.fillStyle = GOLD;
+    ctx.fillText(igClipText(ctx, t?.name || champ, cw - 24), cx + cw / 2, cy + 214);
+  } else {
+    ctx.font = '700 18px "Barlow Condensed", sans-serif'; ctx.letterSpacing = '2px'; ctx.fillStyle = MUTED;
+    ctx.fillText('POR DEFINIR', cx + cw / 2, cy + 160);
+  }
+
+  // Footer
+  ctx.beginPath(); ctx.moveTo(56, H - 58); ctx.lineTo(W - 56, H - 58);
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.textAlign = 'center'; ctx.font = '700 18px "Barlow Condensed", sans-serif';
+  ctx.letterSpacing = '4px'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W / 2, H - 26);
+  ctx.letterSpacing = '0px';
+}
+
 /* ── Canvas helpers ── */
+function igDrawBackground(ctx, W, H) {
+  ctx.fillStyle = '#08090C';
+  ctx.fillRect(0, 0, W, H);
+  const gR = ctx.createRadialGradient(W*0.85, 0, 0, W*0.85, 0, W*0.6);
+  gR.addColorStop(0, 'rgba(248,8,8,0.18)'); gR.addColorStop(1, 'transparent');
+  ctx.fillStyle = gR; ctx.fillRect(0, 0, W, H);
+  const gB = ctx.createRadialGradient(W*0.15, H, 0, W*0.15, H, W*0.5);
+  gB.addColorStop(0, 'rgba(48,9,220,0.14)'); gB.addColorStop(1, 'transparent');
+  ctx.fillStyle = gB; ctx.fillRect(0, 0, W, H);
+  // Franja lateral rojo/azul
+  ctx.fillStyle = '#f80808'; ctx.fillRect(0, 0, 8, H/2);
+  ctx.fillStyle = '#3009dc'; ctx.fillRect(0, H/2, 8, H/2);
+}
+
 function igRoundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
