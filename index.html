@@ -438,6 +438,43 @@
     .sponsors-banner-logos .sponsor-logo-wrap{height:70px;}
 
     /* ── LEGEND / FOOTER / FILTER ── */
+    .po-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-left:8px;white-space:nowrap;vertical-align:middle;}
+    .po-badge.in{color:#4ADE80;border:1px solid rgba(74,222,128,.4);background:rgba(74,222,128,.08);}
+    .po-badge.out{color:#F87171;border:1px solid rgba(248,113,113,.35);}
+    .standings-row.eliminated{opacity:.55;}
+
+    /* ── MINI BRACKET (portada) ── */
+    .mb-banner{margin-bottom:18px;padding:10px 14px;border:1px dashed rgba(242,179,78,.4);border-radius:6px;background:rgba(242,179,78,.05);font-size:13px;color:#C9CDD6;}
+    .mb-banner strong{color:var(--gold);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;}
+    .mb-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr .8fr;gap:18px;align-items:stretch;}
+    .mb-col{display:flex;flex-direction:column;gap:8px;}
+    .mb-body{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px;}
+    .mb-col-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:2px;}
+    .mb-col-label.final{color:var(--gold);}
+    .mb-match{display:block;background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;color:inherit;text-decoration:none;transition:border-color .2s,transform .2s;}
+    a.mb-match:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px);}
+    .mb-grid.projected .mb-match{border-style:dashed;}
+    .mb-match.final{border-color:rgba(242,179,78,.45);}
+    .mb-live{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;color:var(--red);padding:4px 10px 0;}
+    .mb-team{display:grid;grid-template-columns:18px 26px 1fr auto;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;}
+    .mb-team:last-child{border-bottom:none;}
+    .mb-team .seed{font-size:10px;color:var(--muted);text-align:center;}
+    .mb-team .lg{width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+    .mb-team .lg img{width:100%;height:100%;object-fit:contain;}
+    .mb-team .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mb-team .sc{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--muted);min-width:20px;text-align:right;}
+    .mb-team.win{background:rgba(74,222,128,.05);}
+    .mb-team.win .sc{color:var(--text);}
+    .mb-team.lose .nm{color:var(--muted);}
+    .mb-team.tbd .nm{color:var(--muted);font-style:italic;font-weight:500;}
+    .mb-champ{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:18px 12px;border:1px solid rgba(242,179,78,.4);border-radius:8px;background:radial-gradient(ellipse at top,rgba(242,179,78,.16),transparent 70%),var(--card);}
+    .mb-champ .tr{font-size:30px;}
+    .mb-champ .lb{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+    .mb-champ .lg{width:56px;height:56px;}
+    .mb-champ .lg img{width:100%;height:100%;object-fit:contain;}
+    .mb-champ .nm{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--gold);line-height:1;}
+    .mb-champ .tbd{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+
     .legend{margin-top:16px;display:flex;gap:20px;font-size:12px;color:var(--muted);}
     .legend-item{display:flex;align-items:center;gap:6px;}
     .legend-bar{display:inline-block;width:3px;height:14px;border-radius:1px;}
@@ -650,6 +687,9 @@
       .cell{font-size:13px;}
       .cell.pct{font-size:14px;}
       .legend{flex-wrap:wrap;gap:12px;font-size:11px;}
+      .mb-grid{grid-template-columns:1fr;gap:14px;}
+      .mb-col .mb-col-label:empty{display:none;}
+      .po-badge{margin-left:0;display:inline-block;margin-top:3px;}
       .teams-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
       .team-card{padding:20px 12px 16px;border-radius:6px;}
       .team-card-logo{width:72px;height:72px;margin-bottom:12px;}
@@ -1129,6 +1169,7 @@
   <div class="hero" id="hero-root"></div>
   <section id="games-root" class="games-section"></section>
   <section id="standings-root"></section>
+  <section id="playoffs-root"></section>
   <section id="teams-root"></section>
   <section id="roster-root"></section>
   <section id="scorers-root"></section>
@@ -1462,7 +1503,7 @@ const bigLogo   = id => { const t=divTeams()[id]; if(!t) return ''; return `<div
 const smallLogo = id => { const t=divTeams()[id]; if(!t) return ''; return `<div class="ts-logo">${logoInner(id)}</div>`; };
 
 async function render() {
-  renderHero(); renderStandings(); renderTeams(); renderGames();
+  renderHero(); renderStandings(); renderPlayoffsSection(); renderTeams(); renderGames();
   await renderScorers(); 
   await renderRecords();
   renderInstagram();
@@ -1512,17 +1553,38 @@ function renderHero() {
     </div>`;
 }
 
+// Clasificado / eliminado matemáticamente (cálculo conservador: un empate en puntos
+// se cuenta en contra, así nunca se marca antes de tiempo). Al terminar la fase
+// regular valen las posiciones finales.
+function playoffMath(standings) {
+  const pending = STATE.games.filter(g => !isPlayoff(g) && g.type !== 'finished');
+  const rem = id => pending.filter(g => g.home === id || g.away === id).length;
+  const spots = league.playoffSpots, out = {};
+  if (!standings.some(r => r.gp > 0)) return out;
+  standings.forEach((x, i) => {
+    if (!pending.length) { out[x.teamId] = i < spots ? 'in' : 'out'; return; }
+    const minX = x.tablePoints + rem(x.teamId), maxX = x.tablePoints + 2 * rem(x.teamId);
+    const others = standings.filter(y => y.teamId !== x.teamId);
+    if (others.filter(y => y.tablePoints + 2 * rem(y.teamId) >= minX).length < spots) out[x.teamId] = 'in';
+    else if (others.filter(y => y.tablePoints + rem(y.teamId) > maxX).length >= spots) out[x.teamId] = 'out';
+  });
+  return out;
+}
+
 function renderStandings() {
   const standings = computeStandings();
+  const math = playoffMath(standings);
   const rows = standings.map((row, i) => {
     const t = divTeams()[row.teamId]; if (!t) return '';
     const pos = i + 1;
-    const cls = [pos <= league.playoffSpots ? 'playoff' : '', pos === 1 ? 'leader' : '', pos === league.playoffSpots ? 'cutoff' : ''].filter(Boolean).join(' ');
+    const cls = [pos <= league.playoffSpots ? 'playoff' : '', pos === 1 ? 'leader' : '', pos === league.playoffSpots ? 'cutoff' : '', math[row.teamId] === 'out' ? 'eliminated' : ''].filter(Boolean).join(' ');
+    const badge = math[row.teamId] === 'in' ? '<span class="po-badge in">✓ Clasificado</span>'
+      : math[row.teamId] === 'out' ? '<span class="po-badge out">Eliminado</span>' : '';
         const diffStr = row.diff > 0 ? `+${row.diff}` : row.diff === 0 ? '—' : `${row.diff}`;
     const diffCls = row.diff > 0 ? 'diff-pos' : row.diff < 0 ? 'diff-neg' : '';
     const dots = (row.form || []).slice(-5).map(r => `<span class="dot ${r}"></span>`).join('');
     return `<div class="standings-row ${cls} reveal" onclick="window.location.href='team.html?id=${row.teamId}&div=${activeDivision}'" style="cursor:pointer;--team-color:${t.color};">      <div class="rank">${pos}</div>
-      <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}</div></div>
+      <div class="team-info">${bigLogo(row.teamId)}<div class="team-name">${t.name}${badge}</div></div>
       <div class="cell" style="color:var(--gold);font-weight:700;font-size:17px;">${row.tablePoints}</div>
       <div class="cell">${row.gp}</div>
       <div class="cell">${row.w}</div>
@@ -1556,7 +1618,77 @@ function renderStandings() {
     </div>
     <div class="legend reveal">
   <div class="legend-item"><span class="legend-bar" style="background:var(--gold)"></span>Clasifican a Playoffs (Top 8)</div>
+  ${Object.keys(math).length ? '<div class="legend-item"><span class="po-badge in" style="margin:0">✓</span>Clasificado matemáticamente</div>' : ''}
 </div>`;
+}
+
+/* ══ PLAYOFFS EN LA PORTADA ══
+   Mini bracket con los partidos de playoffs (round 100+); antes de confirmar
+   los cruces, la proyección según la tabla. Durante los playoffs la sección
+   sube arriba de la portada. */
+function renderPlayoffsSection() {
+  const root = document.getElementById('playoffs-root');
+  const teams = divTeams();
+  const po = STATE.games.filter(g => g.bracketSlot);
+  const started = po.some(g => g.type !== 'scheduled');
+  const table = computeStandings();
+  const projected = !po.length;
+  if (projected && !table.some(r => r.gp > 0)) { root.innerHTML = ''; return; }
+
+  // Posición de la sección: arriba durante los playoffs, debajo de la tabla antes.
+  const main = root.parentElement;
+  main.insertBefore(root, document.getElementById(started ? 'games-root' : 'teams-root'));
+
+  const slot = id => {
+    if (projected) {
+      const q = quarterFinalsFrom(table).find(x => x.slot === id);
+      return q ? { home: q.home.teamId, away: q.away.teamId, seeds: [q.homeSeed, q.awaySeed] } : {};
+    }
+    const g = po.find(x => x.bracketSlot === id); if (!g) return {};
+    const played = g.type === 'finished' || g.type === 'live';
+    return {
+      id: g.type === 'scheduled' ? null : g.id, live: g.type === 'live',
+      home: g.home, away: g.away, seeds: [g.homeSeed, g.awaySeed],
+      hs: played ? g.homeScore : null, as: played ? g.awayScore : null,
+      winner: g.type === 'finished' ? (+g.homeScore > +g.awayScore ? g.home : g.away) : null,
+    };
+  };
+  const teamRow = (m, side) => {
+    const id = side === 0 ? m.home : m.away;
+    if (!id) return '<div class="mb-team tbd"><span class="seed"></span><span class="lg"></span><span class="nm">Por definir</span><span class="sc"></span></div>';
+    const sc = side === 0 ? m.hs : m.as;
+    const cls = m.winner ? (m.winner === id ? 'win' : 'lose') : '';
+    return `<div class="mb-team ${cls}"><span class="seed">${m.seeds?.[side] ?? ''}</span><span class="lg">${logoInner(id)}</span>
+      <span class="nm">${teams[id]?.name || id}</span><span class="sc">${sc ?? ''}</span></div>`;
+  };
+  const match = (id, extra = '') => {
+    const m = slot(id);
+    const tag = m.id ? 'a' : 'div', href = m.id ? ` href="partido.html?div=${activeDivision}&id=${m.id}"` : '';
+    return `<${tag}${href} class="mb-match ${extra}">${m.live ? '<div class="mb-live">● EN VIVO</div>' : ''}${teamRow(m, 0)}${teamRow(m, 1)}</${tag}>`;
+  };
+  const champ = slot('F1').winner;
+  const pending = new Set(STATE.games.filter(g => !isPlayoff(g) && g.type !== 'finished').map(g => g.round)).size;
+  const tag = champ ? `Campeón ${league.season}` : started ? 'En curso' : projected ? 'Si terminara hoy' : 'Cruces confirmados';
+
+  root.innerHTML = `
+    <div class="section-header reveal">
+      <h2 class="section-title">Playoffs</h2>
+      <span class="section-tag">${tag}</span>
+      <div class="section-line"></div>
+      <a href="playoff.html" class="playoff-bracket-btn"><span class="pb-icon">🏆</span>Cuadro completo<span class="pb-arrow">→</span></a>
+    </div>
+    ${projected ? `<div class="mb-banner reveal"><strong>📊 Proyección</strong> · ${pending
+      ? `Así serían los cruces si la fase regular terminara hoy. ${pending === 1 ? 'Queda 1 jornada' : `Quedan ${pending} jornadas`}.`
+      : 'Fase regular terminada: estos son los cruces según la tabla final, por confirmar.'}</div>` : ''}
+    <div class="mb-grid ${projected ? 'projected' : ''} reveal">
+      <div class="mb-col"><div class="mb-col-label">Cuartos de final</div><div class="mb-body">${['QF1', 'QF2', 'QF3', 'QF4'].map(id => match(id)).join('')}</div></div>
+      <div class="mb-col"><div class="mb-col-label">Semifinales</div><div class="mb-body">${match('SF1')}${match('SF2')}</div></div>
+      <div class="mb-col"><div class="mb-col-label final">Final</div><div class="mb-body">${match('F1', 'final')}</div></div>
+      <div class="mb-col"><div class="mb-col-label"></div><div class="mb-body"><div class="mb-champ">
+        <div class="tr">🏆</div><div class="lb">Campeón</div>
+        ${champ ? `<div class="lg">${logoInner(champ)}</div><div class="nm">${teams[champ]?.name || champ}</div>` : '<div class="tbd">Por definir</div>'}
+      </div></div></div>
+    </div>`;
 }
 
 function renderTeams() {

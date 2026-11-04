@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Playoffs · Liga San Carlos 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -230,6 +231,25 @@
       align-self: stretch;
     }
     .bracket-spacer { flex: 1; }
+
+    /* ── PROYECCIÓN ── */
+    .projection-banner { max-width: 1200px; margin: 0 auto 18px; padding: 12px 16px; border: 1px dashed rgba(242,179,78,.4); border-radius: 6px; background: rgba(242,179,78,.05); font-size: 13px; line-height: 1.5; color: #C9CDD6; text-align: center; }
+    .projection-banner strong { color: var(--gold); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+    .bracket-page.projected .matchup { border-style: dashed; }
+    a.matchup { display: block; color: inherit; text-decoration: none; }
+    .matchup-live { color: var(--red); margin-left: 6px; }
+
+    /* ── ANOTADORES PLAYOFFS ── */
+    .po-scorers { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .po-scorer { display: grid; grid-template-columns: 34px 1fr 54px 54px 60px; align-items: center; gap: 8px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; }
+    .po-scorer:last-child { border-bottom: none; }
+    .po-scorer.head { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,.03); }
+    .po-scorer .num { text-align: center; }
+    .po-scorer .rank { color: var(--muted); text-align: center; }
+    .po-scorer .pts { color: var(--gold); text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 20px; font-weight: 400; }
+    .po-scorer .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .po-scorer .who span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .po-scorer .who small { display: block; font-weight: 500; font-size: 11px; color: var(--muted); letter-spacing: .5px; }
 
     /* ── MATCHUP CARD ── */
     .matchup {
@@ -724,26 +744,6 @@
 </head>
 <body>
 
-<!-- ══ MODAL CONTRASEÑA ══ -->
-<div id="ppwd-modal">
-  <div class="ppwd-box">
-    <div style="font-size:30px;margin-bottom:10px;">🔒</div>
-    <div class="ppwd-title">Admin · Playoffs</div>
-    <div class="ppwd-sub">Ingresa con tu cuenta de administrador</div>
-    <input type="email" class="ppwd-input" id="ppwd-email"
-      placeholder="correo@ejemplo.cl" style="letter-spacing:0;"
-      onkeydown="if(event.key==='Enter')document.getElementById('ppwd-pwd').focus()"
-      oninput="document.getElementById('ppwd-err').textContent=''" />
-    <input type="password" class="ppwd-input" id="ppwd-pwd"
-      placeholder="contraseña"
-      onkeydown="if(event.key==='Enter')checkPPwd()"
-      oninput="document.getElementById('ppwd-err').textContent=''" />
-    <div class="ppwd-err" id="ppwd-err"></div>
-    <button class="btn btn-red" style="width:100%;margin-bottom:8px;" onclick="checkPPwd()">Entrar →</button>
-    <button class="btn btn-outline" style="width:100%;" onclick="document.getElementById('ppwd-modal').classList.remove('open')">Cancelar</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <!-- ══ NAV ══ -->
@@ -754,7 +754,6 @@
     <button class="div-tab segunda"         id="tab-btn-segunda" onclick="switchDiv('segunda')">2° División</button>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button class="admin-toggle-btn" id="admin-btn" onclick="openAdminModal()">⚙ Admin</button>
     <a href="index.html" class="nav-back">← Volver</a>
   </div>
 </nav>
@@ -773,6 +772,7 @@
 <!-- ══ MAIN ══ -->
 <main>
   <!-- BRACKET -->
+  <div class="projection-banner" id="projection-banner" hidden></div>
   <div class="bracket-page" id="bracket-container"></div>
 
   <!-- PLAYOFF GAMES SECTION -->
@@ -792,91 +792,16 @@
     </div>
   </section>
 
-  <!-- ══ PANEL ADMIN PLAYOFFS ══ -->
-  <div id="playoff-admin">
-    <div class="padmin-wrap">
-      <div class="admin-top">
-        <div>
-          <h2>Panel <span>Playoffs</span></h2>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="padmin-div-label">Primera División</div>
-        </div>
-        <div class="admin-top-right">
-          <button class="admin-logout-btn" onclick="logoutAdmin()"><span>⏻</span> Salir</button>
-          <button class="btn btn-outline" style="padding:7px 14px;font-size:11px;" onclick="closeAdminPanel()">✕ Cerrar</button>
-        </div>
-      </div>
-
-      <!-- Admin tabs -->
-      <div class="padmin-tabs">
-        <button class="padmin-tab active" onclick="switchAdminTab('tab-bracket')">🏆 Bracket</button>
-        <button class="padmin-tab" onclick="switchAdminTab('tab-pg-games')">📅 Partidos</button>
-        <button class="padmin-tab" onclick="switchAdminTab('tab-pg-results')">📋 Resultados</button>
-      </div>
-
-      <!-- ── TAB BRACKET ── -->
-      <div class="padmin-pane active" id="tab-bracket">
-        <div class="padmin-grid" id="padmin-grid"></div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-          <button class="btn btn-gold" onclick="saveAllMatchups()">💾 Guardar bracket</button>
-        </div>
-      </div>
-
-      <!-- ── TAB AGREGAR PARTIDO ── -->
-      <div class="padmin-pane" id="tab-pg-games">
-        <p class="section-subtitle">Agregar partido de playoffs</p>
-        <div class="form-row">
-          <div class="form-group"><label>Local</label><select id="pg-home"></select></div>
-          <div class="form-group"><label>Visita</label><select id="pg-away"></select></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Ronda</label>
-            <select id="pg-round">
-              <option value="Cuartos de Final">Cuartos de Final</option>
-              <option value="Semifinal">Semifinal</option>
-              <option value="Final">Final</option>
-              <option value="3er Puesto">3er Puesto</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Fecha / Hora</label><input type="text" id="pg-date" placeholder="ej: Mar 15 Jul · 20:00" /></div>
-        </div>
-        <div class="form-group"><label>Cancha</label>
-          <select id="pg-venue">
-            <option value="Cancha 1 · Colegio Cumbres">Cancha 1</option>
-            <option value="Cancha 2 · Colegio Cumbres">Cancha 2</option>
-          </select>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button class="btn btn-gold" onclick="addPlayoffGame()">+ Agregar partido</button>
-        </div>
-
-        <p class="section-subtitle" style="margin-top:24px;">Partidos próximos registrados</p>
-        <div class="game-admin-list" id="pg-upcoming-list"></div>
-      </div>
-
-      <!-- ── TAB RESULTADOS ── -->
-      <div class="padmin-pane" id="tab-pg-results">
-        <p class="section-subtitle">Ingresar resultado</p>
-        <div class="form-group">
-          <label>Partido</label>
-          <select id="pg-res-select" onchange="fillPlayoffScoreForm()">
-            <option value="">— Selecciona partido —</option>
-          </select>
-        </div>
-        <div id="pg-score-form" style="display:none;">
-          <div class="score-row"><div class="score-team-name" id="pg-sf-home">—</div><input type="number" id="pg-sf-home-score" placeholder="0" min="0" /></div>
-          <div class="score-row"><div class="score-team-name" id="pg-sf-away">—</div><input type="number" id="pg-sf-away-score" placeholder="0" min="0" /></div>
-          <div class="form-group" style="margin-top:12px;"><label>Fecha jugado</label><input type="text" id="pg-sf-date" placeholder="ej: Mar 15 Jul" /></div>
-          <div class="form-group"><label>MVP</label><input type="text" id="pg-sf-mvp" placeholder="ej: Juan Pérez" /></div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
-          <button class="btn btn-red" onclick="savePlayoffResult()">Guardar resultado →</button>
-        </div>
-
-        <p class="section-subtitle" style="margin-top:24px;">Resultados registrados</p>
-        <div class="game-admin-list" id="pg-results-list"></div>
-      </div>
+  <!-- ANOTADORES DE PLAYOFFS (separados de la fase regular) -->
+  <section class="playoff-games-section" id="playoff-scorers-section">
+    <div class="section-header reveal">
+      <h2 class="section-title">Anotadores</h2>
+      <span class="section-tag">Solo playoffs</span>
+      <div class="section-line"></div>
     </div>
-  </div>
+    <div id="playoff-scorers"></div>
+  </section>
+
 </main>
 
 <script>
@@ -886,9 +811,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label: 'Primera División',
-      playoffTable:      'playoffs',
-      playoffGamesTable: 'playoff_games',
+      label: 'Primera División', dbTable: 'games',
       teams: {
         EXMAN: { abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA: { abbr:'ORTHO',  name:'Orthobullets',                  color:'#7A1F3D', logo:'logos/anana.png' },
@@ -902,9 +825,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label: 'Segunda División',
-      playoffTable:      'playoffs_segunda',
-      playoffGamesTable: 'playoff_games_segunda',
+      label: 'Segunda División', dbTable: 'games_segunda',
       teams: {
         T2B: { abbr:'DYN',  name:'Dynamos',              color:'#7C1D1D', logo:'logos/dynamos.png' },
         T2C: { abbr:'DER',  name:'Derazzo',              color:'#B33A3A', logo:'logos/derazzo.png' },
@@ -922,89 +843,72 @@ const CONFIG = {
 
 const SUPABASE_URL = 'https://shresvpjavpxdosdtjfh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNocmVzdnBqYXZweGRvc2R0amZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwOTQ3ODMsImV4cCI6MjA5MDY3MDc4M30.eBZNEhkNZFltKepiGttzyr-GVkG1mGT9rn6GEyNecdA';
-const ADMIN_UIDS  = [
-  'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c',
-  '272f8ea8-a576-46cc-97ae-7c292424a858',
-];
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ── State ── */
 let activeDivision = 'primera';
-let bracketData    = {};
-let playoffGames   = {}; // { primera: [], segunda: [] }
+let divData        = {};   // { primera: { games, bracket, projected, stats }, ... }
 let activeGamesFilter = 'all';
-let _currentSession   = null;
 
 const divCfg   = () => CONFIG.divisions[activeDivision];
 const divTeams = () => divCfg().teams;
-function isAdmin() { return ADMIN_UIDS.includes(_currentSession?.user?.id); }
 
-_sb.auth.onAuthStateChange((event, session) => {
-  _currentSession = session;
-  updateAdminBtn();
-  if (event === 'SIGNED_OUT') closeAdminPanel();
-});
-(async () => { const { data } = await _sb.auth.getSession(); _currentSession = data.session; updateAdminBtn(); })();
-
-function updateAdminBtn() {
-  const btn = document.getElementById('admin-btn');
-  if (isAdmin()) {
-    btn.textContent = '⚙ Admin ✓';
-    btn.style.borderColor = 'rgba(74,222,128,.3)';
-    btn.style.color = '#4ADE80';
-  } else {
-    btn.textContent = '⚙ Admin';
-    btn.style.borderColor = '';
-    btn.style.color = '';
-  }
-}
-
-/* ── Bracket structure ── */
+/* ── Estructura del cuadro (mismas llaves que supabase/playoffs.sql) ── */
 const BRACKET_STRUCTURE = [
-  { id:'QF1', round:'QF', slot:0, label:'Cuartos de Final 1', seeds:[1,8] },
-  { id:'QF2', round:'QF', slot:1, label:'Cuartos de Final 2', seeds:[4,5] },
-  { id:'QF3', round:'QF', slot:2, label:'Cuartos de Final 3', seeds:[3,6] },
-  { id:'QF4', round:'QF', slot:3, label:'Cuartos de Final 4', seeds:[2,7] },
-  { id:'SF1', round:'SF', slot:0, label:'Semifinal 1',        seeds:[] },
-  { id:'SF2', round:'SF', slot:1, label:'Semifinal 2',        seeds:[] },
-  { id:'F1',  round:'F',  slot:0, label:'Gran Final',         seeds:[] },
+  { id:'QF1', round:'QF', label:'Cuartos de Final 1' },
+  { id:'QF2', round:'QF', label:'Cuartos de Final 2' },
+  { id:'QF3', round:'QF', label:'Cuartos de Final 3' },
+  { id:'QF4', round:'QF', label:'Cuartos de Final 4' },
+  { id:'SF1', round:'SF', label:'Semifinal 1' },
+  { id:'SF2', round:'SF', label:'Semifinal 2' },
+  { id:'F1',  round:'F',  label:'Gran Final' },
 ];
 
-/* ═══ LOAD ═══ */
-async function loadBracket(div) {
-  const table = CONFIG.divisions[div].playoffTable;
-  const { data, error } = await _sb.from(table).select('*').order('slot');
-  if (error || !data || data.length === 0) {
-    bracketData[div] = BRACKET_STRUCTURE.map(m => ({
-      ...m, team1:null, team2:null, score1:null, score2:null, winner:null,
-    }));
+/* ═══ LOAD ═══
+   Los playoffs son partidos de games / games_segunda con bracket_slot.
+   Mientras no se confirmen los cruces, el cuadro es una proyección
+   según la tabla actual de la fase regular. */
+async function loadDivision(div) {
+  const cfg = CONFIG.divisions[div];
+  const { data } = await _sb.from(cfg.dbTable).select('*').order('round').order('id');
+  const games = data || [];
+  const playoffs = games.filter(g => g.bracket_slot && g.type !== 'scheduled');
+  const confirmed = games.some(g => g.bracket_slot);
+
+  let bracket;
+  if (confirmed) {
+    bracket = BRACKET_STRUCTURE.map(m => {
+      const g = games.find(x => x.bracket_slot === m.id);
+      if (!g) return { ...m, team1: null, team2: null, score1: null, score2: null, winner: null, seeds: [] };
+      const played = g.type === 'finished' || g.type === 'live';
+      return {
+        ...m, gameId: g.type === 'scheduled' ? null : g.id, live: g.type === 'live',
+        team1: g.home, team2: g.away, seeds: [g.home_seed, g.away_seed],
+        score1: played ? g.home_score : null, score2: played ? g.away_score : null,
+        winner: g.type === 'finished' ? (+g.home_score > +g.away_score ? g.home : g.away) : null,
+      };
+    });
   } else {
-    bracketData[div] = BRACKET_STRUCTURE.map(m => {
-      const row = data.find(r => r.match_id === m.id);
-      return row
-        ? { ...m, team1:row.team1||null, team2:row.team2||null,
-            score1:row.score1??null, score2:row.score2??null, winner:row.winner||null }
-        : { ...m, team1:null, team2:null, score1:null, score2:null, winner:null };
+    const table = regularStandings(games, Object.keys(cfg.teams));
+    const anyPlayed = table.some(r => r.gp > 0);
+    const qf = anyPlayed ? quarterFinalsFrom(table) : [];
+    bracket = BRACKET_STRUCTURE.map(m => {
+      const q = qf.find(x => x.slot === m.id);
+      return { ...m, team1: q?.home.teamId || null, team2: q?.away.teamId || null,
+               seeds: q ? [q.homeSeed, q.awaySeed] : [], score1: null, score2: null, winner: null };
     });
   }
-}
 
-async function loadPlayoffGames(div) {
-  const table = CONFIG.divisions[div].playoffGamesTable;
-  const { data, error } = await _sb.from(table).select('*').order('id', { ascending: true });
-  if (error) { playoffGames[div] = []; return; }
-  playoffGames[div] = (data || []).map(r => ({
-    id:        r.id,
-    type:      r.type || 'upcoming',
-    round:     r.round || '',
-    date:      r.date  || 'Por definir',
-    home:      r.home,
-    away:      r.away,
-    venue:     r.venue || 'Colegio Cumbres',
-    homeScore: r.home_score ?? null,
-    awayScore: r.away_score ?? null,
-    mvp:       r.mvp || '',
-  }));
+  const regular = games.filter(g => !isPlayoff(g));
+  const pendingRounds = new Set(regular.filter(g => g.type !== 'finished').map(g => g.round)).size;
+
+  let stats = [];
+  const ids = playoffs.filter(g => g.type !== 'upcoming').map(g => g.id);
+  if (ids.length) {
+    const { data: st } = await _sb.from('game_stats').select('*').eq('division', div).in('game_id', ids);
+    stats = st || [];
+  }
+  divData[div] = { games, playoffs, bracket, projected: !confirmed, pendingRounds, stats };
 }
 
 /* ═══ SWITCH DIV ═══ */
@@ -1026,29 +930,43 @@ async function switchDiv(div) {
   document.getElementById('playoff-games-grid').innerHTML =
     '<div class="games-empty">Cargando partidos...</div>';
 
-  if (!bracketData[div]) await loadBracket(div);
-  if (!playoffGames[div]) await loadPlayoffGames(div);
+  if (!divData[div]) await loadDivision(div);
 
   renderBracket();
   renderPlayoffGames();
+  renderScorers();
   updateStatus();
   setTimeout(activateReveal, 80);
 }
 
 /* ═══ STATUS ═══ */
 function updateStatus() {
-  const data = bracketData[activeDivision]; if (!data) return;
-  const finalMatch = data.find(m => m.id === 'F1');
+  const d = divData[activeDivision]; if (!d) return;
+  const finalMatch = d.bracket.find(m => m.id === 'F1');
   const pill = document.getElementById('status-pill');
   const txt  = document.getElementById('status-text');
+  const banner = document.getElementById('projection-banner');
+  document.getElementById('bracket-container').classList.toggle('projected', d.projected);
+
+  banner.hidden = !d.projected;
+  if (d.projected) {
+    banner.innerHTML = d.bracket.some(m => m.team1)
+      ? (d.pendingRounds
+          ? `<strong>📊 Proyección</strong> · Así serían los cruces si la fase regular terminara hoy. Se actualiza con cada resultado; ${d.pendingRounds === 1 ? 'queda 1 jornada' : `quedan ${d.pendingRounds} jornadas`}.`
+          : `<strong>Fase regular terminada</strong> · Estos son los cruces según la tabla final; falta que la organización los confirme.`)
+      : '<strong>📊 Proyección</strong> · Los cruces aparecerán cuando se jueguen los primeros partidos.';
+  }
+
   if (finalMatch && finalMatch.winner) {
     pill.className = 'playoff-status-pill pill-active';
     const t = divTeams()[finalMatch.winner];
     txt.textContent = `🏆 Campeón: ${t ? t.name : finalMatch.winner}`;
+  } else if (!d.projected) {
+    pill.className = 'playoff-status-pill pill-active';
+    txt.textContent = d.playoffs.length ? 'Playoffs en curso' : 'Cruces confirmados';
   } else {
-    const anyResult = data.some(m => m.winner);
-    pill.className = 'playoff-status-pill ' + (anyResult ? 'pill-active' : 'pill-pending');
-    txt.textContent = anyResult ? 'Playoffs en curso' : 'Fase regular en curso';
+    pill.className = 'playoff-status-pill pill-pending';
+    txt.textContent = d.pendingRounds ? 'Fase regular en curso' : 'Fase regular terminada';
   }
 }
 
@@ -1079,15 +997,17 @@ function renderMatchup(m, cls = '') {
   const isFinal = m.id === 'F1';
   const isSF    = m.round === 'SF';
   const cardCls = isFinal ? 'final champion-match' : isSF ? 'semifinal' : '';
-  return `<div class="matchup ${cardCls} ${cls}">
-    <div class="matchup-round-tag">${m.label}</div>
-    ${renderTeamRow(m.team1, m.score1, m.winner === m.team1, m.seeds?.[0])}
-    ${renderTeamRow(m.team2, m.score2, m.winner === m.team2, m.seeds?.[1])}
-  </div>`;
+  const tag = m.gameId ? 'a' : 'div';
+  const href = m.gameId ? ` href="partido.html?div=${activeDivision}&id=${m.gameId}"` : '';
+  return `<${tag}${href} class="matchup ${cardCls} ${cls}">
+    <div class="matchup-round-tag">${m.label}${m.live ? '<span class="matchup-live">● En vivo</span>' : ''}</div>
+    ${renderTeamRow(m.team1, m.score1, !!m.winner && m.winner === m.team1, m.seeds?.[0])}
+    ${renderTeamRow(m.team2, m.score2, !!m.winner && m.winner === m.team2, m.seeds?.[1])}
+  </${tag}>`;
 }
 
 function renderBracket() {
-  const data = bracketData[activeDivision]; if (!data) return;
+  const data = divData[activeDivision]?.bracket; if (!data) return;
   const teams = divTeams();
   const qf = data.filter(m => m.round === 'QF');
   const sf = data.filter(m => m.round === 'SF');
@@ -1197,7 +1117,11 @@ function setGamesFilter(f) {
 
 function renderPlayoffGames() {
   const teams   = divTeams();
-  const all     = playoffGames[activeDivision] || [];
+  const all = (divData[activeDivision]?.playoffs || []).map(r => ({
+    id: r.id, type: r.type, round: roundName(r), date: r.date || 'Por definir',
+    home: r.home, away: r.away, venue: r.venue || 'Colegio Cumbres',
+    homeScore: r.home_score ?? 0, awayScore: r.away_score ?? 0, mvp: r.mvp || '',
+  }));
   const finished = all.filter(g => g.type === 'finished');
   const upcoming = all.filter(g => g.type === 'upcoming' || g.type === 'live');
 
@@ -1213,8 +1137,9 @@ function renderPlayoffGames() {
   if (filterBtns[2]) filterBtns[2].textContent = `Resultados (${finished.length})`;
 
   if (!list.length) {
-    document.getElementById('playoff-games-grid').innerHTML =
-      '<div class="games-empty">No hay partidos en esta categoría.</div>';
+    document.getElementById('playoff-games-grid').innerHTML = all.length
+      ? '<div class="games-empty">No hay partidos en esta categoría.</div>'
+      : '<div class="games-empty">Los partidos aparecerán cuando se publiquen los cuartos de final.</div>';
     return;
   }
 
@@ -1229,10 +1154,10 @@ function renderPlayoffGames() {
       ? `<div class="ts-logo-sm"><img src="${away.logo}" alt="${away.abbr}" onerror="this.onerror=null;this.style.display='none'"></div>`
       : `<div class="ts-logo-sm"><div style="width:34px;height:34px;border-radius:50%;background:${away.color};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:10px;color:#fff;">${away.abbr}</div></div>`;
 
-    if (g.type === 'upcoming') {
-      return `<div class="game-card upcoming reveal">
+    if (g.type === 'upcoming' || g.type === 'live') {
+      return `<a href="partido.html?div=${activeDivision}&id=${g.id}" class="game-card upcoming reveal" style="display:block;color:inherit;text-decoration:none;">
         <div class="game-card-header">
-          <span class="game-round-tag">🏆 ${g.round}</span>
+          <span class="game-round-tag">${g.type === 'live' ? '<span style="color:var(--red)">● EN VIVO</span> · ' : '🏆 '}${g.round}</span>
           <span class="game-date-tag">${g.date}</span>
         </div>
         <div class="game-body">
@@ -1246,13 +1171,13 @@ function renderPlayoffGames() {
         </div>
         <div class="game-footer">
           <span>🏟️ ${g.venue}</span>
-          <span style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;">📅 ${g.date}</span>
+          <span style="color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;">${g.type === 'live' ? `${g.homeScore}–${g.awayScore} · Ver en vivo →` : `📅 ${g.date}`}</span>
         </div>
-      </div>`;
+      </a>`;
     }
 
     const homeWon = +g.homeScore > +g.awayScore;
-    return `<div class="game-card finished reveal">
+    return `<a href="partido.html?div=${activeDivision}&id=${g.id}" class="game-card finished reveal" style="display:block;color:inherit;text-decoration:none;">
       <div class="game-card-header">
         <span class="game-round-tag">✓ ${g.round}</span>
         <span class="game-date-tag">${g.date}</span>
@@ -1271,275 +1196,40 @@ function renderPlayoffGames() {
         <span>🏟️ ${g.venue}</span>
         ${g.mvp ? `<span class="mvp-tag">⭐ ${g.mvp}</span>` : ''}
       </div>
-    </div>`;
+    </a>`;
   }).join('');
 
   document.getElementById('playoff-games-grid').innerHTML = cards ||
     '<div class="games-empty">No hay partidos en esta categoría.</div>';
 }
 
-/* ═══ ADMIN ═══ */
-function openAdminModal() {
-  if (isAdmin()) { openAdminPanel(); return; }
-  document.getElementById('ppwd-email').value = '';
-  document.getElementById('ppwd-pwd').value   = '';
-  document.getElementById('ppwd-err').textContent = '';
-  document.getElementById('ppwd-modal').classList.add('open');
-  setTimeout(() => document.getElementById('ppwd-email').focus(), 100);
-}
-
-async function checkPPwd() {
-  const email = document.getElementById('ppwd-email').value.trim();
-  const pwd   = document.getElementById('ppwd-pwd').value;
-  const err   = document.getElementById('ppwd-err');
-  if (!email || !pwd) { err.textContent = 'Completa ambos campos'; shakeBox('.ppwd-box'); return; }
-  const { data, error } = await _sb.auth.signInWithPassword({ email, password: pwd });
-  if (error) { err.textContent = 'Correo o contraseña incorrectos'; shakeBox('.ppwd-box'); document.getElementById('ppwd-pwd').value=''; return; }
-  _currentSession = data.session;
-  if (!isAdmin()) {
-    await _sb.auth.signOut(); _currentSession = null;
-    err.textContent = 'Sin permisos de administrador'; shakeBox('.ppwd-box'); return;
+/* ═══ ANOTADORES DE PLAYOFFS (game_stats de partidos de playoffs) ═══ */
+function renderScorers() {
+  const d = divData[activeDivision]; const teams = divTeams();
+  const el = document.getElementById('playoff-scorers');
+  const byPlayer = {};
+  (d?.stats || []).forEach(s => {
+    if (!(s.points > 0 || s.played)) return;
+    const key = s.player_id ?? `${s.team}:${s.player_name}`;
+    const p = byPlayer[key] ||= { id: s.player_id, name: s.player_name, team: s.team, pts: 0, games: new Set() };
+    p.pts += s.points || 0; p.games.add(s.game_id);
+  });
+  const rows = Object.values(byPlayer).filter(p => p.pts > 0)
+    .sort((a, b) => b.pts - a.pts || a.games.size - b.games.size).slice(0, 10);
+  if (!rows.length) {
+    el.innerHTML = '<div class="games-empty">Los anotadores aparecerán cuando se juegue el primer partido de playoffs.</div>';
+    return;
   }
-  document.getElementById('ppwd-modal').classList.remove('open');
-  updateAdminBtn();
-  openAdminPanel();
-}
-
-async function logoutAdmin() {
-  await _sb.auth.signOut(); _currentSession = null;
-  updateAdminBtn(); closeAdminPanel(); showToast('✓ Sesión cerrada');
-}
-
-function shakeBox(sel) {
-  const box = document.querySelector(sel);
-  box.classList.remove('pwd-shake'); void box.offsetWidth; box.classList.add('pwd-shake');
-}
-
-function openAdminPanel() {
-  if (!isAdmin()) { showToast('⚠ Acceso denegado'); return; }
-  document.getElementById('padmin-div-label').textContent = divCfg().label;
-  renderAdminPanel();
-  populatePlayoffGameSelects();
-  renderPlayoffGameAdminLists();
-  document.getElementById('playoff-admin').classList.add('open');
-  document.getElementById('playoff-admin').scrollIntoView({ behavior:'smooth' });
-}
-
-function closeAdminPanel() {
-  document.getElementById('playoff-admin').classList.remove('open');
-}
-
-function switchAdminTab(id) {
-  document.querySelectorAll('.padmin-tab').forEach((t, i) => {
-    t.classList.toggle('active', ['tab-bracket','tab-pg-games','tab-pg-results'][i] === id);
-  });
-  document.querySelectorAll('.padmin-pane').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (id === 'tab-pg-results') populatePlayoffGameSelects();
-}
-
-/* ── Bracket admin ── */
-function renderAdminPanel() {
-  const data  = bracketData[activeDivision] || [];
-  const teams = divTeams();
-  const teamOptions = '<option value="">— Por definir —</option>' +
-    Object.entries(teams).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
-
-  document.getElementById('padmin-grid').innerHTML = data.map(m => `
-    <div class="padmin-matchup-card" id="padmin-${m.id}">
-      <div class="padmin-matchup-header">
-        <span>${m.label}</span>
-        ${m.id === 'F1' ? '<span style="color:var(--gold)">🏆</span>' : ''}
-      </div>
-      <div class="padmin-matchup-body">
-        <div class="padmin-row">
-          <select class="padmin-select" id="pm-t1-${m.id}" onchange="patchMatch('${m.id}','team1',this.value)">${teamOptions}</select>
-          <input type="number" class="padmin-score-input" id="pm-s1-${m.id}" placeholder="–" min="0" oninput="patchMatch('${m.id}','score1',this.value)" />
-        </div>
-        <div class="padmin-row">
-          <select class="padmin-select" id="pm-t2-${m.id}" onchange="patchMatch('${m.id}','team2',this.value)">${teamOptions}</select>
-          <input type="number" class="padmin-score-input" id="pm-s2-${m.id}" placeholder="–" min="0" oninput="patchMatch('${m.id}','score2',this.value)" />
-        </div>
-        <div class="padmin-row" style="border-bottom:none;margin-top:4px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);grid-column:1/-1;margin-bottom:4px;">Ganador</div>
-          <select class="padmin-select" id="pm-w-${m.id}" onchange="patchMatch('${m.id}','winner',this.value)" style="grid-column:1/-1;width:100%;">
-            <option value="">— Sin definir —</option>
-            ${Object.entries(teams).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    </div>`).join('');
-
-  data.forEach(m => {
-    const s = id => document.getElementById(`pm-${id}-${m.id}`);
-    if (s('t1')) s('t1').value = m.team1 || '';
-    if (s('t2')) s('t2').value = m.team2 || '';
-    if (s('s1')) s('s1').value = m.score1 !== null ? m.score1 : '';
-    if (s('s2')) s('s2').value = m.score2 !== null ? m.score2 : '';
-    if (s('w'))  s('w').value  = m.winner || '';
-  });
-}
-
-function patchMatch(id, field, value) {
-  const data = bracketData[activeDivision]; if (!data) return;
-  const m = data.find(x => x.id === id); if (!m) return;
-  m[field] = (field === 'score1' || field === 'score2')
-    ? (value === '' ? null : +value)
-    : (value || null);
-}
-
-async function saveBracket(div) {
-  const table = CONFIG.divisions[div].playoffTable;
-  const rows  = bracketData[div].map(m => ({
-    match_id:m.id, round:m.round, slot:m.slot,
-    team1:m.team1, team2:m.team2,
-    score1:m.score1, score2:m.score2, winner:m.winner,
-  }));
-  const { error } = await _sb.from(table).upsert(rows, { onConflict:'match_id' });
-  if (error) { showToast('⚠ Error: ' + error.message); return false; }
-  return true;
-}
-
-async function saveAllMatchups() {
-  const ok = await saveBracket(activeDivision);
-  if (ok) { renderBracket(); updateStatus(); showToast('✓ Bracket guardado'); }
-}
-
-/* ── Playoff Games Admin ── */
-function populatePlayoffGameSelects() {
-  const teams = divTeams();
-  ['pg-home','pg-away'].forEach(sid => {
-    const s = document.getElementById(sid); if (!s) return;
-    s.innerHTML = Object.entries(teams).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
-  });
-  const sel = document.getElementById('pg-res-select');
-  if (!sel) return;
-  const upcoming = (playoffGames[activeDivision] || []).filter(g => g.type !== 'finished');
-  sel.innerHTML = '<option value="">— Selecciona partido —</option>' +
-    upcoming.map(g => {
-      const h = teams[g.home]?.name || g.home;
-      const a = teams[g.away]?.name || g.away;
-      return `<option value="${g.id}">${g.round} · ${h} vs ${a}</option>`;
-    }).join('');
-}
-
-function fillPlayoffScoreForm() {
-  const id = +document.getElementById('pg-res-select').value;
-  const g  = (playoffGames[activeDivision] || []).find(x => x.id === id);
-  const form = document.getElementById('pg-score-form');
-  if (!g) { form.style.display = 'none'; return; }
-  const teams = divTeams();
-  document.getElementById('pg-sf-home').textContent = teams[g.home]?.name || g.home;
-  document.getElementById('pg-sf-away').textContent = teams[g.away]?.name || g.away;
-  document.getElementById('pg-sf-home-score').value = '';
-  document.getElementById('pg-sf-away-score').value = '';
-  document.getElementById('pg-sf-date').value = '';
-  document.getElementById('pg-sf-mvp').value  = '';
-  form.style.display = 'block';
-}
-
-async function addPlayoffGame() {
-  const home  = document.getElementById('pg-home').value;
-  const away  = document.getElementById('pg-away').value;
-  const round = document.getElementById('pg-round').value;
-  const date  = document.getElementById('pg-date').value || 'Por definir';
-  const venue = document.getElementById('pg-venue').value;
-  if (home === away) { showToast('⚠ Local y Visita no pueden ser el mismo'); return; }
-
-  const table = divCfg().playoffGamesTable;
-  const { error } = await _sb.from(table).insert([{ type:'upcoming', round, date, home, away, venue }]);
-  if (error) { showToast('⚠ Error: ' + error.message); return; }
-
-  document.getElementById('pg-date').value = '';
-  await loadPlayoffGames(activeDivision);
-  renderPlayoffGames();
-  populatePlayoffGameSelects();
-  renderPlayoffGameAdminLists();
-  showToast('✓ Partido de playoffs agregado');
-}
-
-async function savePlayoffResult() {
-  const id  = +document.getElementById('pg-res-select').value;
-  if (!id)  { showToast('⚠ Selecciona un partido'); return; }
-  const hs  = document.getElementById('pg-sf-home-score').value;
-  const as  = document.getElementById('pg-sf-away-score').value;
-  if (hs === '' || as === '') { showToast('⚠ Ingresa ambos marcadores'); return; }
-  const date = document.getElementById('pg-sf-date').value;
-  const mvp  = document.getElementById('pg-sf-mvp').value.trim();
-
-  const table = divCfg().playoffGamesTable;
-  const { error } = await _sb.from(table).update({
-    type:'finished', home_score:+hs, away_score:+as,
-    ...(date && { date }), mvp: mvp || null,
-  }).eq('id', id);
-
-  if (error) { showToast('⚠ Error: ' + error.message); return; }
-
-  await loadPlayoffGames(activeDivision);
-  renderPlayoffGames();
-  populatePlayoffGameSelects();
-  renderPlayoffGameAdminLists();
-  document.getElementById('pg-score-form').style.display = 'none';
-  document.getElementById('pg-res-select').value = '';
-  showToast('✓ Resultado de playoffs guardado');
-}
-
-async function deletePlayoffGame(id) {
-  if (!confirm('¿Eliminar este partido?')) return;
-  const table = divCfg().playoffGamesTable;
-  const { error } = await _sb.from(table).delete().eq('id', id);
-  if (error) { showToast('⚠ Error: ' + error.message); return; }
-  await loadPlayoffGames(activeDivision);
-  renderPlayoffGames();
-  populatePlayoffGameSelects();
-  renderPlayoffGameAdminLists();
-  showToast('✓ Partido eliminado');
-}
-
-function renderPlayoffGameAdminLists() {
-  const teams = divTeams();
-  const all   = playoffGames[activeDivision] || [];
-
-  const upcoming = all.filter(g => g.type !== 'finished');
-  const upList   = document.getElementById('pg-upcoming-list');
-  upList.innerHTML = upcoming.length
-    ? upcoming.map(g => {
-        const h = teams[g.home]?.name || g.home;
-        const a = teams[g.away]?.name || g.away;
-        return `<div class="game-admin-item">
-          <div class="game-admin-item-info">
-            <div class="game-admin-item-teams">${g.round} · ${h} vs ${a}</div>
-            <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="tag-upcoming">⏳ PRÓXIMO</span></div>
-          </div>
-          <div class="game-admin-actions">
-            <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deletePlayoffGame(${g.id})">✕</button>
-          </div>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:13px;">No hay partidos próximos.</p>';
-
-  const finished = all.filter(g => g.type === 'finished');
-  const resList  = document.getElementById('pg-results-list');
-  resList.innerHTML = finished.length
-    ? finished.map(g => {
-        const h = teams[g.home]?.name || g.home;
-        const a = teams[g.away]?.name || g.away;
-        const homeWon = +g.homeScore > +g.awayScore;
-        return `<div class="game-admin-item is-finished">
-          <div class="game-admin-item-info">
-            <div class="game-admin-item-teams">
-              ${g.round} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
-              <strong style="color:var(--gold);margin:0 6px;">${g.homeScore}–${g.awayScore}</strong>
-              <span style="color:${!homeWon?'#4ADE80':'var(--muted)'}">${a}</span>
-            </div>
-            <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue}${g.mvp?' · ⭐ '+g.mvp:''} · <span class="tag-finished">✓ FINALIZADO</span></div>
-          </div>
-          <div class="game-admin-actions">
-            <button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deletePlayoffGame(${g.id})">✕</button>
-          </div>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:13px;">Aún no hay resultados.</p>';
+  el.innerHTML = `<div class="po-scorers reveal">
+    <div class="po-scorer head"><span class="rank">#</span><span>Jugador</span><span class="num">PJ</span><span class="num">PTS</span><span class="num">PPG</span></div>
+    ${rows.map((p, i) => `<div class="po-scorer">
+      <span class="rank">${i + 1}</span>
+      <span class="who">${teamLogoSmall(p.team)}<span>${p.id ? `<a href="player.html?id=${p.id}&div=${activeDivision}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name}<small>${teams[p.team]?.name || p.team}</small></span></span>
+      <span class="num">${p.games.size}</span>
+      <span class="pts">${p.pts}</span>
+      <span class="num">${(p.pts / p.games.size).toFixed(1)}</span>
+    </div>`).join('')}
+  </div>`;
 }
 
 /* ── Helpers ── */
@@ -1564,14 +1254,8 @@ function activateReveal() {
 
 /* ═══ INIT ═══ */
 (async () => {
-  await Promise.all([
-    loadBracket('primera'),
-    loadPlayoffGames('primera'),
-  ]);
-  renderBracket();
-  renderPlayoffGames();
-  updateStatus();
-  setTimeout(activateReveal, 120);
+  const div = sessionStorage.getItem('activeDivision') === 'segunda' ? 'segunda' : 'primera';
+  await switchDiv(div);
 })();
 </script>
 </body>
