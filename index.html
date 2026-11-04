@@ -226,6 +226,16 @@
 
     /* ── INSTAGRAM BTN ── */
     .ig-gen-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-radius:3px;background:rgba(242,179,78,.08);border:1px solid rgba(242,179,78,.25);color:var(--gold);cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
+    .playoff-bracket-btn{display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 7px;border-radius:999px;border:1.5px solid transparent;background:linear-gradient(var(--dark),var(--dark)) padding-box,linear-gradient(45deg,#8a6a2e,#f2b34e,#ffe2a3,#f2b34e) border-box;color:var(--text);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;transition:transform .2s,box-shadow .2s,background .2s;}
+    .playoff-bracket-btn .pb-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(45deg,#8a6a2e,#f2b34e,#ffe2a3);font-size:14px;flex-shrink:0;}
+    .playoff-bracket-btn .pb-arrow{transition:transform .2s;}
+    .playoff-bracket-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px -6px rgba(242,179,78,.55);background:linear-gradient(rgba(242,179,78,.12),rgba(242,179,78,.12)) padding-box,linear-gradient(var(--dark),var(--dark)) padding-box,linear-gradient(45deg,#8a6a2e,#f2b34e,#ffe2a3,#f2b34e) border-box;}
+    .playoff-bracket-btn:hover .pb-arrow{transform:translateX(3px);}
+    .ig-profile-btn{display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 7px;border-radius:999px;border:1.5px solid transparent;background:linear-gradient(var(--dark),var(--dark)) padding-box,linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5) border-box;color:var(--text);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;transition:transform .2s,box-shadow .2s,background .2s;}
+    .ig-profile-btn .ig-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5);flex-shrink:0;}
+    .ig-profile-btn .ig-arrow{transition:transform .2s;}
+    .ig-profile-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px -6px rgba(214,41,118,.6);background:linear-gradient(rgba(214,41,118,.14),rgba(214,41,118,.14)) padding-box,linear-gradient(var(--dark),var(--dark)) padding-box,linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5) border-box;}
+    .ig-profile-btn:hover .ig-arrow{transform:translateX(3px);}
     .ig-gen-btn:hover{background:rgba(242,179,78,.18);border-color:rgba(242,179,78,.55);transform:translateY(-1px);}
 
     /* ── STANDINGS ── */
@@ -584,8 +594,11 @@
       .stat-num{font-size:34px;}
       .stat-label{font-size:10px;}
       .hero-league-logo img{height:clamp(56px,16vw,76px);}
-      .playoff-bracket-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
+      .playoff-bracket-btn{font-size:11px;letter-spacing:1px;padding:5px 14px 5px 5px;gap:8px;}
+      .playoff-bracket-btn .pb-icon{width:24px;height:24px;font-size:12px;}
       .ig-gen-btn{font-size:10px;padding:7px 12px;letter-spacing:1px;}
+      .ig-profile-btn{font-size:11px;letter-spacing:1px;padding:5px 14px 5px 5px;gap:8px;}
+      .ig-profile-btn .ig-icon{width:24px;height:24px;}
       section{padding:48px 16px;}
       .rec-grid{grid-template-columns:1fr;}
       .rec{min-height:0;}
@@ -1498,7 +1511,7 @@ function renderTeams() {
       <h2 class="section-title">Equipos</h2>
       <span class="section-tag">${Object.keys(teams).length} Equipos</span>
       <div class="section-line"></div>
-      <a href="playoff.html" class="playoff-bracket-btn">🏆 Bracket Playoffs</a>
+      <a href="playoff.html" class="playoff-bracket-btn"><span class="pb-icon">🏆</span>Bracket Playoffs<span class="pb-arrow">→</span></a>
     </div>
     <div class="teams-grid">${cards}</div>`;
 }
@@ -3408,8 +3421,9 @@ function renderInstagram() {
       <h2 class="section-title">Instagram</h2>
       <span class="section-tag">@ligasancarloscc</span>
       <div class="section-line"></div>
-      <a href="https://instagram.com/ligasancarloscc" target="_blank" class="playoff-bracket-btn">
-        Ver perfil →
+      <a href="https://instagram.com/ligasancarloscc" target="_blank" rel="noopener" class="ig-profile-btn">
+        <span class="ig-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="#fff" stroke="none"/></svg></span>
+        Seguir en Instagram<span class="ig-arrow">→</span>
       </a>
     </div>
     <div class="reveal">
