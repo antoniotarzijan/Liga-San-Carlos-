@@ -6,6 +6,7 @@
   <title>Perfil Jugador · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -657,7 +658,7 @@ function renderChart(stats, games) {
     const pct = Math.max((pts / maxPts) * 100, 3);
     const hue = pts >= maxPts * 0.7 ? '#f2b34e' :
                 pts >= maxPts * 0.4 ? '#E8EAF0' : '#6B7280';
-    const label = g ? `J${g.round}` : '—';
+    const label = g ? roundShort(g) : '—';
 
     return `<div class="bar-col">
       <div class="bar-val">${pts}</div>

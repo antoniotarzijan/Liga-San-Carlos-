@@ -6,6 +6,7 @@
   <title>Fixture · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -561,11 +562,11 @@ function renderStatus() {
     const resched = list.some(g => g.rescheduled);
     const fecha = dates.length === 1 ? fechaTexto(dates[0]) : (dates.length ? 'varias fechas' : 'sin fecha');
     const nextTxt = next !== null
-      ? `Cuando se jueguen todos sus partidos, la <strong>J${next}</strong> se publica sola a las 10:00 del día siguiente, para el ${dia} siguiente.`
-      : 'Es la última jornada cargada en el fixture.';
+      ? `Cuando se jueguen todos sus partidos, ${isPlayoff(next) ? 'la ronda' : 'la jornada'} <strong>${roundName(next)}</strong> se publica sola a las 10:00 del día siguiente, para el ${dia} siguiente.`
+      : (isPlayoff(cur) ? (cur === 102 ? 'Es la final.' : 'La siguiente ronda se arma sola cuando terminen estos partidos.') : 'Es la última jornada cargada en el fixture.');
     el.innerHTML = `
-      <div class="status-kicker">Jornada en curso ${resched ? '<span class="tag tag-resched">Reprogramada</span>' : ''}</div>
-      <div class="status-title">J${cur} · <span class="date">${fecha}</span></div>
+      <div class="status-kicker">${isPlayoff(cur) ? 'Playoffs · en curso' : 'Jornada en curso'} ${resched ? '<span class="tag tag-resched">Reprogramada</span>' : ''}</div>
+      <div class="status-title">${roundName(cur)} · <span class="date">${fecha}</span></div>
       <div class="status-text">${nextTxt}</div>
       ${sinFecha ? `<div class="status-warn">⚠ Esta jornada no tiene su fecha guardada. Usa <strong>Cambiar fecha</strong> para fijarla; así la publicación automática sabe cuándo se jugó.</div>` : ''}
       <div class="btn-row">
@@ -583,10 +584,19 @@ function renderStatus() {
     const fecha = fechaTexto(proximoDiaJuego(hoyISO()));
     el.innerHTML = `
       <div class="status-kicker">Sin jornada en curso</div>
-      <div class="status-title">Próxima: J${next}</div>
+      <div class="status-title">Próxima: ${roundName(next)}</div>
       <div class="status-text">Se publicará automáticamente a las 10:00 del día siguiente al último partido jugado.
         Si la publicas ahora, queda para el <strong>${fecha}</strong>.</div>
-      <div class="btn-row"><button class="btn btn-gold" onclick="publishNow(${next})">Publicar J${next} ahora</button></div>`;
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="publishNow(${next})">Publicar ${roundShort(next)} ahora</button>
+        ${next === PLAYOFF_ROUND && !GAMES.some(g => isPlayoff(g) && g.type !== 'scheduled') ? '<button class="btn btn-outline" onclick="undoPlayoffs()">Deshacer cruces</button>' : ''}
+      </div>`;
+    return;
+  }
+
+  const regular = GAMES.filter(g => !isPlayoff(g));
+  if (regular.length && regular.every(g => g.type === 'finished') && !GAMES.some(isPlayoff)) {
+    el.innerHTML = playoffConfirmHTML();
     return;
   }
 
@@ -613,12 +623,12 @@ function renderFixture() {
       : status === 'current' ? '<span class="tag tag-current">Publicada</span>'
       : '<span class="tag tag-pending">Oculta · se publica sola</span>';
     const resched = list.some(g => g.rescheduled && g.type !== 'finished') ? '<span class="tag tag-resched">Reprogramada</span>' : '';
-    const resting = restingTeams(list);
+    const resting = isPlayoff(r) ? [] : restingTeams(list);
     const dups = duplicatedTeams(list);
 
     html += `<div class="round-card ${r === cur ? 'is-current' : ''}">
       <div class="round-head">
-        <div class="round-name">Jornada ${r}${date && status !== 'pending' ? `<small>${fechaTexto(date)}</small>` : ''}</div>
+        <div class="round-name">${roundName(r)}${date && status !== 'pending' ? `<small>${fechaTexto(date)}</small>` : ''}</div>
         <div class="btn-row">${resched}${tag}</div>
       </div>
       ${list.map(matchHTML).join('')}
@@ -627,7 +637,9 @@ function renderFixture() {
     </div>`;
   });
 
-  el.innerHTML = html || '<p class="empty">Todavía no hay jornadas por jugar. Carga el fixture más abajo.</p>';
+  el.innerHTML = html || (played
+    ? '<p class="empty">Todas las jornadas cargadas ya se jugaron.</p>'
+    : '<p class="empty">Todavía no hay jornadas por jugar. Carga el fixture más abajo.</p>');
   const btn = document.getElementById('toggle-played');
   btn.style.display = played ? '' : 'none';
   btn.textContent = showPlayed ? 'Ocultar jornadas jugadas' : `Ver jornadas jugadas (${played})`;
@@ -644,9 +656,9 @@ function matchHTML(g) {
     <div class="match-teams">${teamName(g.home)}${middle}${teamName(g.away)}${g.walkover ? `<span class="wo-tag" title="No se presentó ${teamName(g.walkover)}">W.O.</span>` : ''}</div>
     <div class="match-actions">${editable ? `
       <button class="btn btn-outline btn-sm" onclick="openEdit(${g.id})" title="Editar">✏</button>
-      <button class="btn btn-outline btn-sm" onclick="openSwap(${g.id})" title="Intercambiar">⇅</button>
+      ${isPlayoff(g) ? '' : `<button class="btn btn-outline btn-sm" onclick="openSwap(${g.id})" title="Intercambiar">⇅</button>`}
       ${g.type === 'upcoming' ? `<button class="btn btn-danger btn-sm" onclick="openWalkover(${g.id})" title="Equipo no se presentó">W.O.</button>` : ''}
-      ${g.type === 'scheduled' ? `<button class="btn btn-danger btn-sm" onclick="deleteScheduled(${g.id})" title="Eliminar">✕</button>` : ''}` : ''}
+      ${g.type === 'scheduled' && !isPlayoff(g) ? `<button class="btn btn-danger btn-sm" onclick="deleteScheduled(${g.id})" title="Eliminar">✕</button>` : ''}` : ''}
       ${g.walkover ? `<button class="btn btn-outline btn-sm" onclick="undoWalkover(${g.id})">Deshacer W.O.</button>` : ''}
     </div>
   </div>`;
@@ -681,11 +693,11 @@ async function suspendRound(round) {
   }
   const base = [hoyISO(), ...list.map(g => g.game_date).filter(Boolean)].sort().pop();
   const nueva = proximoDiaJuego(base);
-  if (!confirm(`¿Suspender la Jornada ${round}?\n\nSus partidos pasan al ${fechaTexto(nueva)}, con los mismos horarios y canchas. El resto del calendario se corre una semana.`)) return;
+  if (!confirm(`¿Suspender ${roundName(round)}?\n\nSus partidos pasan al ${fechaTexto(nueva)}, con los mismos horarios y canchas. El resto del calendario se corre una semana.`)) return;
   const ok = await updateRows(list.map(g => ({ ...datedFields(g, nueva), rescheduled: true })));
   if (!ok) return;
   await loadGames();
-  showToast(`✓ J${round} reprogramada para el ${fechaTexto(nueva)}`);
+  showToast(`✓ ${roundShort(round)} reprogramada para el ${fechaTexto(nueva)}`);
 }
 
 function toggleDateEdit() { document.getElementById('date-edit').classList.toggle('open'); }
@@ -697,21 +709,22 @@ async function saveRoundDate(round) {
   const ok = await updateRows(list.map(g => datedFields(g, iso)));
   if (!ok) return;
   await loadGames();
-  showToast(`✓ J${round}: ${fechaTexto(iso)}`);
+  showToast(`✓ ${roundShort(round)}: ${fechaTexto(iso)}`);
 }
 
 // Igual que lsc_publicar_jornada() en Supabase, pero sin esperar a las 10:00.
 async function publishNow(round) {
   if (currentRound() !== null) { showToast('⚠ Todavía hay una jornada en curso', true); return; }
   const nueva = proximoDiaJuego(hoyISO());
-  if (!confirm(`¿Publicar la Jornada ${round} ahora para el ${fechaTexto(nueva)}?`)) return;
+  if (!confirm(`¿Publicar ${roundName(round)} ahora para el ${fechaTexto(nueva)}?`)) return;
   const list = GAMES.filter(g => g.round === round && g.type === 'scheduled');
   const ok = await updateRows(list.map(g => ({ ...datedFields(g, nueva), type: 'upcoming', rescheduled: false })));
   if (!ok) return;
-  const { error } = await _supabase.from('settings').upsert(
+  // La "jornada actual" del sitio solo cuenta la fase regular.
+  const { error } = isPlayoff(round) ? {} : await _supabase.from('settings').upsert(
     { key: `round_${activeDivision}`, value: String(round) }, { onConflict: 'key' });
   if (error) showToast('⚠ Publicada, pero no se actualizó la jornada actual: ' + error.message, true);
-  else showToast(`✓ J${round} publicada para el ${fechaTexto(nueva)}`);
+  else showToast(`✓ ${roundShort(round)} publicada para el ${fechaTexto(nueva)}`);
   await loadGames();
 }
 
@@ -729,9 +742,11 @@ function teamOptions(selected) {
 function openEdit(id) {
   const g = GAMES.find(x => x.id === id); if (!g) return;
   editingId = id;
-  document.getElementById('edit-title').textContent = `Editar · Jornada ${g.round}`;
+  document.getElementById('edit-title').textContent = `Editar · ${roundName(g)}`;
   document.getElementById('edit-home').innerHTML = teamOptions(g.home);
   document.getElementById('edit-away').innerHTML = teamOptions(g.away);
+  // En playoffs los equipos salen de la tabla y del bracket: solo se cambia hora y cancha.
+  document.getElementById('edit-home').disabled = document.getElementById('edit-away').disabled = isPlayoff(g);
   document.getElementById('edit-time').value = horaDe(g);
   document.getElementById('edit-court').value = canchaCorta(g.venue);
   document.getElementById('edit-err').textContent = '';
@@ -741,8 +756,8 @@ function openEdit(id) {
 async function saveEdit() {
   const g = GAMES.find(x => x.id === editingId); if (!g) return;
   const err = document.getElementById('edit-err');
-  const home = document.getElementById('edit-home').value;
-  const away = document.getElementById('edit-away').value;
+  const home = isPlayoff(g) ? g.home : document.getElementById('edit-home').value;
+  const away = isPlayoff(g) ? g.away : document.getElementById('edit-away').value;
   const rawTime = document.getElementById('edit-time').value.trim();
   const hora = normHora(rawTime);
   const venue = canchaVenue(document.getElementById('edit-court').value);
@@ -750,7 +765,7 @@ async function saveEdit() {
   if (rawTime && !hora) { err.textContent = 'Hora no válida (ej: 19:30).'; return; }
   const others = GAMES.filter(x => x.round === g.round && x.id !== g.id);
   const dup = duplicatedTeams([...others, { home, away }]);
-  if (dup.length) { err.textContent = `${dup.map(teamName).join(', ')} ya juega en la Jornada ${g.round}.`; return; }
+  if (dup.length) { err.textContent = `${dup.map(teamName).join(', ')} ya juega en ${roundName(g)}.`; return; }
 
   const fields = { home, away, venue, slot_time: hora || null };
   if (g.game_date) fields.date = fechaTexto(g.game_date, hora);
@@ -766,10 +781,10 @@ function openSwap(id) {
   swappingId = id;
   const candidates = GAMES.filter(x => x.id !== id && (x.type === 'scheduled' || x.type === 'upcoming'));
   document.getElementById('swap-desc').innerHTML =
-    `<strong>J${g.round} · ${horaDe(g) || '—'} · ${teamName(g.home)} vs ${teamName(g.away)}</strong><br>
+    `<strong>${roundShort(g)} · ${horaDe(g) || '—'} · ${teamName(g.home)} vs ${teamName(g.away)}</strong><br>
      Los equipos cambian de lugar; cada horario, cancha y jornada se mantiene. Sirve para mover un partido a otra hora o a otra jornada.`;
   document.getElementById('swap-target').innerHTML = candidates.map(x =>
-    `<option value="${x.id}">J${x.round} · ${horaDe(x) || '—'} · ${canchaCorta(x.venue)} · ${teamName(x.home)} vs ${teamName(x.away)}</option>`).join('');
+    `<option value="${x.id}">${roundShort(x)} · ${horaDe(x) || '—'} · ${canchaCorta(x.venue)} · ${teamName(x.home)} vs ${teamName(x.away)}</option>`).join('');
   document.getElementById('swap-err').textContent = candidates.length ? '' : 'No hay otros partidos por jugar.';
   openModal('swap-modal');
 }
@@ -785,7 +800,7 @@ async function saveSwap() {
       const list = GAMES.filter(x => x.round === round && x.id !== out.id);
       const dup = duplicatedTeams([...list, inn]);
       if (dup.length) {
-        err.textContent = `No se puede: ${dup.map(teamName).join(', ')} quedaría jugando dos veces en la Jornada ${round}.`;
+        err.textContent = `No se puede: ${dup.map(teamName).join(', ')} quedaría jugando dos veces en ${roundName(round)}.`;
         return;
       }
     }
@@ -803,11 +818,104 @@ async function saveSwap() {
 
 async function deleteScheduled(id) {
   const g = GAMES.find(x => x.id === id); if (!g || g.type !== 'scheduled') return;
-  if (!confirm(`¿Eliminar ${teamName(g.home)} vs ${teamName(g.away)} (J${g.round}) del fixture?`)) return;
+  if (!confirm(`¿Eliminar ${teamName(g.home)} vs ${teamName(g.away)} (${roundShort(g)}) del fixture?`)) return;
   const { error } = await _supabase.from(divCfg().dbTable).delete().eq('id', id).eq('type', 'scheduled');
   if (error) { showToast('⚠ Error: ' + error.message, true); return; }
   await loadGames();
   showToast('✓ Partido eliminado del fixture');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PLAYOFFS: confirmar cruces de cuartos según la tabla final.
+   Semis y final las arma solas la base de datos (supabase/playoffs.sql).
+══════════════════════════════════════════════════════════════ */
+
+// Misma regla que computeStandings() en index.html: 2 pts por victoria, 1 por derrota (0 si es por W.O.);
+// desempate por diferencial, duelo directo y puntos anotados.
+function computeStandings(finished) {
+  const rows = {};
+  Object.keys(divTeams()).forEach(id => {
+    rows[id] = { teamId: id, gp: 0, w: 0, l: 0, diff: 0, pointsFor: 0, tablePoints: 0 };
+  });
+  finished.forEach(g => {
+    if (!rows[g.home] || !rows[g.away]) return;
+    const hs = +g.home_score, as = +g.away_score;
+    const h = rows[g.home], a = rows[g.away];
+    h.gp++; a.gp++;
+    h.pointsFor += hs; a.pointsFor += as;
+    h.diff += hs - as; a.diff += as - hs;
+    const [win, loss] = hs > as ? [h, a] : [a, h];
+    win.w++; win.tablePoints += 2;
+    loss.l++; loss.tablePoints += g.walkover ? 0 : 1;
+  });
+  const headToHead = (idA, idB) => {
+    let wA = 0, wB = 0;
+    finished.forEach(g => {
+      if (g.home === idA && g.away === idB) { if (+g.home_score > +g.away_score) wA++; else wB++; }
+      else if (g.home === idB && g.away === idA) { if (+g.home_score > +g.away_score) wB++; else wA++; }
+    });
+    return wA > wB ? 1 : wB > wA ? -1 : 0;
+  };
+  return Object.values(rows).sort((a, b) => {
+    const ap = a.gp > 0 ? 1 : 0, bp = b.gp > 0 ? 1 : 0;
+    if (bp !== ap) return bp - ap;
+    if (b.tablePoints !== a.tablePoints) return b.tablePoints - a.tablePoints;
+    if (b.diff !== a.diff) return b.diff - a.diff;
+    const h2h = headToHead(a.teamId, b.teamId);
+    if (h2h !== 0) return -h2h;
+    return b.pointsFor - a.pointsFor;
+  });
+}
+
+function quarterFinals() {
+  const table = computeStandings(GAMES.filter(g => g.type === 'finished' && !isPlayoff(g)));
+  return Object.entries(PLAYOFF_QF).map(([slot, [hs, as, hora, cancha]]) => ({
+    slot, hora, cancha, home: table[hs - 1], away: table[as - 1], homeSeed: hs, awaySeed: as,
+  }));
+}
+
+function playoffConfirmHTML() {
+  const table = computeStandings(GAMES.filter(g => g.type === 'finished' && !isPlayoff(g)));
+  const out = table.slice(8).map(r => teamName(r.teamId));
+  const row = q => `<div class="match">
+      <div class="match-slot">${q.hora}<span>${q.cancha}</span></div>
+      <div class="match-teams">${q.homeSeed}° ${teamName(q.home.teamId)}<span class="vs">vs</span>${q.awaySeed}° ${teamName(q.away.teamId)}</div>
+      <div></div>
+    </div>`;
+  return `
+    <div class="status-kicker">Fase regular terminada</div>
+    <div class="status-title">Cuartos de final</div>
+    <div class="status-text">Cruces según la tabla final (1° vs 8°, 4° vs 5°, 2° vs 7°, 3° vs 6°); el mejor ubicado juega de local.
+      Al confirmarlos, se publican solos a las 10:00 del día siguiente al último partido, para el ${DIAS[divCfg().gameDay].toLowerCase()} siguiente.
+      Las semifinales y la final se arman solas.</div>
+    <div class="round-card" style="margin-bottom:12px;">${quarterFinals().map(row).join('')}
+      ${out.length ? `<div class="round-foot">Eliminado: ${out.join(', ')}</div>` : ''}</div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="confirmPlayoffs()">✓ Confirmar cruces</button></div>`;
+}
+
+async function confirmPlayoffs() {
+  if (GAMES.some(isPlayoff)) { showToast('⚠ Los cruces ya están confirmados', true); return; }
+  const qf = quarterFinals();
+  const txt = qf.map(q => `${q.homeSeed}° ${teamName(q.home.teamId)} vs ${q.awaySeed}° ${teamName(q.away.teamId)} (${q.hora})`).join('\n');
+  if (!confirm(`¿Confirmar los cuartos de final de ${divCfg().label}?\n\n${txt}`)) return;
+  const { error } = await _supabase.from(divCfg().dbTable).insert(qf.map(q => ({
+    type: 'scheduled', round: PLAYOFF_ROUND, bracket_slot: q.slot,
+    home: q.home.teamId, away: q.away.teamId, home_seed: q.homeSeed, away_seed: q.awaySeed,
+    slot_time: q.hora, venue: canchaVenue(q.cancha), date: 'Por definir',
+  })));
+  if (error) { showToast('⚠ Error: ' + error.message, true); return; }
+  await loadGames();
+  showToast('✓ Cruces confirmados');
+}
+
+// Solo mientras ningún partido de playoffs se haya publicado.
+async function undoPlayoffs() {
+  if (GAMES.some(g => isPlayoff(g) && g.type !== 'scheduled')) { showToast('⚠ Los playoffs ya comenzaron', true); return; }
+  if (!confirm('¿Deshacer los cruces? Se borran los cuartos de final y vuelves a ver la tabla para confirmarlos de nuevo.')) return;
+  const { error } = await _supabase.from(divCfg().dbTable).delete().gte('round', PLAYOFF_ROUND).eq('type', 'scheduled');
+  if (error) { showToast('⚠ Error: ' + error.message, true); return; }
+  await loadGames();
+  showToast('Cruces deshechos');
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -821,7 +929,7 @@ let woGameId = null, woAbsent = null, woPlayers = [];
 function openWalkover(id) {
   const g = GAMES.find(x => x.id === id); if (!g) return;
   woGameId = id; woAbsent = null; woPlayers = [];
-  document.getElementById('wo-title').textContent = `W.O. · J${g.round} · ${teamName(g.home)} vs ${teamName(g.away)}`;
+  document.getElementById('wo-title').textContent = `W.O. · ${roundShort(g)} · ${teamName(g.home)} vs ${teamName(g.away)}`;
   document.getElementById('wo-teams').innerHTML = [g.home, g.away].map(t =>
     `<button class="wo-team" data-team="${t}" onclick="selectWalkoverAbsent('${t}')">${teamName(t)}<small>No se presentó</small></button>`).join('');
   document.getElementById('wo-dist').style.display = 'none';
@@ -885,7 +993,7 @@ async function saveWalkover() {
   })));
   if (statsErr) showToast('⚠ W.O. guardado, pero falló el detalle por jugador: ' + statsErr.message, true);
 
-  for (const { player, pts } of dist) {
+  for (const { player, pts } of isPlayoff(g) ? [] : dist) {   // los playoffs no suman a la temporada
     const { error: plErr } = await _supabase.from(divCfg().playersTable)
       .update({ points: (player.points || 0) + pts, games: (player.games || 0) + 1 }).eq('id', player.id);
     if (plErr) showToast(`⚠ No se actualizó ${player.name}: ${plErr.message}`, true);
@@ -901,7 +1009,7 @@ async function undoWalkover(id) {
   if (!confirm(`¿Deshacer el W.O. de ${teamName(g.home)} vs ${teamName(g.away)}?\n\nEl partido vuelve a quedar pendiente y se descuentan los puntos y partidos jugados que se repartieron.`)) return;
 
   const { data: stats } = await _supabase.from('game_stats').select('*').eq('game_id', id).eq('division', activeDivision);
-  for (const s of stats || []) {
+  for (const s of isPlayoff(g) ? [] : stats || []) {
     const { data: p } = await _supabase.from(divCfg().playersTable).select('points,games').eq('id', s.player_id).single();
     if (p) await _supabase.from(divCfg().playersTable).update({
       points: Math.max(0, (p.points || 0) - (s.points || 0)),
@@ -959,7 +1067,7 @@ function previewImport() {
     const dup = duplicatedTeams(rows.filter(r => r.home && r.away));
     rows.forEach(r => {
       dup.filter(id => r.home === id || r.away === id)
-         .forEach(id => r.errors.push(`${teamName(id)} juega dos veces en la J${round}`));
+         .forEach(id => r.errors.push(`${teamName(id)} juega dos veces en la ${roundShort(round)}`));
     });
   });
 

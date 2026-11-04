@@ -6,6 +6,7 @@
   <title>En Vivo · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root{
@@ -270,7 +271,7 @@ function renderLive(){
     <div class="lg-card" data-game-id="${g.id}">
       <div class="lg-head">
         <div class="lg-head-left"><span class="live-dot-big"></span>EN VIVO</div>
-        <div class="lg-round">Jornada ${g.round} · 🏟️ ${g.venue || ''}</div>
+        <div class="lg-round">${roundName(g)} · 🏟️ ${g.venue || ''}</div>
       </div>
       <div class="lg-body">
         <div class="lg-teams">

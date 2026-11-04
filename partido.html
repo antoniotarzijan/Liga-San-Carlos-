@@ -6,6 +6,7 @@
   <title>Partido · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root{
@@ -407,7 +408,7 @@ async function renderUpcoming(row){
   const home = teams[row.home], away = teams[row.away];
   document.getElementById('root').innerHTML = `
     <div class="hero-bar">
-      <div class="hero-eyebrow">Jornada ${row.round} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
+      <div class="hero-eyebrow">${roundName(row)} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
       <div class="score-hero">
         <div class="hero-team">
           <div class="hero-team-logo">${teamLogoHTML(row.home)}</div>
@@ -498,7 +499,9 @@ async function buildPreviewHTML(row){
       .order('round', { ascending: true }).order('id', { ascending: true }),
     _supabase.from(divCfg().playersTable).select('*').in('team', [row.home, row.away]).gt('games', 0),
   ]);
-  const finished = gamesRes.data || [];
+  const allFinished = gamesRes.data || [];
+  // La tabla y la comparación son de la fase regular; "Cómo llegan" incluye los playoffs.
+  const finished = allFinished.filter(g => !isPlayoff(g));
   const players = playersRes.data || [];
 
   const standings = computeStandings(finished);
@@ -541,7 +544,7 @@ async function buildPreviewHTML(row){
     <div class="preview-compare">${meetings.map(g => {
       const homeWon = +g.home_score > +g.away_score;
       return `<a class="recent-row" href="partido.html?div=${activeDivision}&id=${g.id}">
-        <span class="recent-opp">J${g.round} · <b>${teams[g.home]?.name || g.home}</b> vs <b>${teams[g.away]?.name || g.away}</b></span>
+        <span class="recent-opp">${roundShort(g)} · <b>${teams[g.home]?.name || g.home}</b> vs <b>${teams[g.away]?.name || g.away}</b></span>
         <span class="recent-res">${g.home_score}–${g.away_score} · gana ${teams[homeWon ? g.home : g.away]?.abbr || ''}</span>
       </a>`;
     }).join('')}</div>` : '';
@@ -549,15 +552,15 @@ async function buildPreviewHTML(row){
   // ── Momento de cada equipo ──
   const formBlock = teamId => {
     const t = teams[teamId];
-    const res = teamResults(finished, teamId);
+    const res = teamResults(allFinished, teamId);
     const last5 = res.slice(-5);
     const recent = res.slice(-3).reverse();
     return `<div class="preview-team" style="--tc:${t?.color || '#666'}">
       <div class="preview-team-head"><span>${t?.name || teamId}</span><span class="streak-text">${streakText(res)}</span></div>
       ${res.length ? `
-        <div class="form-chips">${last5.map(r => `<span class="form-chip ${r.won ? 'w' : 'l'}" title="J${r.round} vs ${teams[r.opp]?.name || r.opp}: ${r.own}–${r.oppScore}">${r.won ? 'G' : 'P'}</span>`).join('')}</div>
+        <div class="form-chips">${last5.map(r => `<span class="form-chip ${r.won ? 'w' : 'l'}" title="${roundShort(r)} vs ${teams[r.opp]?.name || r.opp}: ${r.own}–${r.oppScore}">${r.won ? 'G' : 'P'}</span>`).join('')}</div>
         ${recent.map(r => `<a class="recent-row" href="partido.html?div=${activeDivision}&id=${r.id}">
-          <span class="recent-opp">J${r.round} · ${r.isHome ? 'vs' : '@'} <b>${teams[r.opp]?.name || r.opp}</b></span>
+          <span class="recent-opp">${roundShort(r)} · ${r.isHome ? 'vs' : '@'} <b>${teams[r.opp]?.name || r.opp}</b></span>
           <span class="recent-res ${r.won ? 'w' : 'l'}">${r.won ? 'G' : 'P'} ${r.wo ? 'W.O.' : `${r.own}–${r.oppScore}`}</span>
         </a>`).join('')}`
       : '<div class="preview-empty">Aún no juega esta temporada.</div>'}
@@ -655,7 +658,7 @@ async function renderGame(row){
       <div class="status-row">
         ${isLive ? `<span class="status-badge live"><span class="live-dot"></span>EN VIVO</span>` : `<span class="status-badge finished">✓ FINALIZADO${row.walkover ? ` · W.O. (no se presentó ${teams[row.walkover]?.name || row.walkover})` : ''}</span>`}
       </div>
-      <div class="hero-meta-line">Jornada ${row.round} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
+      <div class="hero-meta-line">${roundName(row)} · ${divCfg().label} · 🏟️ ${row.venue || 'Colegio Cumbres'}</div>
 
       <div class="score-hero matchday">
         <div class="hero-team home" style="--tc:${home?.color||'#666'}">

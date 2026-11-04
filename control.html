@@ -6,6 +6,7 @@
   <title>Mesa de Control · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root{
@@ -1023,7 +1024,7 @@ async function goToList(){
     return `<div class="game-pick ${tag==='live'?'is-live':''}" onclick="openGame(${g.id})">
       <div>
         <div class="gp-teams">${h} vs ${a}</div>
-        <div class="gp-meta">Jornada ${g.round}${metaByTag[tag]}</div>
+        <div class="gp-meta">${roundName(g)}${metaByTag[tag]}</div>
       </div>
       <div class="gp-tag ${tag}">${tagHTML[tag]}</div>
     </div>`;
@@ -1059,7 +1060,7 @@ async function openStart(){
   const teams = divTeams();
   document.getElementById('start-teams').textContent =
     `${teams[currentGame.home]?.name || currentGame.home} vs ${teams[currentGame.away]?.name || currentGame.away}`;
-  document.getElementById('start-round').textContent = `Jornada ${currentGame.round}`;
+  document.getElementById('start-round').textContent = `${roundName(currentGame)}`;
   chosenPeriodMinutes = 10;
   renderPeriodChoices();
 
@@ -1239,7 +1240,7 @@ function openBoard(){
   document.getElementById('view-board').classList.toggle('finished-mode', isFinished);
   const teams = divTeams();
   const home = teams[currentGame.home], away = teams[currentGame.away];
-  document.getElementById('board-round').textContent = `Jornada ${currentGame.round}`;
+  document.getElementById('board-round').textContent = `${roundName(currentGame)}`;
   document.getElementById('roster-logo-home').innerHTML = teamLogoHTML(currentGame.home);
   document.getElementById('roster-logo-away').innerHTML = teamLogoHTML(currentGame.away);
   document.getElementById('roster-name-home').textContent = home?.name || currentGame.home;
@@ -2492,7 +2493,8 @@ async function finishGame(){
   }).eq('id', currentGame.id);
   if (error){ showToast('⚠ Error: ' + error.message, true); return; }
 
-  if (playersWithActivity.length){
+  // Los playoffs no suman a la nómina de la temporada (sus puntos quedan en game_stats).
+  if (playersWithActivity.length && !isPlayoff(currentGame)){
     showToast('⏳ Actualizando estadísticas de jugadores...');
     for (const { player, points } of playersWithActivity){
       const newPoints = (player.points || 0) + points;
