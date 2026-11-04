@@ -411,6 +411,26 @@
     .sanctions-empty{padding:60px;text-align:center;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:16px;letter-spacing:2px;text-transform:uppercase;}
 
     /* ── SPONSORS BANNER ── */
+    /* ── CONTACTO ── */
+    .contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:32px;align-items:start;}
+    .contact-lead{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3vw,34px);letter-spacing:.5px;line-height:1.1;margin-bottom:12px;}
+    .contact-intro p{color:#B6BAC5;font-size:15px;line-height:1.6;margin-bottom:18px;}
+    .contact-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;color:var(--text);}
+    .contact-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px;}
+    .contact-card label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .contact-card select option{background:var(--dark2);}
+    .contact-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+    .contact-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+    .contact-status{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;color:var(--muted);}
+    .contact-status.ok{color:#4ADE80;}
+    .contact-status.err{color:#F87171;}
+    .contact-btn{display:inline-flex;align-items:center;gap:10px;margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:12px 22px;border:none;border-radius:999px;background:var(--red);color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;}
+    .contact-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 22px -6px rgba(248,8,8,.6);}
+    .contact-btn:hover:not(:disabled) .pb-arrow{transform:translateX(3px);}
+    .contact-btn:disabled{opacity:.5;cursor:not-allowed;}
+    .contact-btn .pb-arrow{transition:transform .2s;}
+
     .sponsors-banner{padding:48px clamp(24px,8vw,120px);border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:20px;background:rgba(255,255,255,.015);}
     .sponsors-banner-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
     .sponsors-banner-logos{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
@@ -664,6 +684,10 @@
       .sanction-card{padding:16px;}
       .sanction-player{font-size:16px;}
       .sponsors-banner{padding:32px 16px;}
+      .contact-grid{grid-template-columns:1fr;gap:20px;}
+      .contact-row{grid-template-columns:1fr;}
+      .contact-card{padding:18px;}
+      .contact-btn{width:100%;justify-content:center;margin-left:0;}
       .sponsors-banner-logos{gap:20px;}
       .sponsors-banner-logos .sponsor-logo-wrap{height:44px;}
       footer{padding:28px 16px;flex-direction:column;align-items:flex-start;gap:10px;}
@@ -1078,6 +1102,7 @@
     <a href="#scorers-root">Anotadores</a>
     <a href="#records-root">Récords</a>
     <a href="#sanctions-root">Sanciones</a>
+    <a href="#contact-root">Contacto</a>
   </div>
   <div class="nav-right">
     <button class="nav-search-btn" onclick="openSearch()" title="Buscar equipo o jugador" aria-label="Buscar">🔍</button>
@@ -1109,6 +1134,45 @@
   <section id="records-root"></section>
   <section id="instagram-root"></section>
   <section id="sanctions-root"></section>
+  <section id="contact-root">
+    <div class="section-header reveal">
+      <h2 class="section-title">Contacto</h2>
+      <span class="section-tag">Escríbenos</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-intro reveal">
+        <div class="contact-lead">¿Una sugerencia, un reclamo o una idea para la liga?</div>
+        <p>Escríbenos aquí y le llega directo a la organización. Si dejas tu correo, te respondemos.</p>
+        <ul class="contact-list">
+          <li>💡 Ideas para mejorar la liga o la página</li>
+          <li>📅 Dudas de horarios, fixture o resultados</li>
+          <li>🤝 Auspicios y colaboraciones</li>
+        </ul>
+      </div>
+      <form class="contact-card reveal" id="contact-form" onsubmit="sendContact(event)" novalidate>
+        <div class="contact-row">
+          <div><label for="ct-name">Nombre</label><input id="ct-name" name="name" maxlength="80" placeholder="Tu nombre" required></div>
+          <div><label for="ct-email">Correo</label><input id="ct-email" name="email" type="email" maxlength="120" placeholder="para poder responderte" required></div>
+        </div>
+        <div>
+          <label for="ct-type">Motivo</label>
+          <select id="ct-type" name="type">
+            <option>Sugerencia</option><option>Consulta</option><option>Reclamo</option><option>Auspicio</option><option>Otro</option>
+          </select>
+        </div>
+        <div>
+          <label for="ct-message">Mensaje</label>
+          <textarea id="ct-message" name="message" maxlength="3000" rows="5" placeholder="Cuéntanos..." required></textarea>
+        </div>
+        <input type="checkbox" name="botcheck" id="ct-botcheck" class="contact-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="contact-foot">
+          <span class="contact-status" id="ct-status" role="status"></span>
+          <button type="submit" class="contact-btn" id="ct-submit">Enviar mensaje<span class="pb-arrow">→</span></button>
+        </div>
+      </form>
+    </div>
+  </section>
   <div class="sponsors-banner" id="sponsors-banner">
     <div class="sponsors-banner-label">Auspicios</div>
     <div class="sponsors-banner-logos">
@@ -2279,6 +2343,53 @@ async function renderSanctions() {
       <div class="section-line"></div>
     </div>
     ${cards?`<div class="sanctions-list">${cards}</div>`:'<div class="sanctions-empty">No hay sanciones registradas.</div>'}`;
+}
+
+/* ══ CONTACTO ══
+   Los mensajes se envían con Web3Forms (web3forms.com), que los reenvía al
+   correo de la liga. La llave es pública por diseño: el correo de destino
+   queda guardado en Web3Forms y no aparece en la página. */
+const CONTACT_FORM_KEY = '356c711f-90a4-47be-ba6e-16e062a74c30';
+
+async function sendContact(e) {
+  e.preventDefault();
+  const form = document.getElementById('contact-form');
+  const status = document.getElementById('ct-status');
+  const btn = document.getElementById('ct-submit');
+  const val = id => document.getElementById(id).value.trim();
+  const name = val('ct-name'), email = val('ct-email'), message = val('ct-message'), motivo = val('ct-type');
+  const setStatus = (txt, cls = '') => { status.textContent = txt; status.className = 'contact-status ' + cls; };
+
+  if (document.getElementById('ct-botcheck').checked) return;  // trampa para bots
+  if (!name || !message) { setStatus('Completa tu nombre y el mensaje', 'err'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Revisa tu correo', 'err'); return; }
+  if (CONTACT_FORM_KEY.startsWith('PEGAR')) { setStatus('El formulario aún no está activado', 'err'); return; }
+
+  btn.disabled = true; setStatus('Enviando...');
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        access_key: CONTACT_FORM_KEY,
+        subject: `Contacto web · ${motivo} · ${league.name}`,
+        from_name: `Web ${league.name}`,
+        name, email, replyto: email,
+        motivo,
+        division: activeDivision === 'primera' ? 'Primera' : 'Segunda',
+        message,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error(data.message || res.status);
+    form.reset();
+    setStatus('✓ ¡Mensaje enviado! Gracias por escribirnos', 'ok');
+  } catch (err) {
+    console.warn('Contacto:', err);
+    setStatus('No se pudo enviar. Intenta de nuevo en un rato', 'err');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function renderFooter(){
