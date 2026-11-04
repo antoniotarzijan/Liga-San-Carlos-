@@ -6,6 +6,7 @@
   <title>Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://w.behold.so/widget.js" type="module"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
@@ -1351,6 +1352,7 @@ function rowToGame(row) {
     venue:row.venue||'Colegio Cumbres',
     homeScore:row.home_score, awayScore:row.away_score,
     mvp:row.mvp||'',
+    bracketSlot:row.bracket_slot||null, homeSeed:row.home_seed??null, awaySeed:row.away_seed??null,
     rescheduled:!!row.rescheduled,
     walkover:row.walkover||null,
   };
@@ -1387,7 +1389,7 @@ function computeStandings() {
     };
   });
 
-  const finishedGames = STATE.games.filter(g => g.type === 'finished');
+  const finishedGames = STATE.games.filter(g => g.type === 'finished' && !isPlayoff(g));
 
   finishedGames.forEach(g => {
     if (!rows[g.home] || !rows[g.away]) return;
@@ -1604,7 +1606,7 @@ function renderGames() {
       const awayLiveCls = hs === as ? '' : (as > hs ? 'winner' : 'loser');
       return `
       <div class="game-card live reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
-        <div class="game-card-header"><span class="game-round">Jornada ${g.round} · EN VIVO</span>
+        <div class="game-card-header"><span class="game-round">${roundName(g)} · EN VIVO</span>
         <span class="game-status-live"><span class="live-dot"></span>EN CURSO</span></div>
         <div class="game-body">
           <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="ts-score ${homeLiveCls}">${g.homeScore}</div></div>
@@ -1622,7 +1624,7 @@ function renderGames() {
 
     if (g.type==='upcoming') return `
       <div class="game-card upcoming reveal">
-        <div class="game-card-header"><span class="game-round">Próximo · Jornada ${g.round}${g.rescheduled?' · Reprogramado':''}</span><span class="game-date">${g.date}</span></div>
+        <div class="game-card-header"><span class="game-round">Próximo · ${roundName(g)}${g.rescheduled?' · Reprogramado':''}</span><span class="game-date">${g.date}</span></div>
         <div class="game-body">
           <div class="team-score-row" style="--team-color:${home.color}">${rowHome}<div class="vs-label">VS</div></div>
           <div class="team-score-row" style="--team-color:${away.color}">${rowAway}</div>
@@ -1637,7 +1639,7 @@ function renderGames() {
     return `
       <div class="game-card finished reveal" onclick="location.href='partido.html?div=${activeDivision}&id=${g.id}'">
         <div class="game-card-header">
-          <span class="game-round">Jornada ${g.round}${g.walkover?' · W.O.':''}</span>
+          <span class="game-round">${roundName(g)}${g.walkover?' · W.O.':''}</span>
           <span class="game-date">✓ ${g.date}</span>
         </div>
         <div class="game-body">
@@ -1808,7 +1810,7 @@ async function renderGameDetailContent(gameId) {
     <div style="height:4px;background:linear-gradient(90deg,#f80808 50%,#3009dc 50%);"></div>
     <div style="padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
-        <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">Jornada ${g.round} · ${divCfg().label}</div>
+        <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#6B7280;font-family:'Barlow Condensed',sans-serif;">${roundName(g)} · ${divCfg().label}</div>
         ${liveMeta}
       </div>
       ${statusBadge}
@@ -1884,7 +1886,7 @@ function openShareModal(gameId) {
   const home=teams[g.home], away=teams[g.away];
   const homeWon=+g.homeScore>+g.awayScore;
   document.getElementById('sc-division-label').textContent=`${divCfg().label} · ${league.season}`;
-  document.getElementById('sc-round-label').textContent=`Jornada ${g.round}`;
+  document.getElementById('sc-round-label').textContent=`${roundName(g)}`;
   document.getElementById('sc-home-name').textContent=home?.name||g.home;
   document.getElementById('sc-away-name').textContent=away?.name||g.away;
   document.getElementById('sc-home-score').textContent=g.homeScore;
@@ -2071,12 +2073,12 @@ async function renderScorers() {
 
 /* ══ RÉCORDS ══ */
 // Se calculan solos con los resultados (games) y los puntos por jugador (game_stats).
-// Ante empate, se queda el que lo consiguió primero. Los W.O. no cuentan.
+// Ante empate, se queda el que lo consiguió primero. Los W.O. y los playoffs no cuentan.
 async function renderRecords() {
   const root = document.getElementById('records-root');
   const teams = divTeams();
   const byOrder = (a, b) => a.round - b.round || a.id - b.id;
-  const finished = STATE.games.filter(g => g.type === 'finished' && !g.walkover).sort(byOrder);
+  const finished = STATE.games.filter(g => g.type === 'finished' && !g.walkover && !isPlayoff(g)).sort(byOrder);
   if (!finished.length) { root.innerHTML = ''; return; }
 
   const gameById = Object.fromEntries(finished.map(g => [g.id, g]));
@@ -2139,7 +2141,7 @@ async function renderRecords() {
       <div class="rec-value">${ws}–${ls}</div>
       <div class="rec-who">${logo(w)}<div>
         <div class="rec-name">${tname(w)} <span class="vs">vs</span> ${tname(l)}</div>
-        <div class="rec-sub">Jornada ${g.round}</div>
+        <div class="rec-sub">${roundName(g)}</div>
       </div></div>
     </div>`;
   };
@@ -2523,7 +2525,7 @@ function populateAdminSelects(){
   sel.innerHTML='<option value="">— Selecciona partido —</option>';
   STATE.games.filter(g=>g.type==='upcoming'||g.type==='live').forEach(g=>{
     const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
-    sel.innerHTML+=`<option value="${g.id}">J${g.round} · ${h} vs ${a}</option>`;
+    sel.innerHTML+=`<option value="${g.id}">${roundShort(g)} · ${h} vs ${a}</option>`;
   });
   ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team','bulk-team-select'].forEach(sid=>{
     const s=document.getElementById(sid);if(!s) return;
@@ -2544,7 +2546,7 @@ function renderAdminLists(){
     const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
     return `<div class="game-admin-item">
       <div class="game-admin-item-info">
-        <div class="game-admin-item-teams">J${g.round} · ${h} vs ${a}</div>
+        <div class="game-admin-item-teams">${roundShort(g)} · ${h} vs ${a}</div>
         <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="tag-upcoming">⏳ PRÓXIMO</span></div>
       </div>
       <div class="game-admin-actions">
@@ -2586,7 +2588,7 @@ function renderAdminLists(){
     return `<div class="game-admin-item is-finished">
       <div class="game-admin-item-info">
         <div class="game-admin-item-teams">
-          J${g.round} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
+          ${roundShort(g)} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
           <strong style="color:var(--gold);margin:0 6px;">${g.homeScore}–${g.awayScore}</strong>
           <span style="color:${!homeWon?'#4ADE80':'var(--muted)'}">${a}</span>
         </div>
@@ -2872,13 +2874,15 @@ async function saveResult(){
     ...awayScores.filter(s => s.played || s.pts > 0).map(s => s.id),
   ];
 
-  if (playerIdsInGame.length > 0) {
+  // Los playoffs no suman a la nómina de la temporada; el total se recalcula solo con la fase regular.
+  if (playerIdsInGame.length > 0 && !isPlayoff(game)) {
     showToast('⏳ Actualizando estadísticas...');
 
     const { data: allPlayerStats } = await _supabase
       .from('game_stats')
       .select('player_id, points, game_id')
       .in('player_id', playerIdsInGame)
+      .in('game_id', STATE.games.filter(g => !isPlayoff(g)).map(g => g.id))
       .eq('division', activeDivision)
       .eq('played', true);
 
@@ -2930,7 +2934,7 @@ async function deleteGame(id){
 
   // Si era un partido terminado, revertir estadísticas de jugadores
   const game = STATE.games.find(g => g.id === id);
-  if(game && game.type === 'finished'){
+  if(game && game.type === 'finished' && !isPlayoff(game)){
     const {data:stats} = await _supabase.from('game_stats').select('*')
       .eq('game_id', id).eq('division', activeDivision);
     if(stats && stats.length > 0){
@@ -2962,7 +2966,7 @@ function openEditModal(id){
   editingId=id;
   const teams=divTeams();
   const h=teams[g.home]?.name||g.home, a=teams[g.away]?.name||g.away;
-  document.getElementById('edit-title').textContent=`Editar: J${g.round}`;
+  document.getElementById('edit-title').textContent=`Editar: ${roundShort(g)}`;
   document.getElementById('edit-subtitle').textContent=`${h} vs ${a}`;
   document.getElementById('edit-home-name').textContent=h;
   document.getElementById('edit-away-name').textContent=a;
@@ -3553,7 +3557,7 @@ async function recalcAllStats(){
   showToast('⏳ Recalculando...');
 
   try {
-    const finishedIds = STATE.games.filter(g => g.type === 'finished').map(g => g.id);
+    const finishedIds = STATE.games.filter(g => g.type === 'finished' && !isPlayoff(g)).map(g => g.id);
     if(finishedIds.length === 0){
       showToast('⚠ No hay partidos finalizados');
       return;

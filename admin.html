@@ -6,6 +6,7 @@
   <title>Admin · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -1361,7 +1362,7 @@ function populateAdminSelects() {
   sel.innerHTML = '<option value="">— Selecciona partido —</option>';
   STATE.games.filter(g => g.type === 'upcoming' || g.type === 'live').forEach(g => {
     const h = teams[g.home]?.name || g.home, a = teams[g.away]?.name || g.away;
-    sel.innerHTML += `<option value="${g.id}">J${g.round} · ${h} vs ${a}</option>`;
+    sel.innerHTML += `<option value="${g.id}">${roundShort(g)} · ${h} vs ${a}</option>`;
   });
 
   ['ng-home','ng-away','sanc-team-input','pl-team','pl-filter-team','bulk-team-select'].forEach(sid => {
@@ -1385,7 +1386,7 @@ function renderAdminLists() {
     const isLive = g.type === 'live';
     return `<div class="game-admin-item">
       <div class="game-admin-item-info">
-        <div class="game-admin-item-teams">J${g.round} · ${h} vs ${a}</div>
+        <div class="game-admin-item-teams">${roundShort(g)} · ${h} vs ${a}</div>
         <div class="game-admin-item-meta">📅 ${g.date} · 🏟️ ${g.venue} · <span class="${isLive ? 'tag-live' : 'tag-upcoming'}">${isLive ? '🔴 EN VIVO' : '⏳ PRÓXIMO'}</span></div>
       </div>
       <div class="game-admin-actions">
@@ -1404,7 +1405,7 @@ function renderAdminLists() {
     return `<div class="game-admin-item is-finished">
       <div class="game-admin-item-info">
         <div class="game-admin-item-teams">
-          J${g.round} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
+          ${roundShort(g)} · <span style="color:${homeWon?'#4ADE80':'var(--muted)'}">${h}</span>
           <strong style="color:var(--gold);margin:0 6px;">${g.homeScore}–${g.awayScore}</strong>
           <span style="color:${!homeWon?'#4ADE80':'var(--muted)'}">${a}</span>
         </div>
@@ -1632,8 +1633,9 @@ async function saveResult() {
     if (statsErr) console.warn('Error guardando game_stats:', statsErr.message);
   }
 
+  // Los playoffs no suman a la nómina de la temporada.
   const playersWithActivity = [...homeScores, ...awayScores].filter(s => s.played || s.pts > 0);
-  if (playersWithActivity.length > 0) {
+  if (playersWithActivity.length > 0 && !isPlayoff(game)) {
     showToast('⏳ Actualizando estadísticas...');
     for (const s of playersWithActivity) {
       const newPoints = (s.points || 0) + s.pts;
@@ -1718,7 +1720,7 @@ function openEditModal(id) {
   editingId   = id;
   const teams = divTeams();
   const h = teams[g.home]?.name || g.home, a = teams[g.away]?.name || g.away;
-  document.getElementById('edit-title').textContent    = `Editar: J${g.round}`;
+  document.getElementById('edit-title').textContent    = `Editar: ${roundShort(g)}`;
   document.getElementById('edit-subtitle').textContent = `${h} vs ${a}`;
   document.getElementById('edit-home-name').textContent = h;
   document.getElementById('edit-away-name').textContent = a;
@@ -2090,7 +2092,7 @@ async function recalcAllStats() {
   if (resetErr) { showToast('⚠ Error al resetear: ' + resetErr.message); return; }
 
   // 2. Obtener IDs de partidos finalizados
-  const finishedIds = STATE.games.filter(g => g.type === 'finished').map(g => g.id);
+  const finishedIds = STATE.games.filter(g => g.type === 'finished' && !isPlayoff(g)).map(g => g.id);
   if (finishedIds.length === 0) {
     showToast('✓ Estadísticas reseteadas (no hay partidos activos)');
     return;

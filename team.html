@@ -6,6 +6,7 @@
   <title>Equipo — Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="playoffs.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@500;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -619,7 +620,7 @@ function computeStandings() {
   Object.keys(teams).forEach(id => {
     rows[id] = { teamId: id, gp: 0, w: 0, l: 0, diff: 0, pf: 0, pa: 0, pts: 0, form: [] };
   });
-  allGames.filter(g => g.type === 'finished').forEach(g => {
+  allGames.filter(g => g.type === 'finished' && !isPlayoff(g)).forEach(g => {
     if (!rows[g.home] || !rows[g.away]) return;
     const hs = +g.homeScore, as = +g.awayScore;
     rows[g.home].gp++; rows[g.away].gp++;
@@ -716,7 +717,7 @@ function renderResults(players) {
       const isHome = g.home === teamId;
       return `<div class="upcoming-card reveal">
         <div class="upcoming-info">
-          <div class="upcoming-label">⏳ Próximo partido · Jornada ${g.round}</div>
+          <div class="upcoming-label">⏳ Próximo partido · ${roundName(g)}</div>
           <div class="upcoming-matchup">${isHome
             ? `${teamData.name} <span style="color:var(--muted)">vs</span> ${oppTeam?.name || opp}`
             : `${oppTeam?.name || opp} <span style="color:var(--muted)">vs</span> ${teamData.name}`
@@ -748,7 +749,7 @@ function renderResults(players) {
     };
     return `<div class="result-card ${cls} reveal">
       <div class="result-header">
-        <span class="result-round">Jornada ${g.round} · ${isHome ? '🏠 Local' : '✈️ Visita'}</span>
+        <span class="result-round">${roundName(g)} · ${isHome ? '🏠 Local' : '✈️ Visita'}</span>
         <span class="result-date">✓ ${g.date}</span>
       </div>
       <div class="result-body">

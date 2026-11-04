@@ -118,11 +118,14 @@ begin
       where type = ''scheduled'' and round = $2', tabla)
   using nueva, siguiente;
 
-  insert into public.settings (key, value)
-  values ('round_' || division, siguiente::text)
-  on conflict (key) do update set value = excluded.value;
+  -- La "jornada actual" del sitio solo cuenta la fase regular (playoffs = round 100+).
+  if siguiente < 100 then
+    insert into public.settings (key, value)
+    values ('round_' || division, siguiente::text)
+    on conflict (key) do update set value = excluded.value;
+  end if;
 
-  return format('J%s publicada para el %s', siguiente, public.lsc_fecha_texto(nueva, null));
+  return format('Ronda %s publicada para el %s', siguiente, public.lsc_fecha_texto(nueva, null));
 end $$;
 
 create or replace function public.lsc_publicar_jornadas()
