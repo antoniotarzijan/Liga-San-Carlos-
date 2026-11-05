@@ -441,6 +441,22 @@
 
     /* ── AUSPICIADORES ── */
     .sponsors-section{padding:56px clamp(24px,8vw,120px) 64px;border-top:1px solid var(--border);background:rgba(255,255,255,.015);}
+    /* Franja de auspiciadores en movimiento (entre resultados y tabla) */
+    .sp-marquee{position:relative;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(242,179,78,.05),rgba(255,255,255,.02),rgba(242,179,78,.05));padding:22px 0;}
+    .sp-marquee::before,.sp-marquee::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;}
+    .sp-marquee::before{left:0;background:linear-gradient(90deg,var(--dark),transparent);}
+    .sp-marquee::after{right:0;background:linear-gradient(270deg,var(--dark),transparent);}
+    .spm-track{display:flex;width:max-content;animation:spm-scroll 40s linear infinite;}
+    .sp-marquee:hover .spm-track{animation-play-state:paused;}
+    .spm-group{display:flex;align-items:center;gap:72px;padding-right:72px;}
+    .spm-item{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--text);white-space:nowrap;}
+    .spm-item img{height:124px;width:auto;margin:-22px 0;}
+    .spm-name{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;line-height:1;}
+    .spm-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+    .spm-sep{height:40px;width:auto;opacity:.3;margin:-6px 0;}
+    @keyframes spm-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+    @media (prefers-reduced-motion: reduce){.spm-track{animation:none;}}
+
     .sp-head{text-align:center;margin-bottom:28px;}
     .sp-kicker{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);}
     .sp-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,4vw,44px);letter-spacing:1px;margin-top:4px;}
@@ -756,6 +772,10 @@
       .sp-card.final img{height:110px;}
       .sp-general{gap:22px;}
       .sp-general a,.sp-general span{height:48px;}
+      .spm-item img{height:92px;margin:-16px 0;}
+      .spm-name{font-size:26px;}
+      .spm-group{gap:44px;padding-right:44px;}
+      .sp-marquee::before,.sp-marquee::after{width:32px;}
 
       .contact-grid{grid-template-columns:1fr;gap:20px;}
       .contact-row{grid-template-columns:1fr;}
@@ -1196,6 +1216,7 @@
 <main>
   <div class="hero" id="hero-root"></div>
   <section id="games-root" class="games-section"></section>
+  <div class="sp-marquee" id="sp-marquee" aria-label="Auspiciadores"></div>
   <section id="standings-root"></section>
   <section id="playoffs-root"></section>
   <section id="teams-root"></section>
@@ -1702,6 +1723,19 @@ function renderSponsors() {
       ? `<a href="${sp.link}" target="_blank" rel="noopener" title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></a>`
       : `<span title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></span>`).join('')}</div>` : ''}
 `;
+
+  // Franja en movimiento: la secuencia se repite hasta llenar el ancho y se duplica para un loop continuo.
+  const strip = document.getElementById('sp-marquee');
+  if (strip) {
+    const item = sp => `${sp.link ? `<a class="spm-item" href="${sp.link}" target="_blank" rel="noopener">` : '<span class="spm-item">'}
+        <img src="${sp.logo}" alt="${sp.name}">
+        <span class="spm-name">${labelOf(sp) ? `<span class="spm-label">${labelOf(sp)}</span>` : ''}${sp.name}</span>
+      ${sp.link ? '</a>' : '</span>'}<img class="spm-sep" src="${league.logo}" alt="">`;
+    const reps = Math.max(1, Math.ceil(6 / SPONSORS.length));
+    const group = `<div class="spm-group">${Array.from({ length: reps }, () => SPONSORS.map(item).join('')).join('')}</div>`;
+    strip.innerHTML = SPONSORS.length ? `<div class="spm-track">${group}${group.replace('class="spm-group"', 'class="spm-group" aria-hidden="true"')}</div>` : '';
+    strip.hidden = !SPONSORS.length;
+  }
 
   const sel = document.getElementById('div-sel-sponsors-logos');
   if (sel) sel.innerHTML = SPONSORS.map(sp => `<div class="sponsor-logo-wrap"><img src="${sp.logo}" alt="${sp.name}"></div>`).join('');
