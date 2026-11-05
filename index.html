@@ -442,17 +442,17 @@
     /* ── AUSPICIADORES ── */
     .sponsors-section{padding:56px clamp(24px,8vw,120px) 64px;border-top:1px solid var(--border);background:rgba(255,255,255,.015);}
     /* Franja de auspiciadores en movimiento (entre resultados y tabla) */
-    .sp-marquee{position:relative;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(242,179,78,.05),rgba(255,255,255,.02),rgba(242,179,78,.05));padding:14px 0;}
+    .sp-marquee{position:relative;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(242,179,78,.05),rgba(255,255,255,.02),rgba(242,179,78,.05));padding:22px 0;}
     .sp-marquee::before,.sp-marquee::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;}
     .sp-marquee::before{left:0;background:linear-gradient(90deg,var(--dark),transparent);}
     .sp-marquee::after{right:0;background:linear-gradient(270deg,var(--dark),transparent);}
     .spm-track{display:flex;width:max-content;animation:spm-scroll 40s linear infinite;}
     .sp-marquee:hover .spm-track{animation-play-state:paused;}
-    .spm-group{display:flex;align-items:center;gap:56px;padding-right:56px;}
-    .spm-item{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);white-space:nowrap;}
-    .spm-item img{height:76px;width:auto;margin:-14px 0;}
-    .spm-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.5px;line-height:1.1;}
-    .spm-label{display:block;font-weight:600;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);}
+    .spm-group{display:flex;align-items:center;gap:72px;padding-right:72px;}
+    .spm-item{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--text);white-space:nowrap;}
+    .spm-item img{height:124px;width:auto;margin:-22px 0;}
+    .spm-name{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;line-height:1;}
+    .spm-label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
     .spm-sep{height:40px;width:auto;opacity:.3;margin:-6px 0;}
     @keyframes spm-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
     @media (prefers-reduced-motion: reduce){.spm-track{animation:none;}}
@@ -772,8 +772,9 @@
       .sp-card.final img{height:110px;}
       .sp-general{gap:22px;}
       .sp-general a,.sp-general span{height:48px;}
-      .spm-item img{height:60px;margin:-10px 0;}
-      .spm-group{gap:36px;padding-right:36px;}
+      .spm-item img{height:92px;margin:-16px 0;}
+      .spm-name{font-size:26px;}
+      .spm-group{gap:44px;padding-right:44px;}
       .sp-marquee::before,.sp-marquee::after{width:32px;}
 
       .contact-grid{grid-template-columns:1fr;gap:20px;}
