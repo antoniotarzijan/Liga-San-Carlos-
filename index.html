@@ -426,6 +426,7 @@
     .cs-btn.gold{background:var(--gold);color:#000;border-color:var(--gold);}
     .contact-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px;}
     .contact-card label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .contact-card label .contact-opt{letter-spacing:1px;text-transform:none;font-weight:500;}
     .contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
     .contact-card select option{background:var(--dark2);}
     .contact-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
@@ -1243,7 +1244,7 @@
       <form class="contact-card reveal" id="contact-form" onsubmit="sendContact(event)" novalidate>
         <div class="contact-row">
           <div><label for="ct-name">Nombre</label><input id="ct-name" name="name" maxlength="80" placeholder="Tu nombre" required></div>
-          <div><label for="ct-email">Correo</label><input id="ct-email" name="email" type="email" maxlength="120" placeholder="para poder responderte" required></div>
+          <div><label for="ct-email">Correo <span class="contact-opt">(opcional)</span></label><input id="ct-email" name="email" type="email" maxlength="120" placeholder="para poder responderte"></div>
         </div>
         <div>
           <label for="ct-type">Motivo</label>
@@ -2632,7 +2633,7 @@ async function sendContact(e) {
 
   if (document.getElementById('ct-botcheck').checked) return;  // trampa para bots
   if (!name || !message) { setStatus('Completa tu nombre y el mensaje', 'err'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Revisa tu correo', 'err'); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Ese correo no parece válido (ej: nombre@gmail.com)', 'err'); return; }
   if (CONTACT_FORM_KEY.startsWith('PEGAR')) { setStatus('El formulario aún no está activado', 'err'); return; }
 
   btn.disabled = true; setStatus('Enviando...');
@@ -2644,7 +2645,7 @@ async function sendContact(e) {
         access_key: CONTACT_FORM_KEY,
         subject: `Contacto web · ${motivo} · ${league.name}`,
         from_name: `Web ${league.name}`,
-        name, email, replyto: email,
+        name, ...(email ? { email, replyto: email } : {}),
         motivo,
         division: activeDivision === 'primera' ? 'Primera' : 'Segunda',
         message,
