@@ -432,6 +432,35 @@
     .contact-btn:disabled{opacity:.5;cursor:not-allowed;}
     .contact-btn .pb-arrow{transition:transform .2s;}
 
+    /* ── AUSPICIADORES ── */
+    .sponsors-section{padding:56px clamp(24px,8vw,120px) 64px;border-top:1px solid var(--border);background:rgba(255,255,255,.015);}
+    .sp-head{text-align:center;margin-bottom:28px;}
+    .sp-kicker{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);}
+    .sp-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,4vw,44px);letter-spacing:1px;margin-top:4px;}
+    .sp-featured{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;max-width:1100px;margin:0 auto;}
+    .sp-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:26px 18px 22px;border:1px solid var(--border);border-radius:10px;background:var(--card);text-decoration:none;color:inherit;transition:border-color .2s,transform .2s;}
+    a.sp-card:hover{border-color:rgba(255,255,255,.22);transform:translateY(-2px);}
+    .sp-card.final{border-color:rgba(242,179,78,.45);background:radial-gradient(ellipse at top,rgba(242,179,78,.12),transparent 70%),var(--card);}
+    .sp-tier{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+    .sp-card.final .sp-tier{color:var(--gold);}
+    .sp-card img{height:96px;width:auto;max-width:80%;object-fit:contain;}
+    .sp-card.final img{height:130px;}
+    .sp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.5px;}
+    .sp-link{font-size:11px;color:var(--muted);}
+    .sp-general{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:30px;}
+    .sp-general a,.sp-general span{display:flex;height:70px;opacity:.8;transition:opacity .2s;}
+    .sp-general a:hover{opacity:1;}
+    .sp-general img{height:100%;width:auto;object-fit:contain;}
+    .sp-cta{max-width:1100px;margin:30px auto 0;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 24px;border:1px dashed rgba(255,255,255,.16);border-radius:10px;}
+    .sp-cta-t{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1;}
+    .sp-cta-d{font-size:13px;color:var(--muted);margin-top:4px;}
+    .sp-cta-btns{display:flex;gap:10px;flex-wrap:wrap;}
+    .sp-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;border:1px solid rgba(255,255,255,.18);color:var(--text);background:none;}
+    .sp-btn.gold{background:var(--gold);color:#000;border-color:var(--gold);}
+    .po-presented{display:flex;align-items:center;gap:12px;margin:-18px 0 22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+    .po-presented img{height:56px;width:auto;margin:-6px 0;}
+    .po-presented b{color:var(--text);letter-spacing:1px;font-size:14px;}
+
     .sponsors-banner{padding:48px clamp(24px,8vw,120px);border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:20px;background:rgba(255,255,255,.015);}
     .sponsors-banner-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
     .sponsors-banner-logos{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
@@ -725,6 +754,13 @@
       .sanction-card{padding:16px;}
       .sanction-player{font-size:16px;}
       .sponsors-banner{padding:32px 16px;}
+      .sponsors-section{padding:40px 16px 48px;}
+      .sp-featured{grid-template-columns:1fr;}
+      .sp-card.final img{height:110px;}
+      .sp-general{gap:22px;}
+      .sp-general a,.sp-general span{height:48px;}
+      .sp-cta{flex-direction:column;align-items:flex-start;}
+      .po-presented{margin:-8px 0 18px;}
       .contact-grid{grid-template-columns:1fr;gap:20px;}
       .contact-row{grid-template-columns:1fr;}
       .contact-card{padding:18px;}
@@ -811,12 +847,8 @@
   </div>
   <div class="div-sel-sponsors">
     <div class="div-sel-sponsors-label">Auspicios</div>
-    <div class="div-sel-sponsors-logos">
-      <div class="sponsor-logo-wrap"><img src="images/premios pais.png" alt="Auspicio 1" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 1</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="logos/mattre.png" alt="Auspicio 2" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 2</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="images/painland.png" alt="Auspicio 3" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 3</div>'"></div>
+    <div class="div-sel-sponsors-logos" id="div-sel-sponsors-logos"></div>
     </div>
-  </div>
 </div>
 
 <!-- ══ MODAL LOGIN ══ -->
@@ -1215,14 +1247,7 @@
       </form>
     </div>
   </section>
-  <div class="sponsors-banner" id="sponsors-banner">
-    <div class="sponsors-banner-label">Auspicios</div>
-    <div class="sponsors-banner-logos">
-      <div class="sponsor-logo-wrap"><img src="images/premios pais.png" alt="Auspicio 1" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 1</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="logos/mattre.png" alt="Auspicio 2" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 2</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="images/painland.png" alt="Auspicio 3" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 3</div>'"></div>
-    </div>
-  </div>
+  <section class="sponsors-section" id="sponsors-banner"></section>
   <footer id="footer-root"></footer>
 </main>
 
@@ -1383,6 +1408,7 @@ async function renderSchedStrip() {
 }
 
 if (!_savedDivision) renderSchedStrip();
+loadSponsors();
 setInterval(renderSchedStrip, 15000);
 
 function rowToGame(row) {
@@ -1622,6 +1648,73 @@ function renderStandings() {
 </div>`;
 }
 
+/* ══ AUSPICIADORES ══
+   Vienen de la tabla `sponsors` (name, logo, link, tier, sort, active). tier: 'final' (auspiciador
+   oficial de la Final), 'mvp', 'hidratacion' o 'general'. Si la tabla no existe o está vacía,
+   se muestran los auspiciadores de siempre. */
+const SPONSOR_TIERS = { final: 'Auspiciador oficial de la Final', mvp: 'Premio MVP de la Final', hidratacion: 'Hidratación oficial' };
+const DEFAULT_SPONSORS = [
+  { name: 'Premios País', logo: 'images/premios pais.png', tier: 'general' },
+  { name: 'Mattre',       logo: 'logos/mattre.png',        tier: 'general' },
+  { name: 'Painland',     logo: 'images/painland.png',     tier: 'general' },
+];
+const SPONSOR_KIT_URL = 'kit-auspicio-2026.pdf';
+let SPONSORS = DEFAULT_SPONSORS;
+
+async function loadSponsors() {
+  const { data, error } = await _supabase.from('sponsors').select('*').eq('active', true).order('sort');
+  if (!error && data?.length) SPONSORS = data;
+  renderSponsors();
+  if (STATE.games.length) renderPlayoffsSection();
+  setTimeout(activateReveal, 50);
+}
+
+const finalSponsor = () => SPONSORS.find(sp => sp.tier === 'final') || null;
+
+function renderSponsors() {
+  const linkOpen = sp => sp.link ? `<a href="${sp.link}" target="_blank" rel="noopener" class="sp-card ${sp.tier}">` : `<div class="sp-card ${sp.tier}">`;
+  const linkClose = sp => sp.link ? '</a>' : '</div>';
+  const featured = ['final', 'mvp', 'hidratacion'].map(t => SPONSORS.find(sp => sp.tier === t)).filter(Boolean);
+  const general = SPONSORS.filter(sp => !SPONSOR_TIERS[sp.tier]);
+  const host = sp => (sp.link || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+
+  document.getElementById('sponsors-banner').innerHTML = `
+    <div class="sp-head reveal">
+      <div class="sp-kicker">Gracias a quienes hacen posible la liga</div>
+      <div class="sp-title">Nuestros auspiciadores</div>
+    </div>
+    ${featured.length ? `<div class="sp-featured reveal" style="${featured.length < 3 ? `grid-template-columns:repeat(${featured.length},1fr);max-width:${featured.length * 360}px;` : ''}">
+      ${featured.map(sp => `${linkOpen(sp)}
+        <div class="sp-tier">${SPONSOR_TIERS[sp.tier]}</div>
+        <img src="${sp.logo}" alt="${sp.name}">
+        <div class="sp-name">${sp.name}</div>
+        ${sp.link ? `<div class="sp-link">${host(sp)} ↗</div>` : ''}
+      ${linkClose(sp)}`).join('')}
+    </div>` : ''}
+    ${general.length ? `<div class="sp-general reveal">${general.map(sp => sp.link
+      ? `<a href="${sp.link}" target="_blank" rel="noopener" title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></a>`
+      : `<span title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></span>`).join('')}</div>` : ''}
+    <div class="sp-cta reveal">
+      <div>
+        <div class="sp-cta-t">¿Quieres auspiciar la Liga San Carlos?</div>
+        <div class="sp-cta-d">18 equipos, casi 300 jugadores y una comunidad activa en Instagram. Conoce cómo participar en la gran final.</div>
+      </div>
+      <div class="sp-cta-btns">
+        <a class="sp-btn gold" href="${SPONSOR_KIT_URL}" target="_blank" rel="noopener">Descargar kit</a>
+        <button class="sp-btn" onclick="contactAboutSponsoring()">Escríbenos →</button>
+      </div>
+    </div>`;
+
+  const sel = document.getElementById('div-sel-sponsors-logos');
+  if (sel) sel.innerHTML = SPONSORS.map(sp => `<div class="sponsor-logo-wrap"><img src="${sp.logo}" alt="${sp.name}"></div>`).join('');
+}
+
+function contactAboutSponsoring() {
+  document.getElementById('ct-type').value = 'Auspicio';
+  document.getElementById('contact-root').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => document.getElementById('ct-name').focus(), 600);
+}
+
 /* ══ PLAYOFFS EN LA PORTADA ══
    Mini bracket con los partidos de playoffs (round 100+); antes de confirmar
    los cruces, la proyección según la tabla. Durante los playoffs la sección
@@ -1688,6 +1781,7 @@ function renderPlayoffsSection() {
       <button class="ig-gen-btn" onclick="openInstagramModal('bracket')">📸 Para Instagram</button>
       <a href="playoff.html" class="playoff-bracket-btn"><span class="pb-icon">🏆</span>Cuadro completo<span class="pb-arrow">→</span></a>
     </div>
+    ${finalSponsor() ? `<div class="po-presented reveal">Final presentada por <img src="${finalSponsor().logo}" alt=""><b>${finalSponsor().name}</b></div>` : ''}
     ${projected ? `<div class="mb-banner reveal"><strong>📊 Proyección</strong> · ${pending
       ? `Así serían los cruces si la fase regular terminara hoy. ${pending === 1 ? 'Queda 1 jornada' : `Quedan ${pending} jornadas`}.`
       : 'Fase regular terminada: estos son los cruces según la tabla final, por confirmar.'}</div>` : ''}
@@ -3725,16 +3819,36 @@ async function drawInstagramBracket() {
     ctx.fillText('POR DEFINIR', cx + cw / 2, cy + 160);
   }
 
-  // Footer
-  ctx.beginPath(); ctx.moveTo(56, H - 58); ctx.lineTo(W - 56, H - 58);
+  // Footer: auspiciador de la Final (si hay) o la web
+  ctx.beginPath(); ctx.moveTo(56, H - 70); ctx.lineTo(W - 56, H - 70);
   ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
-  ctx.textAlign = 'center'; ctx.font = '700 18px "Barlow Condensed", sans-serif';
-  ctx.letterSpacing = '4px'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W / 2, H - 26);
+  const sp = finalSponsor();
+  ctx.font = '700 18px "Barlow Condensed", sans-serif'; ctx.letterSpacing = '4px';
+  if (sp) {
+    ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillText('FINAL PRESENTADA POR', W / 2 - 10, H - 28);
+    const lw = await igDrawLogoFit(ctx, sp.logo, W / 2 + 6, H - 70, 62);
+    ctx.textAlign = 'left'; ctx.fillStyle = TEXT; ctx.letterSpacing = '1px'; ctx.font = '700 22px "Barlow Condensed", sans-serif';
+    ctx.fillText(sp.name.toUpperCase(), W / 2 + 18 + lw, H - 28);
+  } else {
+    ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W / 2, H - 26);
+  }
   ctx.letterSpacing = '0px';
 }
 
 /* ── Canvas helpers ── */
+// Dibuja un logo a altura h manteniendo su proporción; devuelve el ancho usado.
+function igDrawLogoFit(ctx, src, x, y, h) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { const w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, x, y, w, h); resolve(w); };
+    img.onerror = () => resolve(0);
+    img.src = src;
+  });
+}
+
 function igDrawBackground(ctx, W, H) {
   ctx.fillStyle = '#08090C';
   ctx.fillRect(0, 0, W, H);
