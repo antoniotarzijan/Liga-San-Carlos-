@@ -447,8 +447,9 @@
     .sp-marquee::before,.sp-marquee::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none;}
     .sp-marquee::before{left:0;background:linear-gradient(90deg,var(--dark),transparent);}
     .sp-marquee::after{right:0;background:linear-gradient(270deg,var(--dark),transparent);}
-    .spm-track{display:flex;width:max-content;animation:spm-scroll 40s linear infinite;}
-    .sp-marquee:hover .spm-track{animation-play-state:paused;}
+    .sp-marquee{contain:paint;}
+    .spm-track{display:flex;width:max-content;animation:spm-scroll 40s linear infinite;will-change:transform;}
+    .sp-marquee:hover .spm-track,.sp-marquee.is-off .spm-track,.sp-marquee.is-hidden-tab .spm-track{animation-play-state:paused;}
     .spm-group{display:flex;align-items:center;gap:72px;padding-right:72px;}
     .spm-item{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--text);white-space:nowrap;}
     .spm-item img{height:124px;width:auto;margin:-22px 0;}
@@ -1725,22 +1726,52 @@ function renderSponsors() {
       : `<span title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></span>`).join('')}</div>` : ''}
 `;
 
-  // Franja en movimiento: la secuencia se repite hasta llenar el ancho y se duplica para un loop continuo.
-  const strip = document.getElementById('sp-marquee');
-  if (strip) {
-    const item = sp => `${sp.link ? `<a class="spm-item" href="${sp.link}" target="_blank" rel="noopener">` : '<span class="spm-item">'}
-        <img src="${sp.logo}" alt="${sp.name}">
-        <span class="spm-name">${labelOf(sp) ? `<span class="spm-label">${labelOf(sp)}</span>` : ''}${sp.name}</span>
-      ${sp.link ? '</a>' : '</span>'}<img class="spm-sep" src="${league.logo}" alt="">`;
-    const reps = Math.max(1, Math.ceil(6 / SPONSORS.length));
-    const group = `<div class="spm-group">${Array.from({ length: reps }, () => SPONSORS.map(item).join('')).join('')}</div>`;
-    strip.innerHTML = SPONSORS.length ? `<div class="spm-track">${group}${group.replace('class="spm-group"', 'class="spm-group" aria-hidden="true"')}</div>` : '';
-    strip.hidden = !SPONSORS.length;
-  }
+  renderSponsorStrip(labelOf);
 
   const sel = document.getElementById('div-sel-sponsors-logos');
   if (sel) sel.innerHTML = SPONSORS.map(sp => `<div class="sponsor-logo-wrap"><img src="${sp.logo}" alt="${sp.name}"></div>`).join('');
 }
+
+/* Franja de auspiciadores en movimiento (entre resultados y tabla).
+   Se repiten los logos solo lo necesario para cubrir el ancho de la pantalla (una tira
+   muy larga es pesada de mover en celulares de alta resolución), se duplica una vez
+   para el loop continuo, y se pausa cuando no está a la vista o la pestaña está oculta. */
+const SPONSOR_STRIP_SPEED = 45;   // px por segundo
+let _stripObserver = null, _stripResizeTimer = null;
+
+async function renderSponsorStrip(labelOf) {
+  const strip = document.getElementById('sp-marquee');
+  if (!strip) return;
+  strip.hidden = !SPONSORS.length;
+  if (!SPONSORS.length) { strip.innerHTML = ''; return; }
+  const item = sp => `${sp.link ? `<a class="spm-item" href="${sp.link}" target="_blank" rel="noopener">` : '<span class="spm-item">'}
+      <img src="${sp.logo}" alt="${sp.name}">
+      <span class="spm-name">${labelOf(sp) ? `<span class="spm-label">${labelOf(sp)}</span>` : ''}${sp.name}</span>
+    ${sp.link ? '</a>' : '</span>'}<img class="spm-sep" src="${league.logo}" alt="">`;
+  const seq = SPONSORS.map(item).join('');
+
+  // 1) Una secuencia para medir su ancho real (con las imágenes cargadas).
+  strip.innerHTML = `<div class="spm-track"><div class="spm-group">${seq}</div></div>`;
+  await Promise.all([...strip.querySelectorAll('img')].map(img => img.decode().catch(() => {})));
+  const seqWidth = strip.querySelector('.spm-group').scrollWidth || 1;
+
+  // 2) Cada mitad del loop debe cubrir la pantalla; la tira completa son dos mitades iguales.
+  const reps = Math.max(1, Math.ceil(strip.clientWidth / seqWidth));
+  const group = seq.repeat(reps);
+  strip.innerHTML = `<div class="spm-track" style="animation-duration:${(seqWidth * reps / SPONSOR_STRIP_SPEED).toFixed(1)}s">
+    <div class="spm-group">${group}</div><div class="spm-group" aria-hidden="true">${group}</div></div>`;
+
+  // 3) Solo se mueve mientras está a la vista.
+  _stripObserver?.disconnect();
+  _stripObserver = new IntersectionObserver(([e]) => strip.classList.toggle('is-off', !e.isIntersecting));
+  _stripObserver.observe(strip);
+}
+
+document.addEventListener('visibilitychange', () => document.getElementById('sp-marquee')?.classList.toggle('is-hidden-tab', document.hidden));
+window.addEventListener('resize', () => {
+  clearTimeout(_stripResizeTimer);
+  _stripResizeTimer = setTimeout(() => renderSponsorStrip(sp => sp.label || SPONSOR_TIERS[sp.tier] || ''), 300);
+});
 
 function contactAboutSponsoring() {
   document.getElementById('ct-type').value = 'Auspicio';
