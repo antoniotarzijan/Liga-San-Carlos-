@@ -1661,8 +1661,8 @@ function renderStandings() {
 // `label`: título sobre el logo; los que tienen label van destacados en tarjetas (el primero, en dorado).
 const SPONSOR_TIERS = { final: 'Auspiciador oficial de la Final', mvp: 'Premio MVP de la Final', hidratacion: 'Hidratación oficial' };
 const DEFAULT_SPONSORS = [
-  { name: 'Premios País', logo: 'images/premios pais.png', label: 'Auspiciador oficial de la premiación', link: '' },
-  { name: 'Painland',     logo: 'images/painland.png',     label: 'Kinesiología',                         link: '' },
+  { name: 'Premios País', logo: 'images/premios pais.png', label: 'Auspiciador oficial de la premiación', link: 'https://www.instagram.com/premiospais/' },
+  { name: 'Painland',     logo: 'images/painland.png',     label: 'Kinesiología',                         link: 'https://www.instagram.com/painland_/' },
 ];
 let SPONSORS = DEFAULT_SPONSORS;
 
@@ -1682,7 +1682,8 @@ function renderSponsors() {
   const general = SPONSORS.filter(sp => !labelOf(sp));
   const linkOpen = (sp, i) => sp.link ? `<a href="${sp.link}" target="_blank" rel="noopener" class="sp-card ${i === 0 ? 'final' : ''}">` : `<div class="sp-card ${i === 0 ? 'final' : ''}">`;
   const linkClose = sp => sp.link ? '</a>' : '</div>';
-  const host = sp => (sp.link || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  // Links de Instagram se muestran como @usuario
+  const host = sp => { const l = (sp.link || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''); return l.startsWith('instagram.com/') ? '@' + l.slice(14) : l; };
 
   document.getElementById('sponsors-banner').innerHTML = `
     <div class="sp-head reveal">
