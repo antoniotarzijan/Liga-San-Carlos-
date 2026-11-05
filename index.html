@@ -417,6 +417,13 @@
     .contact-lead{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3vw,34px);letter-spacing:.5px;line-height:1.1;margin-bottom:12px;}
     .contact-intro p{color:#B6BAC5;font-size:15px;line-height:1.6;margin-bottom:18px;}
     .contact-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;color:var(--text);}
+    .contact-sponsor{margin-top:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 24px;border:1px solid rgba(242,179,78,.45);border-radius:10px;background:radial-gradient(ellipse at top left,rgba(242,179,78,.14),transparent 70%),var(--card);}
+    .cs-kicker{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+    .cs-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;line-height:1.05;margin:6px 0 6px;}
+    .contact-sponsor p{font-size:14px;color:#B6BAC5;line-height:1.5;margin:0;}
+    .cs-btns{display:flex;gap:10px;flex-wrap:wrap;}
+    .cs-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 16px;border-radius:999px;text-decoration:none;cursor:pointer;border:1px solid rgba(255,255,255,.2);color:var(--text);background:none;}
+    .cs-btn.gold{background:var(--gold);color:#000;border-color:var(--gold);}
     .contact-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px;}
     .contact-card label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
     .contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -432,6 +439,25 @@
     .contact-btn:disabled{opacity:.5;cursor:not-allowed;}
     .contact-btn .pb-arrow{transition:transform .2s;}
 
+    /* ── AUSPICIADORES ── */
+    .sponsors-section{padding:56px clamp(24px,8vw,120px) 64px;border-top:1px solid var(--border);background:rgba(255,255,255,.015);}
+    .sp-head{text-align:center;margin-bottom:28px;}
+    .sp-kicker{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);}
+    .sp-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,4vw,44px);letter-spacing:1px;margin-top:4px;}
+    .sp-featured{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;max-width:1100px;margin:0 auto;}
+    .sp-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:26px 18px 22px;border:1px solid var(--border);border-radius:10px;background:var(--card);text-decoration:none;color:inherit;transition:border-color .2s,transform .2s;}
+    a.sp-card:hover{border-color:rgba(255,255,255,.22);transform:translateY(-2px);}
+    .sp-card.final{border-color:rgba(242,179,78,.45);background:radial-gradient(ellipse at top,rgba(242,179,78,.12),transparent 70%),var(--card);}
+    .sp-tier{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+    .sp-card.final .sp-tier{color:var(--gold);}
+    .sp-card img{height:96px;width:auto;max-width:80%;object-fit:contain;}
+    .sp-card.final img{height:130px;}
+    .sp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.5px;}
+    .sp-link{font-size:11px;color:var(--muted);}
+    .sp-general{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:30px;}
+    .sp-general a,.sp-general span{display:flex;height:70px;opacity:.8;transition:opacity .2s;}
+    .sp-general a:hover{opacity:1;}
+    .sp-general img{height:100%;width:auto;object-fit:contain;}
     .sponsors-banner{padding:48px clamp(24px,8vw,120px);border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:20px;background:rgba(255,255,255,.015);}
     .sponsors-banner-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
     .sponsors-banner-logos{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
@@ -725,6 +751,12 @@
       .sanction-card{padding:16px;}
       .sanction-player{font-size:16px;}
       .sponsors-banner{padding:32px 16px;}
+      .sponsors-section{padding:40px 16px 48px;}
+      .sp-featured{grid-template-columns:1fr;}
+      .sp-card.final img{height:110px;}
+      .sp-general{gap:22px;}
+      .sp-general a,.sp-general span{height:48px;}
+
       .contact-grid{grid-template-columns:1fr;gap:20px;}
       .contact-row{grid-template-columns:1fr;}
       .contact-card{padding:18px;}
@@ -811,12 +843,8 @@
   </div>
   <div class="div-sel-sponsors">
     <div class="div-sel-sponsors-label">Auspicios</div>
-    <div class="div-sel-sponsors-logos">
-      <div class="sponsor-logo-wrap"><img src="images/premios pais.png" alt="Auspicio 1" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 1</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="logos/mattre.png" alt="Auspicio 2" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 2</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="images/painland.png" alt="Auspicio 3" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 3</div>'"></div>
+    <div class="div-sel-sponsors-logos" id="div-sel-sponsors-logos"></div>
     </div>
-  </div>
 </div>
 
 <!-- ══ MODAL LOGIN ══ -->
@@ -1189,7 +1217,6 @@
         <ul class="contact-list">
           <li>💡 Ideas para mejorar la liga o la página</li>
           <li>📅 Dudas de horarios, fixture o resultados</li>
-          <li>🤝 Auspicios y colaboraciones</li>
         </ul>
       </div>
       <form class="contact-card reveal" id="contact-form" onsubmit="sendContact(event)" novalidate>
@@ -1214,15 +1241,19 @@
         </div>
       </form>
     </div>
-  </section>
-  <div class="sponsors-banner" id="sponsors-banner">
-    <div class="sponsors-banner-label">Auspicios</div>
-    <div class="sponsors-banner-logos">
-      <div class="sponsor-logo-wrap"><img src="images/premios pais.png" alt="Auspicio 1" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 1</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="logos/mattre.png" alt="Auspicio 2" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 2</div>'"></div>
-      <div class="sponsor-logo-wrap"><img src="images/painland.png" alt="Auspicio 3" onerror="this.parentElement.innerHTML='<div class=\'sponsor-placeholder\'>Auspicio 3</div>'"></div>
+    <div class="contact-sponsor reveal">
+      <div class="cs-text">
+        <div class="cs-kicker">🤝 Auspicios</div>
+        <div class="cs-title">¿Tu marca quiere ser parte de la liga?</div>
+        <p>Descarga nuestro kit con los números de la liga y las formas de participar en la gran final.</p>
+      </div>
+      <div class="cs-btns">
+        <a class="cs-btn gold" href="kit-auspicio-2026.pdf" target="_blank" rel="noopener">Descargar kit</a>
+        <button type="button" class="cs-btn" onclick="contactAboutSponsoring()">Escribir sobre auspicio</button>
+      </div>
     </div>
-  </div>
+  </section>
+  <section class="sponsors-section" id="sponsors-banner"></section>
   <footer id="footer-root"></footer>
 </main>
 
@@ -1383,6 +1414,7 @@ async function renderSchedStrip() {
 }
 
 if (!_savedDivision) renderSchedStrip();
+loadSponsors();
 setInterval(renderSchedStrip, 15000);
 
 function rowToGame(row) {
@@ -1620,6 +1652,65 @@ function renderStandings() {
   <div class="legend-item"><span class="legend-bar" style="background:var(--gold)"></span>Clasifican a Playoffs (Top 8)</div>
   ${Object.keys(math).length ? '<div class="legend-item"><span class="po-badge in" style="margin:0">✓</span>Clasificado matemáticamente</div>' : ''}
 </div>`;
+}
+
+/* ══ AUSPICIADORES ══
+   Vienen de la tabla `sponsors` (name, logo, link, tier, sort, active). tier: 'final' (auspiciador
+   oficial de la Final), 'mvp', 'hidratacion' o 'general'. Si la tabla no existe o está vacía,
+   se muestran los auspiciadores de siempre. */
+// `label`: título sobre el logo; los que tienen label van destacados en tarjetas (el primero, en dorado).
+const SPONSOR_TIERS = { final: 'Auspiciador oficial de la Final', mvp: 'Premio MVP de la Final', hidratacion: 'Hidratación oficial' };
+const DEFAULT_SPONSORS = [
+  { name: 'Premios País', logo: 'images/premios pais.png', label: 'Auspiciador oficial de la premiación', link: 'https://www.instagram.com/premiospais/' },
+  { name: 'Painland',     logo: 'images/painland.png',     label: 'Kinesiología',                         link: 'https://www.instagram.com/painland_/' },
+];
+let SPONSORS = DEFAULT_SPONSORS;
+
+async function loadSponsors() {
+  const { data, error } = await _supabase.from('sponsors').select('*').eq('active', true).order('sort');
+  if (!error && data?.length) SPONSORS = data;
+  renderSponsors();
+  if (STATE.games.length) renderPlayoffsSection();
+  setTimeout(activateReveal, 50);
+}
+
+const finalSponsor = () => SPONSORS.find(sp => sp.tier === 'final') || null;
+
+function renderSponsors() {
+  const labelOf = sp => sp.label || SPONSOR_TIERS[sp.tier] || '';
+  const featured = SPONSORS.filter(labelOf);
+  const general = SPONSORS.filter(sp => !labelOf(sp));
+  const linkOpen = (sp, i) => sp.link ? `<a href="${sp.link}" target="_blank" rel="noopener" class="sp-card ${i === 0 ? 'final' : ''}">` : `<div class="sp-card ${i === 0 ? 'final' : ''}">`;
+  const linkClose = sp => sp.link ? '</a>' : '</div>';
+  // Links de Instagram se muestran como @usuario
+  const host = sp => { const l = (sp.link || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''); return l.startsWith('instagram.com/') ? '@' + l.slice(14) : l; };
+
+  document.getElementById('sponsors-banner').innerHTML = `
+    <div class="sp-head reveal">
+      <div class="sp-kicker">Gracias a quienes hacen posible la liga</div>
+      <div class="sp-title">Nuestros auspiciadores</div>
+    </div>
+    ${featured.length ? `<div class="sp-featured reveal" style="${featured.length < 3 ? `grid-template-columns:repeat(${featured.length},1fr);max-width:${featured.length * 360}px;` : ''}">
+      ${featured.map((sp, i) => `${linkOpen(sp, i)}
+        <div class="sp-tier">${labelOf(sp)}</div>
+        <img src="${sp.logo}" alt="${sp.name}">
+        <div class="sp-name">${sp.name}</div>
+        ${sp.link ? `<div class="sp-link">${host(sp)} ↗</div>` : ''}
+      ${linkClose(sp)}`).join('')}
+    </div>` : ''}
+    ${general.length ? `<div class="sp-general reveal">${general.map(sp => sp.link
+      ? `<a href="${sp.link}" target="_blank" rel="noopener" title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></a>`
+      : `<span title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></span>`).join('')}</div>` : ''}
+`;
+
+  const sel = document.getElementById('div-sel-sponsors-logos');
+  if (sel) sel.innerHTML = SPONSORS.map(sp => `<div class="sponsor-logo-wrap"><img src="${sp.logo}" alt="${sp.name}"></div>`).join('');
+}
+
+function contactAboutSponsoring() {
+  document.getElementById('ct-type').value = 'Auspicio';
+  document.getElementById('contact-root').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => document.getElementById('ct-name').focus(), 600);
 }
 
 /* ══ PLAYOFFS EN LA PORTADA ══
@@ -3725,16 +3816,36 @@ async function drawInstagramBracket() {
     ctx.fillText('POR DEFINIR', cx + cw / 2, cy + 160);
   }
 
-  // Footer
-  ctx.beginPath(); ctx.moveTo(56, H - 58); ctx.lineTo(W - 56, H - 58);
+  // Footer: auspiciador de la Final (si hay) o la web
+  ctx.beginPath(); ctx.moveTo(56, H - 70); ctx.lineTo(W - 56, H - 70);
   ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
-  ctx.textAlign = 'center'; ctx.font = '700 18px "Barlow Condensed", sans-serif';
-  ctx.letterSpacing = '4px'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W / 2, H - 26);
+  const sp = finalSponsor();
+  ctx.font = '700 18px "Barlow Condensed", sans-serif'; ctx.letterSpacing = '4px';
+  if (sp) {
+    ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillText('FINAL PRESENTADA POR', W / 2 - 10, H - 28);
+    const lw = await igDrawLogoFit(ctx, sp.logo, W / 2 + 6, H - 70, 62);
+    ctx.textAlign = 'left'; ctx.fillStyle = TEXT; ctx.letterSpacing = '1px'; ctx.font = '700 22px "Barlow Condensed", sans-serif';
+    ctx.fillText(sp.name.toUpperCase(), W / 2 + 18 + lw, H - 28);
+  } else {
+    ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillText('LIGA SAN CARLOS  ·  2026  ·  ligasancarloscc.cl', W / 2, H - 26);
+  }
   ctx.letterSpacing = '0px';
 }
 
 /* ── Canvas helpers ── */
+// Dibuja un logo a altura h manteniendo su proporción; devuelve el ancho usado.
+function igDrawLogoFit(ctx, src, x, y, h) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { const w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, x, y, w, h); resolve(w); };
+    img.onerror = () => resolve(0);
+    img.src = src;
+  });
+}
+
 function igDrawBackground(ctx, W, H) {
   ctx.fillStyle = '#08090C';
   ctx.fillRect(0, 0, W, H);
