@@ -417,6 +417,13 @@
     .contact-lead{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3vw,34px);letter-spacing:.5px;line-height:1.1;margin-bottom:12px;}
     .contact-intro p{color:#B6BAC5;font-size:15px;line-height:1.6;margin-bottom:18px;}
     .contact-list{list-style:none;display:flex;flex-direction:column;gap:10px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;color:var(--text);}
+    .contact-sponsor{margin-top:22px;padding:18px 20px;border:1px solid rgba(242,179,78,.45);border-radius:10px;background:radial-gradient(ellipse at top left,rgba(242,179,78,.14),transparent 70%),var(--card);}
+    .cs-kicker{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+    .cs-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.5px;line-height:1.05;margin:6px 0 6px;}
+    .contact-sponsor p{font-size:14px;color:#B6BAC5;line-height:1.5;margin:0 0 14px;}
+    .cs-btns{display:flex;gap:10px;flex-wrap:wrap;}
+    .cs-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 16px;border-radius:999px;text-decoration:none;cursor:pointer;border:1px solid rgba(255,255,255,.2);color:var(--text);background:none;}
+    .cs-btn.gold{background:var(--gold);color:#000;border-color:var(--gold);}
     .contact-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:14px;}
     .contact-card label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
     .contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -451,16 +458,6 @@
     .sp-general a,.sp-general span{display:flex;height:70px;opacity:.8;transition:opacity .2s;}
     .sp-general a:hover{opacity:1;}
     .sp-general img{height:100%;width:auto;object-fit:contain;}
-    .sp-cta{max-width:1100px;margin:30px auto 0;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 24px;border:1px dashed rgba(255,255,255,.16);border-radius:10px;}
-    .sp-cta-t{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1;}
-    .sp-cta-d{font-size:13px;color:var(--muted);margin-top:4px;}
-    .sp-cta-btns{display:flex;gap:10px;flex-wrap:wrap;}
-    .sp-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:11px 18px;border-radius:999px;text-decoration:none;cursor:pointer;border:1px solid rgba(255,255,255,.18);color:var(--text);background:none;}
-    .sp-btn.gold{background:var(--gold);color:#000;border-color:var(--gold);}
-    .po-presented{display:flex;align-items:center;gap:12px;margin:-18px 0 22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
-    .po-presented img{height:56px;width:auto;margin:-6px 0;}
-    .po-presented b{color:var(--text);letter-spacing:1px;font-size:14px;}
-
     .sponsors-banner{padding:48px clamp(24px,8vw,120px);border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:20px;background:rgba(255,255,255,.015);}
     .sponsors-banner-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
     .sponsors-banner-logos{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap;}
@@ -759,8 +756,7 @@
       .sp-card.final img{height:110px;}
       .sp-general{gap:22px;}
       .sp-general a,.sp-general span{height:48px;}
-      .sp-cta{flex-direction:column;align-items:flex-start;}
-      .po-presented{margin:-8px 0 18px;}
+
       .contact-grid{grid-template-columns:1fr;gap:20px;}
       .contact-row{grid-template-columns:1fr;}
       .contact-card{padding:18px;}
@@ -1221,8 +1217,16 @@
         <ul class="contact-list">
           <li>💡 Ideas para mejorar la liga o la página</li>
           <li>📅 Dudas de horarios, fixture o resultados</li>
-          <li>🤝 Auspicios y colaboraciones</li>
         </ul>
+        <div class="contact-sponsor">
+          <div class="cs-kicker">🤝 Auspicios</div>
+          <div class="cs-title">¿Tu marca quiere ser parte de la liga?</div>
+          <p>Descarga nuestro kit con los números de la liga y las formas de participar en la gran final.</p>
+          <div class="cs-btns">
+            <a class="cs-btn gold" href="kit-auspicio-2026.pdf" target="_blank" rel="noopener">Descargar kit</a>
+            <button type="button" class="cs-btn" onclick="contactAboutSponsoring()">Escribir sobre auspicio</button>
+          </div>
+        </div>
       </div>
       <form class="contact-card reveal" id="contact-form" onsubmit="sendContact(event)" novalidate>
         <div class="contact-row">
@@ -1658,7 +1662,6 @@ const DEFAULT_SPONSORS = [
   { name: 'Mattre',       logo: 'logos/mattre.png',        tier: 'general' },
   { name: 'Painland',     logo: 'images/painland.png',     tier: 'general' },
 ];
-const SPONSOR_KIT_URL = 'kit-auspicio-2026.pdf';
 let SPONSORS = DEFAULT_SPONSORS;
 
 async function loadSponsors() {
@@ -1694,16 +1697,7 @@ function renderSponsors() {
     ${general.length ? `<div class="sp-general reveal">${general.map(sp => sp.link
       ? `<a href="${sp.link}" target="_blank" rel="noopener" title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></a>`
       : `<span title="${sp.name}"><img src="${sp.logo}" alt="${sp.name}"></span>`).join('')}</div>` : ''}
-    <div class="sp-cta reveal">
-      <div>
-        <div class="sp-cta-t">¿Quieres auspiciar la Liga San Carlos?</div>
-        <div class="sp-cta-d">18 equipos, casi 300 jugadores y una comunidad activa en Instagram. Conoce cómo participar en la gran final.</div>
-      </div>
-      <div class="sp-cta-btns">
-        <a class="sp-btn gold" href="${SPONSOR_KIT_URL}" target="_blank" rel="noopener">Descargar kit</a>
-        <button class="sp-btn" onclick="contactAboutSponsoring()">Escríbenos →</button>
-      </div>
-    </div>`;
+`;
 
   const sel = document.getElementById('div-sel-sponsors-logos');
   if (sel) sel.innerHTML = SPONSORS.map(sp => `<div class="sponsor-logo-wrap"><img src="${sp.logo}" alt="${sp.name}"></div>`).join('');
@@ -1781,7 +1775,6 @@ function renderPlayoffsSection() {
       <button class="ig-gen-btn" onclick="openInstagramModal('bracket')">📸 Para Instagram</button>
       <a href="playoff.html" class="playoff-bracket-btn"><span class="pb-icon">🏆</span>Cuadro completo<span class="pb-arrow">→</span></a>
     </div>
-    ${finalSponsor() ? `<div class="po-presented reveal">Final presentada por <img src="${finalSponsor().logo}" alt=""><b>${finalSponsor().name}</b></div>` : ''}
     ${projected ? `<div class="mb-banner reveal"><strong>📊 Proyección</strong> · ${pending
       ? `Así serían los cruces si la fase regular terminara hoy. ${pending === 1 ? 'Queda 1 jornada' : `Quedan ${pending} jornadas`}.`
       : 'Fase regular terminada: estos son los cruces según la tabla final, por confirmar.'}</div>` : ''}
