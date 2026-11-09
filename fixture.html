@@ -101,6 +101,7 @@
     .date-edit { display: none; margin-top: 14px; gap: 10px; align-items: center; flex-wrap: wrap; }
     .date-edit.open { display: flex; }
     .date-edit input { width: auto; }
+    .round-swap-help { flex-basis: 100%; font-size: 12px; color: var(--muted); line-height: 1.5; }
 
     /* ── Fixture ── */
     .round-card { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 14px; overflow: hidden; }
@@ -257,6 +258,10 @@
         <label>Cancha</label>
         <input id="edit-court" list="court-options" placeholder="Cancha 1" />
       </div>
+    </div>
+    <div class="form-group" id="edit-date-group">
+      <label>Fecha</label>
+      <input type="date" id="edit-date" />
     </div>
     <div class="modal-error" id="edit-err"></div>
     <div class="modal-actions">
@@ -572,11 +577,18 @@ function renderStatus() {
       <div class="btn-row">
         <button class="btn btn-red" onclick="suspendRound(${cur})">⛈ Suspender jornada</button>
         <button class="btn btn-outline" onclick="toggleDateEdit()">📅 Cambiar fecha</button>
+        ${canSwapRound(cur) ? '<button class="btn btn-outline" onclick="toggleRoundSwap()">🔁 Cambiar por otra jornada</button>' : ''}
       </div>
       <div class="date-edit" id="date-edit">
         <input type="date" id="round-date-input" value="${dates[0] || ''}" />
         <button class="btn btn-gold btn-sm" onclick="saveRoundDate(${cur})">Guardar fecha</button>
-      </div>`;
+      </div>
+      ${canSwapRound(cur) ? `<div class="date-edit" id="round-swap">
+        <select id="round-swap-target" style="width:auto;">${pendingRegularRounds().map(r =>
+          `<option value="${r}">${roundName(r)}</option>`).join('')}</select>
+        <button class="btn btn-gold btn-sm" onclick="swapRound(${cur})">Cambiar</button>
+        <div class="round-swap-help">La jornada elegida se publica para el ${fecha} y ${roundName(cur)} vuelve a quedar oculta: se publica sola después, cuando le toque.</div>
+      </div>` : ''}`;
     return;
   }
 
@@ -700,7 +712,50 @@ async function suspendRound(round) {
   showToast(`✓ ${roundShort(round)} reprogramada para el ${fechaTexto(nueva)}`);
 }
 
-function toggleDateEdit() { document.getElementById('date-edit').classList.toggle('open'); }
+function toggleDateEdit() {
+  document.getElementById('round-swap')?.classList.remove('open');
+  document.getElementById('date-edit').classList.toggle('open');
+}
+
+function toggleRoundSwap() {
+  document.getElementById('date-edit').classList.remove('open');
+  document.getElementById('round-swap').classList.toggle('open');
+}
+
+// Jornadas de fase regular que siguen ocultas en el fixture.
+function pendingRegularRounds() {
+  return [...new Set(GAMES.filter(g => g.type === 'scheduled' && !isPlayoff(g)).map(g => g.round))].sort((a, b) => a - b);
+}
+
+// Solo se cambia una jornada de fase regular que aún no tiene partidos jugados ni en vivo.
+function canSwapRound(round) {
+  return !isPlayoff(round)
+    && GAMES.filter(g => g.round === round).every(g => g.type === 'upcoming')
+    && pendingRegularRounds().length > 0;
+}
+
+// Cambia el orden de dos jornadas: la oculta elegida se publica en la fecha de la jornada en curso,
+// y la jornada en curso vuelve a quedar oculta. Las ocultas se publican después por número
+// de jornada (de menor a mayor), igual que siempre.
+async function swapRound(cur) {
+  const target = +document.getElementById('round-swap-target').value;
+  const curList = GAMES.filter(g => g.round === cur);
+  const newList = GAMES.filter(g => g.round === target && g.type === 'scheduled');
+  if (!canSwapRound(cur) || !newList.length) { showToast('⚠ No se puede cambiar esta jornada', true); return; }
+  const iso = curList.map(g => g.game_date).filter(Boolean).sort()[0] || proximoDiaJuego(hoyISO());
+  if (!confirm(`¿Jugar ${roundName(target)} el ${fechaTexto(iso)} en vez de ${roundName(cur)}?\n\n` +
+    `${roundName(target)} queda publicada con sus horarios y canchas. ${roundName(cur)} vuelve a quedar oculta y se publica sola después.`)) return;
+  const ok = await updateRows([
+    ...newList.map(g => ({ ...datedFields(g, iso), type: 'upcoming', rescheduled: false })),
+    ...curList.map(g => ({ id: g.id, type: 'scheduled', game_date: null, rescheduled: false, date: 'Por definir' })),
+  ]);
+  if (!ok) return;
+  const { error } = await _supabase.from('settings').upsert(
+    { key: `round_${activeDivision}`, value: String(target) }, { onConflict: 'key' });
+  if (error) showToast('⚠ Cambiada, pero no se actualizó la jornada actual: ' + error.message, true);
+  else showToast(`✓ ${roundShort(target)} se juega el ${fechaTexto(iso)}; ${roundShort(cur)} queda para después`);
+  await loadGames();
+}
 
 async function saveRoundDate(round) {
   const iso = document.getElementById('round-date-input').value;
@@ -749,6 +804,9 @@ function openEdit(id) {
   document.getElementById('edit-home').disabled = document.getElementById('edit-away').disabled = isPlayoff(g);
   document.getElementById('edit-time').value = horaDe(g);
   document.getElementById('edit-court').value = canchaCorta(g.venue);
+  // La fecha solo existe en partidos publicados; las jornadas ocultas la reciben al publicarse.
+  document.getElementById('edit-date-group').style.display = g.type === 'upcoming' ? '' : 'none';
+  document.getElementById('edit-date').value = g.game_date || '';
   document.getElementById('edit-err').textContent = '';
   openModal('edit-modal');
 }
@@ -767,8 +825,9 @@ async function saveEdit() {
   const dup = duplicatedTeams([...others, { home, away }]);
   if (dup.length) { err.textContent = `${dup.map(teamName).join(', ')} ya juega en ${roundName(g)}.`; return; }
 
+  const fecha = g.type === 'upcoming' ? (document.getElementById('edit-date').value || g.game_date) : g.game_date;
   const fields = { home, away, venue, slot_time: hora || null };
-  if (g.game_date) fields.date = fechaTexto(g.game_date, hora);
+  if (fecha) Object.assign(fields, { game_date: fecha, date: fechaTexto(fecha, hora) });
   const { error } = await _supabase.from(divCfg().dbTable).update(fields).eq('id', g.id);
   if (error) { err.textContent = 'Error: ' + error.message; return; }
   closeModal('edit-modal');
