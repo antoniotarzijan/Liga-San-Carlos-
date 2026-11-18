@@ -311,6 +311,32 @@
     .pv-btn.live { background: var(--red); color: #fff; }
     .pv-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 18px 16px; }
 
+    /* ── Pronósticos ("la polla") ── */
+    .pv-vote { margin: 2px 18px 8px; padding: 14px 16px 16px; border-radius: 8px; border: 1px solid rgba(242,179,78,.3); background: rgba(242,179,78,.05); }
+    .pv-vote h4 { margin: 0 0 10px !important; color: var(--gold) !important; }
+    .vote-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .vote-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.04); color: var(--text); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .5px; cursor: pointer; transition: border-color .2s, background .2s, transform .1s; min-width: 0; }
+    .vote-btn:hover { border-color: rgba(242,179,78,.6); }
+    .vote-btn:active { transform: scale(.98); }
+    .vote-btn img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
+    .vote-btn span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .vote-btn.mine { border-color: var(--gold); background: rgba(242,179,78,.16); }
+    .vote-btn.mine::after { content: '✓'; color: var(--gold); }
+    .vote-btn:disabled { cursor: default; opacity: .6; }
+    .vote-hint { margin-top: 10px; text-align: center; font-size: 12px; color: var(--muted); }
+    .vote-res { margin-top: 12px; }
+    .vote-bar { display: flex; height: 30px; border-radius: 6px; overflow: hidden; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; }
+    .vote-bar div { display: flex; align-items: center; padding: 0 10px; white-space: nowrap; min-width: 0; transition: width .6s ease; }
+    .vote-bar .a { background: var(--gold); color: #08090C; justify-content: flex-start; }
+    .vote-bar .b { background: rgba(255,255,255,.14); color: var(--text); justify-content: flex-end; }
+    .vote-names { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #C9CDD6; gap: 10px; }
+    .vote-names span:last-child { text-align: right; }
+    .matchup-vote { display: flex; height: 18px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: .5px; border-top: 1px solid var(--border); }
+    .matchup-vote div { display: flex; align-items: center; padding: 0 7px; white-space: nowrap; overflow: hidden; }
+    .matchup-vote .a { background: rgba(242,179,78,.75); color: #08090C; }
+    .matchup-vote .b { background: rgba(255,255,255,.08); color: #C9CDD6; justify-content: flex-end; }
+    .matchup-cta.vote { color: #08090C; background: var(--gold); opacity: 1; padding: 1px 6px; border-radius: 3px; }
+
     /* ── Jugador de la ronda ── */
     .potr { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding: 18px 20px; margin-bottom: 18px; border-radius: 10px; border: 1px solid rgba(242,179,78,.35); background: linear-gradient(120deg, rgba(242,179,78,.14), rgba(242,179,78,.02) 60%); }
     .potr .lg { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
@@ -1017,7 +1043,7 @@ async function loadDivision(div) {
   });
   const { data: pl } = await _sb.from(cfg.playersTable).select('*');
   const table = regularStandings(games, Object.keys(cfg.teams));
-  divData[div] = { games, playoffs, bracket, projected: !confirmed, pendingRounds, stats, players: pl || [], table };
+  divData[div] = { games, playoffs, bracket, projected: !confirmed, pendingRounds, stats, players: pl || [], table, votes: await loadVotes(div) };
 }
 
 /* ═══ SWITCH DIV ═══ */
@@ -1113,12 +1139,16 @@ function renderMatchup(m, cls = '') {
   const isSF    = m.round === 'SF';
   const cardCls = isFinal ? 'final champion-match' : isSF ? 'semifinal' : '';
   const open = m.team1 && m.team2;
-  const cta = !open ? '' : m.live ? '<span class="matchup-live">● En vivo</span>' : `<span class="matchup-cta">${m.winner ? 'Detalle' : 'Previa'} →</span>`;
+  const canVote = open && voteOpen(m) && !myVote(m);
+  const cta = !open ? '' : m.live ? '<span class="matchup-live">● En vivo</span>'
+    : canVote ? '<span class="matchup-cta vote">Vota →</span>'
+    : `<span class="matchup-cta">${m.winner ? 'Detalle' : 'Previa'} →</span>`;
   const attrs = open ? ` onclick="openPreview('${m.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openPreview('${m.id}')"` : '';
   return `<div${attrs} class="matchup ${cardCls} ${cls} ${open ? 'clickable' : ''} ${m.live ? 'is-live' : ''}">
     <div class="matchup-round-tag"><span>${m.label}</span>${cta}</div>
     ${renderTeamRow(m.team1, m.score1, !!m.winner && m.winner === m.team1, m.seeds?.[0])}
     ${renderTeamRow(m.team2, m.score2, !!m.winner && m.winner === m.team2, m.seeds?.[1])}
+    ${voteBarSmall(m)}
     ${m.mvp ? `<div class="matchup-mvp" title="MVP: ${m.mvp}">⭐ MVP <b>${m.mvp}</b>${m.mvpPts != null ? ` · ${m.mvpPts} pts` : ''}</div>` : ''}
   </div>`;
 }
@@ -1496,6 +1526,110 @@ function teamProfile(d, id) {
            last5: res.slice(-5), streak: res.length ? { n: streak, won: res[res.length - 1].won } : null, top, path };
 }
 
+/* ═══ PRONÓSTICOS ("la polla") ═══
+   Un voto por celular y por partido (código anónimo guardado en el navegador).
+   Se puede cambiar hasta que el partido empiece. Los porcentajes se ven
+   después de votar, o cuando la votación ya cerró. Ver supabase/pronosticos.sql. */
+const VOTE_KEY = 'lsc_votos_2026';
+function deviceId() {
+  try {
+    let id = localStorage.getItem('lsc_device');
+    if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => (Math.random() * 16 | 0).toString(16)); localStorage.setItem('lsc_device', id); }
+    return id;
+  } catch { return window._lscDevice ||= (crypto.randomUUID ? crypto.randomUUID() : null); }
+}
+function myVotes() { try { return JSON.parse(localStorage.getItem(VOTE_KEY) || '{}'); } catch { return window._lscVotes ||= {}; } }
+function saveMyVote(key, team) {
+  const v = myVotes(); v[key] = team;
+  try { localStorage.setItem(VOTE_KEY, JSON.stringify(v)); } catch { window._lscVotes = v; }
+}
+const voteKey = m => `${activeDivision}:${m.game?.id}`;
+const myVote = m => m.game ? myVotes()[voteKey(m)] || null : null;
+// Se vota en cruces confirmados que todavía no empiezan.
+const voteOpen = m => !!(m.game && m.team1 && m.team2 && (m.game.type === 'scheduled' || m.game.type === 'upcoming'));
+
+async function loadVotes(div) {
+  const { data, error } = await _sb.rpc('lsc_votos', { p_division: div });
+  const out = {};
+  if (!error) (data || []).forEach(r => { (out[r.game_id] ||= {})[r.team] = +r.votos; });
+  return out;
+}
+
+function voteCounts(m) {
+  const c = divData[activeDivision]?.votes?.[m.game?.id] || {};
+  const a = c[m.team1] || 0, b = c[m.team2] || 0, total = a + b;
+  const pa = total ? Math.round(a / total * 100) : 50;
+  return { a, b, total, pa, pb: 100 - pa };
+}
+
+// Barrita en la tarjeta del cuadro: solo si ya votaste o si la votación cerró.
+function voteBarSmall(m) {
+  if (!m.game || !m.team1 || !m.team2) return '';
+  const { total, pa, pb } = voteCounts(m);
+  if (!total || (voteOpen(m) && !myVote(m))) return '';
+  const t = divTeams();
+  return `<div class="matchup-vote" title="Pronóstico de la gente · ${total} votos">
+    <div class="a" style="width:${pa}%">${pa >= 25 ? `${pa}% ${t[m.team1]?.abbr || ''}` : ''}</div>
+    <div class="b" style="width:${pb}%">${pb >= 25 ? `${t[m.team2]?.abbr || ''} ${pb}%` : ''}</div></div>`;
+}
+
+function voteBlockHTML(m) {
+  if (!m.game || !m.team1 || !m.team2) return '';
+  const t = divTeams();
+  const open = voteOpen(m), mine = myVote(m);
+  const { total, pa, pb } = voteCounts(m);
+  const btn = id => {
+    const tm = t[id];
+    return `<button class="vote-btn ${mine === id ? 'mine' : ''}" ${open ? `onclick="castVote('${m.id}','${id}')"` : 'disabled'}>
+      ${tm?.logo ? `<img src="${tm.logo}" alt="">` : ''}<span>${tm?.name || id}</span></button>`;
+  };
+  const showRes = !open || mine;
+  const res = showRes ? (total
+    ? `<div class="vote-res"><div class="vote-bar">
+        <div class="a" style="width:${Math.max(pa, 12)}%">${pa}%</div><div class="b" style="width:${Math.max(pb, 12)}%">${pb}%</div></div>
+        <div class="vote-names"><span>${t[m.team1]?.name || m.team1}</span><span>${t[m.team2]?.name || m.team2}</span></div></div>`
+    : '<div class="vote-hint">Todavía no hay votos.</div>') : '';
+  let hint;
+  if (!open) {
+    const right = m.winner && total ? Math.round((voteCounts(m)[m.winner === m.team1 ? 'a' : 'b']) / total * 100) : null;
+    hint = m.winner
+      ? `Votación cerrada · ${total} ${total === 1 ? 'voto' : 'votos'}${right != null ? ` · acertó el ${right}%` : ''}${mine ? (mine === m.winner ? ' · ¡Acertaste! 🎯' : ' · Esta vez no 😅') : ''}`
+      : `Votación cerrada · ${total} ${total === 1 ? 'voto' : 'votos'}`;
+  } else if (mine) {
+    hint = `Votaste por <b style="color:var(--gold)">${t[mine]?.name || mine}</b> · ${total} ${total === 1 ? 'voto' : 'votos'} · Puedes cambiarlo hasta que empiece el partido.`;
+  } else {
+    hint = 'Vota para ver qué piensa la gente.';
+  }
+  return `<div class="pv-vote"><h4>🗳 ¿Quién gana?</h4>
+    <div class="vote-btns">${btn(m.team1)}${btn(m.team2)}</div>
+    ${res}<div class="vote-hint">${hint}</div></div>`;
+}
+
+let _voting = false;
+async function castVote(slot, team) {
+  if (_voting) return;
+  const d = divData[activeDivision];
+  const m = d?.bracket.find(x => x.id === slot);
+  if (!m || !voteOpen(m)) return;
+  const prev = myVote(m);
+  if (prev === team) return;
+  _voting = true;
+  const { error } = await _sb.rpc('lsc_votar', { p_division: activeDivision, p_game_id: m.game.id, p_device: deviceId(), p_team: team });
+  _voting = false;
+  if (error) { showToast('⚠ ' + (error.message.includes('cerró') ? 'La votación de este partido ya cerró' : 'No se pudo guardar el voto')); return; }
+  saveMyVote(voteKey(m), team);
+  // Actualiza el conteo local al tiro y luego trae el real.
+  const c = (d.votes[m.game.id] ||= {});
+  if (prev) c[prev] = Math.max(0, (c[prev] || 1) - 1);
+  c[team] = (c[team] || 0) + 1;
+  document.getElementById('pv-vote').innerHTML = voteBlockHTML(m);
+  renderBracket();
+  showToast(prev ? '✓ Voto cambiado' : '✓ ¡Voto guardado!');
+  d.votes = await loadVotes(activeDivision);
+  if (document.getElementById('pv-overlay').classList.contains('open')) document.getElementById('pv-vote').innerHTML = voteBlockHTML(m);
+  renderBracket();
+}
+
 function openPreview(slot) {
   const d = divData[activeDivision]; const teams = divTeams();
   const m = d?.bracket.find(x => x.id === slot); if (!m || !m.team1 || !m.team2) return;
@@ -1549,6 +1683,7 @@ function openPreview(slot) {
     <div class="pv-head"><div><div class="t">${m.label}</div><div class="d">${when || (d.projected ? 'Cruce proyectado según la tabla actual' : 'Fecha por confirmar')}</div></div>
       <button class="pv-close" onclick="closePreview()" aria-label="Cerrar">×</button></div>
     <div class="pv-teams">${team(A, pa, m.seeds?.[0])}${mid}${team(B, pb, m.seeds?.[1])}</div>
+    <div id="pv-vote">${voteBlockHTML(m)}</div>
     <div class="pv-sec"><h4>Fase regular</h4>
       ${rows.map(rowHTML).join('')}
       <div class="pv-row"><div class="v">${form(pa)}</div><div class="l">Últimos 5</div><div class="v">${form(pb)}</div></div>
