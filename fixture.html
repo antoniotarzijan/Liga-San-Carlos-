@@ -93,6 +93,21 @@
 
     /* ── Estado actual ── */
     .status-card { background: var(--card); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 22px; }
+    .votes-card { margin-top: 16px; }
+    .votes-card[hidden] { display: none; }
+    .votes-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 16px; }
+    .votes-kpi { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+    .votes-kpi .n { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; color: var(--gold); }
+    .votes-kpi .l { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+    .votes-row { display: grid; grid-template-columns: 1fr 70px; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); font-size: 14px; }
+    .votes-row .names { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 12px; color: var(--muted); }
+    .votes-row .names b { color: var(--text); }
+    .votes-row .bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; }
+    .votes-row .bar div { height: 100%; }
+    .votes-row .bar .a { background: var(--gold); color: #08090C; }
+    .votes-row .bar .b { background: rgba(255,255,255,.12); justify-content: flex-end; }
+    .votes-row .tot { text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--muted); }
+    @media (max-width: 700px) { .votes-kpis { grid-template-columns: repeat(2, 1fr); } }
     .status-kicker { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
     .status-title { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 1px; margin: 4px 0 6px; }
     .status-title .date { color: var(--gold); }
@@ -221,6 +236,7 @@
     </div>
 
     <div class="status-card" id="status-card"></div>
+    <div class="status-card votes-card" id="votes-card" hidden></div>
 
     <p class="section-subtitle">Fixture de la temporada</p>
     <div id="fixture-list"></div>
@@ -556,6 +572,45 @@ function duplicatedTeams(list) {
 function render() {
   renderStatus();
   renderFixture();
+  renderVotes();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PRONÓSTICOS: resumen de votos de la polla de playoffs (solo admin).
+   Ver lsc_votos_admin() en supabase/pronosticos.sql.
+══════════════════════════════════════════════════════════════ */
+async function renderVotes() {
+  const el = document.getElementById('votes-card');
+  const po = GAMES.filter(g => isPlayoff(g) && g.home && g.away);
+  if (!po.length) { el.hidden = true; return; }
+  const div = activeDivision;
+  const { data, error } = await _supabase.rpc('lsc_votos_admin', { p_division: div });
+  if (div !== activeDivision) return;
+  el.hidden = false;
+  if (error || !data) {
+    el.innerHTML = `<div class="status-kicker">Pronósticos</div><div class="status-text">No se pudo cargar el resumen de votos${error ? ': ' + error.message : ''}.</div>`;
+    return;
+  }
+  const byGame = {};
+  (data.partidos || []).forEach(r => { (byGame[r.game_id] ||= {})[r.team] = r.votos; });
+  const rows = po.slice().sort((a, b) => a.round - b.round || (a.bracket_slot || '').localeCompare(b.bracket_slot || '')).map(g => {
+    const c = byGame[g.id] || {}, a = c[g.home] || 0, b = c[g.away] || 0, t = a + b;
+    const pa = t ? Math.round(a / t * 100) : 50;
+    return `<div class="votes-row"><div>${roundShort(g)} · <strong>${teamName(g.home)}</strong> vs <strong>${teamName(g.away)}</strong>
+        <div class="bar"><div class="a" style="width:${pa}%"></div><div class="b" style="width:${100 - pa}%"></div></div>
+        <div class="names"><span>${teamName(g.home)} · <b>${a}</b>${t ? ` (${pa}%)` : ''}</span><span>${t ? `(${100 - pa}%) ` : ''}<b>${b}</b> · ${teamName(g.away)}</span></div></div>
+      <div class="tot">${t} ${t === 1 ? 'voto' : 'votos'}</div></div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="status-kicker">Pronósticos · ${divCfg().label}</div>
+    <div class="votes-kpis">
+      <div class="votes-kpi"><div class="n">${data.personas}</div><div class="l">Personas votaron</div></div>
+      <div class="votes-kpi"><div class="n">${data.votos}</div><div class="l">Votos en total</div></div>
+      <div class="votes-kpi"><div class="n">${data.personas_hoy}</div><div class="l">Personas hoy</div></div>
+      <div class="votes-kpi"><div class="n">${data.votos_hoy}</div><div class="l">Votos hoy</div></div>
+    </div>
+    ${rows}
+    <div class="btn-row" style="margin-top:12px;"><button class="btn btn-outline btn-sm" onclick="renderVotes()">↻ Actualizar</button></div>`;
 }
 
 function renderStatus() {
