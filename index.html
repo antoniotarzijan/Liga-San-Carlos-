@@ -180,6 +180,18 @@
     .hero-badges{display:flex;gap:16px;margin-top:24px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;animation:fadeUp .6s .3s ease both;}
     .hero-change-div-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 26px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.03);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
     .hero-change-div-btn:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.06);}
+    .hero-po-cta{display:inline-flex;align-items:center;gap:16px;padding:10px 26px 10px 10px;border-radius:14px;border:2px solid transparent;background:linear-gradient(rgba(14,15,18,.88),rgba(14,15,18,.88)) padding-box,linear-gradient(45deg,#8a6a2e,#f2b34e,#ffe2a3,#f2b34e) border-box;color:var(--text);text-decoration:none;box-shadow:0 10px 34px -10px rgba(242,179,78,.55);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+    .hero-po-cta::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,226,163,.18),transparent);animation:poShine 3.8s ease-in-out infinite;pointer-events:none;}
+    @keyframes poShine{0%,55%{left:-60%;}100%{left:130%;}}
+    .hero-po-cta:hover{transform:translateY(-2px);box-shadow:0 14px 40px -10px rgba(242,179,78,.75);}
+    .hero-po-cta .po-ic{width:54px;height:54px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(45deg,#8a6a2e,#f2b34e,#ffe2a3);font-size:28px;flex-shrink:0;}
+    .hero-po-cta .po-tx{display:flex;flex-direction:column;align-items:flex-start;text-align:left;}
+    .hero-po-cta .po-t{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:2px;color:#ffe2a3;}
+    .hero-po-cta .po-s{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.6px;text-transform:uppercase;color:var(--text);opacity:.85;margin-top:3px;}
+    .hero-po-cta .po-s .live{color:#F87171;}
+    .hero-po-cta .po-ar{font-size:26px;color:#f2b34e;margin-left:6px;transition:transform .2s;}
+    .hero-po-cta:hover .po-ar{transform:translateX(4px);}
+    .hero-badges .hero-po-cta + .hero-change-div-btn{align-self:center;}
     .badge{padding:10px 22px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;border:none;}
     .badge-primary{background:var(--red);color:#fff;}
     .badge-primary:hover{background:#c8001a;transform:translateY(-2px);}
@@ -691,6 +703,11 @@
       .hero-sub{font-size:13px;max-width:100%;}
       .hero-meta-row{font-size:12px;gap:10px;}
       .hero-badges{gap:10px;}
+      .hero-po-cta{width:100%;padding:8px 16px 8px 8px;gap:12px;}
+      .hero-po-cta .po-ic{width:46px;height:46px;font-size:24px;}
+      .hero-po-cta .po-t{font-size:28px;}
+      .hero-po-cta .po-s{font-size:11.5px;letter-spacing:1px;}
+      .hero-po-cta .po-ar{margin-left:auto;}
       .badge{padding:9px 16px;font-size:13px;}
       .hero-stats{gap:24px;margin-top:36px;}
       .stat-num{font-size:34px;}
@@ -1449,7 +1466,7 @@ function rowToGame(row) {
     homeScore:row.home_score, awayScore:row.away_score,
     mvp:row.mvp||'',
     bracketSlot:row.bracket_slot||null, homeSeed:row.home_seed??null, awaySeed:row.away_seed??null,
-    rescheduled:!!row.rescheduled,
+    rescheduled:!!row.rescheduled, gameDate:row.game_date||null,
     walkover:row.walkover||null,
   };
 }
@@ -1597,6 +1614,7 @@ function renderHero() {
           <span class="hero-meta-item">📍 ${league.venue}</span>
         </div>
         <div class="hero-badges">
+          ${heroPlayoffCTA()}
           <button class="hero-change-div-btn" onclick="selectDivision(activeDivision==='primera'?'segunda':'primera')">⇄ Cambiar División</button>
         </div>
       </div>
@@ -1606,6 +1624,48 @@ function renderHero() {
         <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">Campeón</div></div>
       </div>
     </div>`;
+}
+
+// Botón grande a playoffs en el hero: aparece en la recta final de la fase regular
+// y durante los playoffs, con el estado del momento.
+const HERO_GAME_DAY = { primera: 4, segunda: 2 };   // 4 = jueves, 2 = martes
+function heroPlayoffCTA() {
+  const b = playoffBracket();
+  const teams = divTeams();
+  const po = STATE.games.filter(isPlayoff);
+  const active = po.filter(g => g.type === 'upcoming' || g.type === 'live');
+  let sub = '';
+  if (b.champ) {
+    sub = `🏆 Campeón: ${teams[b.champ]?.name || b.champ}`;
+  } else if (active.length) {
+    const r = Math.min(...active.map(g => g.round));
+    const list = active.filter(g => g.round === r);
+    const fecha = (list[0].date || '').split('·')[0].trim();
+    sub = list.some(g => g.type === 'live')
+      ? `<span class="live">● En vivo</span> · ${roundName(r)}`
+      : `${roundName(r)}${fecha && fecha !== 'Por definir' ? ' · ' + fecha : ''}`;
+  } else if (!b.pendingRounds && STATE.games.some(g => !isPlayoff(g))) {
+    const last = STATE.games.filter(g => g.type === 'finished' && g.gameDate).map(g => g.gameDate).sort().pop();
+    let txt = 'Comienzan pronto';
+    if (last) {
+      const [y, m, d] = last.split('-').map(Number), dt = new Date(y, m - 1, d);
+      do { dt.setDate(dt.getDate() + 1); } while (dt.getDay() !== HERO_GAME_DAY[activeDivision]);
+      if (dt >= new Date(new Date().toDateString())) {
+        const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+        const MES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        txt = `Comienzan el ${DIAS[dt.getDay()]} ${dt.getDate()} ${MES[dt.getMonth()]}`;
+      }
+    }
+    sub = `${txt} · Mira los cruces`;
+  } else if (b.pendingRounds > 0 && b.pendingRounds <= 2 && !b.empty) {
+    sub = 'Así irían los cruces hoy';
+  } else {
+    return '';
+  }
+  return `<a href="playoff.html" class="hero-po-cta">
+    <span class="po-ic">🏆</span>
+    <span class="po-tx"><span class="po-t">Playoffs ${league.season}</span><span class="po-s">${sub}</span></span>
+    <span class="po-ar">→</span></a>`;
 }
 
 // Clasificado / eliminado matemáticamente (cálculo conservador: un empate en puntos
