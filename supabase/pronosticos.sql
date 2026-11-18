@@ -63,3 +63,32 @@ revoke all on function public.lsc_votar(text, bigint, uuid, text) from public;
 revoke all on function public.lsc_votos(text) from public;
 grant execute on function public.lsc_votar(text, bigint, uuid, text) to anon, authenticated;
 grant execute on function public.lsc_votos(text) to anon, authenticated;
+
+-- Resumen para el admin (página del fixture): personas que votaron, votos,
+-- votos de hoy y conteo por partido. Solo lo pueden ver las cuentas admin.
+-- Las cuentas deben coincidir con ADMIN_UIDS de fixture.html.
+create or replace function public.lsc_votos_admin(p_division text)
+returns json language plpgsql security definer set search_path = public stable as $$
+declare
+  hoy date := (now() at time zone 'America/Santiago')::date;
+begin
+  if auth.uid() is null or auth.uid() not in (
+       'b4a8b65e-c365-4ae4-9a85-0624e8c7cd9c'::uuid,
+       '272f8ea8-a576-46cc-97ae-7c292424a858'::uuid) then
+    raise exception 'Solo para administradores';
+  end if;
+  return json_build_object(
+    'personas',     (select count(distinct device_id) from playoff_votes where division = p_division),
+    'votos',        (select count(*) from playoff_votes where division = p_division),
+    'personas_hoy', (select count(distinct device_id) from playoff_votes
+                      where division = p_division and (updated_at at time zone 'America/Santiago')::date = hoy),
+    'votos_hoy',    (select count(*) from playoff_votes
+                      where division = p_division and (updated_at at time zone 'America/Santiago')::date = hoy),
+    'partidos',     (select coalesce(json_agg(x), '[]'::json) from (
+                       select game_id, team, count(*) as votos from playoff_votes
+                        where division = p_division group by game_id, team) x)
+  );
+end $$;
+
+revoke all on function public.lsc_votos_admin(text) from public, anon;
+grant execute on function public.lsc_votos_admin(text) to authenticated;
