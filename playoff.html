@@ -311,7 +311,7 @@
     .pv-btn.live { background: var(--red); color: #fff; }
     .pv-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 18px 16px; }
 
-    /* ── Jugador de la ronda + carrera de anotadores ── */
+    /* ── Jugador de la ronda ── */
     .potr { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding: 18px 20px; margin-bottom: 18px; border-radius: 10px; border: 1px solid rgba(242,179,78,.35); background: linear-gradient(120deg, rgba(242,179,78,.14), rgba(242,179,78,.02) 60%); }
     .potr .lg { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
     .potr .lg img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -321,22 +321,6 @@
     .potr .sub { font-size: 13px; color: #C9CDD6; margin-top: 2px; }
     .potr .pts { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: .9; color: var(--gold); }
     .potr .pts small { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; color: var(--muted); }
-    .race { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; }
-    .race-row { display: grid; grid-template-columns: 26px 34px 1fr 54px; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .race-row:last-child { border-bottom: none; }
-    .race-row .rk { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
-    .race-row:first-child .rk { color: var(--gold); }
-    .race-row .dl { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; text-align: center; color: var(--muted); }
-    .race-row .dl.up { color: #4ADE80; } .race-row .dl.dn { color: #F87171; } .race-row .dl.nw { color: var(--gold); font-size: 9px; letter-spacing: 1px; }
-    .race-row .who { min-width: 0; }
-    .race-row .who .top { display: flex; align-items: center; gap: 8px; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; }
-    .race-row .who .top a { color: inherit; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .race-row .who .top small { font-weight: 500; font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .race-row .track { height: 8px; border-radius: 99px; background: rgba(255,255,255,.05); margin-top: 6px; overflow: hidden; }
-    .race-row .bar { height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #8a6a2e, var(--gold)); transition: width 1s cubic-bezier(.2,.8,.2,1); }
-    .race.visible .bar { width: var(--w); }
-    .race-row .pts { text-align: right; font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--gold); line-height: 1; }
-    .race-row .pts small { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 1px; color: var(--muted); }
 
     /* ── ANOTADORES PLAYOFFS ── */
     .po-scorers { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
@@ -1337,9 +1321,8 @@ function renderPlayoffGames() {
 }
 
 /* ═══ ANOTADORES DE PLAYOFFS (game_stats de partidos de playoffs) ═══
-   Carrera de anotadores con barras y cambio de puesto respecto de la
-   fecha anterior, más el "Jugador de la ronda" (más puntos en la última
-   ronda jugada; empate: menos faltas). */
+   Tabla de anotadores, más el "Jugador de la ronda" (más puntos en la
+   última ronda jugada; empate: menos faltas). */
 function scorerRanking(stats) {
   const byPlayer = {};
   stats.forEach(s => {
@@ -1389,29 +1372,15 @@ function renderScorers() {
     }
   }
 
-  // Cambio de puesto: ranking sin los partidos de la última fecha jugada.
-  const dates = [...new Set(done.map(g => g.game_date).filter(Boolean))].sort();
-  let prevRank = null;
-  if (dates.length > 1) {
-    const lastIds = new Set(done.filter(g => g.game_date === dates[dates.length - 1]).map(g => g.id));
-    prevRank = new Map(scorerRanking(stats.filter(s => !lastIds.has(s.game_id))).map((p, i) => [p.key, i]));
-  }
-  const top = rows.slice(0, 8), max = top[0].pts;
-  const delta = (p, i) => {
-    if (!prevRank) return '<span class="dl"></span>';
-    if (!prevRank.has(p.key)) return '<span class="dl nw">NUEVO</span>';
-    const dlt = prevRank.get(p.key) - i;
-    return dlt > 0 ? `<span class="dl up">▲${dlt}</span>` : dlt < 0 ? `<span class="dl dn">▼${-dlt}</span>` : '<span class="dl">–</span>';
-  };
-  el.innerHTML = `${potrHTML}<div class="race reveal">
-    ${top.map((p, i) => `<div class="race-row">
-      <span class="rk">${i + 1}</span>
-      ${delta(p, i)}
-      <div class="who">
-        <div class="top">${teamLogoSmall(p.team)}${playerLink(p)}<small>${teams[p.team]?.abbr || p.team}</small></div>
-        <div class="track"><div class="bar" style="--w:${Math.max(4, Math.round(p.pts / max * 100))}%"></div></div>
-      </div>
-      <span class="pts">${p.pts}<small>${(p.pts / p.games.size).toFixed(1)} PPG</small></span>
+  const top = rows.slice(0, 10);
+  el.innerHTML = `${potrHTML}<div class="po-scorers reveal">
+    <div class="po-scorer head"><span class="rank">#</span><span>Jugador</span><span class="num">PJ</span><span class="num">PTS</span><span class="num">PPG</span></div>
+    ${top.map((p, i) => `<div class="po-scorer">
+      <span class="rank">${i + 1}</span>
+      <span class="who">${teamLogoSmall(p.team)}<span>${p.id ? `<a href="player.html?id=${p.id}&div=${activeDivision}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name}<small>${teams[p.team]?.name || p.team}</small></span></span>
+      <span class="num">${p.games.size}</span>
+      <span class="pts">${p.pts}</span>
+      <span class="num">${(p.pts / p.games.size).toFixed(1)}</span>
     </div>`).join('')}
   </div>`;
 }
