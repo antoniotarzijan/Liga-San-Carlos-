@@ -239,6 +239,105 @@
     a.matchup { display: block; color: inherit; text-decoration: none; }
     .matchup-live { color: var(--red); margin-left: 6px; }
 
+    /* ── Cruce clickeable, en vivo y MVP ── */
+    .matchup.clickable { cursor: pointer; }
+    .matchup.clickable:hover { border-color: rgba(242,179,78,.45); }
+    .matchup-round-tag { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .matchup-cta { color: var(--gold); opacity: .75; letter-spacing: 1.5px; white-space: nowrap; }
+    .matchup.clickable:hover .matchup-cta { opacity: 1; }
+    .matchup.is-live { border-color: rgba(248,8,8,.75) !important; animation: liveGlow 1.6s ease-in-out infinite; }
+    .matchup.is-live .team-score-bracket { color: #fff; }
+    @keyframes liveGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(248,8,8,.0); } 50% { box-shadow: 0 0 22px 2px rgba(248,8,8,.45); } }
+    .matchup-mvp { padding: 5px 10px; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: .5px; color: var(--muted); border-top: 1px solid var(--border); background: rgba(242,179,78,.04); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .matchup-mvp b { color: var(--gold); font-weight: 700; }
+
+    /* ── Barra "en vivo" ── */
+    .live-bar { max-width: 1200px; margin: 0 auto 18px; display: flex; flex-direction: column; gap: 8px; }
+    .live-bar[hidden] { display: none; }
+    .live-item { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 14px; padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(248,8,8,.45); background: linear-gradient(90deg, rgba(248,8,8,.14), rgba(248,8,8,.05)); color: var(--text); text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+    .live-item .dot { color: var(--red); animation: pulse 1.2s ease infinite; }
+    .live-item .sc { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; color: #fff; }
+    .live-item .go { color: var(--gold); font-size: 12px; letter-spacing: 2px; }
+
+    /* ── Cuenta regresiva ── */
+    .po-countdown { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .po-countdown[hidden] { display: none; }
+    .cd-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+    .cd-label b { color: var(--gold); font-weight: 700; }
+    .cd-boxes { display: flex; gap: 10px; }
+    .cd-box { min-width: 70px; padding: 10px 8px 8px; border: 1px solid rgba(242,179,78,.25); border-radius: 8px; background: rgba(242,179,78,.05); text-align: center; }
+    .cd-box .n { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+    .cd-box .u { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+    .cd-sub { font-size: 13px; color: #C9CDD6; }
+    .cd-now { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; color: var(--red); }
+
+    /* ── Previa del cruce (modal) ── */
+    .pv-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(4,5,8,.82); backdrop-filter: blur(4px); display: none; align-items: flex-start; justify-content: center; padding: 40px 14px; overflow-y: auto; }
+    .pv-overlay.open { display: flex; }
+    .pv-box { width: 100%; max-width: 640px; background: var(--card); border: 1px solid rgba(242,179,78,.3); border-radius: 10px; overflow: hidden; animation: fadeUp .3s ease both; }
+    .pv-head { padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,.02); }
+    .pv-head .t { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); }
+    .pv-head .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .pv-close { background: none; border: 1px solid var(--border); color: var(--text); border-radius: 6px; width: 34px; height: 34px; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+    .pv-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 22px 18px 16px; }
+    .pv-team { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; min-width: 0; }
+    .pv-team .lg { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+    .pv-team .lg img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .pv-team .ph { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; color: #fff; font-size: 18px; }
+    .pv-team .nm { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; line-height: 1.05; }
+    .pv-team .sd { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .pv-team.won .nm { color: #4ADE80; }
+    .pv-mid { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
+    .pv-mid .sc { font-size: 42px; color: var(--text); letter-spacing: 1px; line-height: 1; }
+    .pv-mid .lv { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; color: var(--red); }
+    .pv-sec { padding: 4px 18px 14px; }
+    .pv-sec h4 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; text-align: center; }
+    .pv-row { display: grid; grid-template-columns: 1fr 130px 1fr; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .pv-row:last-child { border-bottom: none; }
+    .pv-row .l { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; }
+    .pv-row .v { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; color: #C9CDD6; text-align: center; }
+    .pv-row .v.best { color: var(--gold); }
+    .pv-row .v small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); }
+    .pv-form { display: inline-flex; gap: 4px; }
+    .pv-form i { width: 18px; height: 18px; border-radius: 4px; font-style: normal; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; color: #08090C; font-weight: 700; }
+    .pv-form i.w { background: #4ADE80; } .pv-form i.l { background: rgba(248,8,8,.75); color: #fff; }
+    .pv-h2h { display: flex; flex-direction: column; gap: 6px; }
+    .pv-h2h div { display: flex; justify-content: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; color: #C9CDD6; }
+    .pv-h2h div span.w { color: var(--text); }
+    .pv-h2h div em { font-style: normal; color: var(--muted); font-weight: 500; }
+    .pv-empty { text-align: center; color: var(--muted); font-size: 13px; }
+    .pv-foot { padding: 14px 18px 18px; display: flex; justify-content: center; }
+    .pv-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; background: var(--gold); color: #08090C; text-decoration: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    .pv-btn.live { background: var(--red); color: #fff; }
+    .pv-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 18px 16px; }
+
+    /* ── Jugador de la ronda + carrera de anotadores ── */
+    .potr { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding: 18px 20px; margin-bottom: 18px; border-radius: 10px; border: 1px solid rgba(242,179,78,.35); background: linear-gradient(120deg, rgba(242,179,78,.14), rgba(242,179,78,.02) 60%); }
+    .potr .lg { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+    .potr .lg img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .potr .k { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); }
+    .potr .nm { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 1px; line-height: 1.05; }
+    .potr .nm a { color: inherit; text-decoration: none; }
+    .potr .sub { font-size: 13px; color: #C9CDD6; margin-top: 2px; }
+    .potr .pts { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: .9; color: var(--gold); }
+    .potr .pts small { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; color: var(--muted); }
+    .race { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; }
+    .race-row { display: grid; grid-template-columns: 26px 34px 1fr 54px; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .race-row:last-child { border-bottom: none; }
+    .race-row .rk { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
+    .race-row:first-child .rk { color: var(--gold); }
+    .race-row .dl { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; text-align: center; color: var(--muted); }
+    .race-row .dl.up { color: #4ADE80; } .race-row .dl.dn { color: #F87171; } .race-row .dl.nw { color: var(--gold); font-size: 9px; letter-spacing: 1px; }
+    .race-row .who { min-width: 0; }
+    .race-row .who .top { display: flex; align-items: center; gap: 8px; min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; }
+    .race-row .who .top a { color: inherit; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .race-row .who .top small { font-weight: 500; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .race-row .track { height: 8px; border-radius: 99px; background: rgba(255,255,255,.05); margin-top: 6px; overflow: hidden; }
+    .race-row .bar { height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #8a6a2e, var(--gold)); transition: width 1s cubic-bezier(.2,.8,.2,1); }
+    .race.visible .bar { width: var(--w); }
+    .race-row .pts { text-align: right; font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--gold); line-height: 1; }
+    .race-row .pts small { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 10px; letter-spacing: 1px; color: var(--muted); }
+
     /* ── ANOTADORES PLAYOFFS ── */
     .po-scorers { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
     .po-scorer { display: grid; grid-template-columns: 34px 1fr 54px 54px 60px; align-items: center; gap: 8px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; }
@@ -729,6 +828,19 @@
       .winner-check { width:14px; height:14px; margin-right:4px; }
 
       .champion-card { min-width: 190px; }
+      .cd-box { min-width: 58px; } .cd-box .n { font-size: 32px; }
+      .cd-now { font-size: 24px; }
+      .live-bar, .projection-banner { margin-left: 14px; margin-right: 14px; }
+      .live-item { font-size: 12px; } .live-item .sc { font-size: 20px; }
+      .pv-overlay { padding: 14px 8px; }
+      .pv-team .nm { font-size: 18px; } .pv-team .lg { width: 52px; height: 52px; }
+      .pv-mid .sc { font-size: 32px; }
+      .pv-row { grid-template-columns: 1fr 96px 1fr; }
+      .pv-row .v { font-size: 15px; }
+      .potr { grid-template-columns: auto 1fr; gap: 12px; padding: 14px; }
+      .potr .pts { grid-column: 1 / -1; text-align: left; font-size: 40px; }
+      .potr .pts small { display: inline; margin-left: 6px; }
+      .potr .nm { font-size: 24px; }
 
       .padmin-grid { grid-template-columns:1fr; }
       .nav-logo { font-size:17px; }
@@ -745,6 +857,11 @@
 <body>
 
 <div class="toast" id="toast"></div>
+
+<!-- ══ PREVIA DEL CRUCE ══ -->
+<div class="pv-overlay" id="pv-overlay" onclick="if(event.target===this)closePreview()">
+  <div class="pv-box" id="pv-box" role="dialog" aria-modal="true"></div>
+</div>
 
 <!-- ══ NAV ══ -->
 <nav>
@@ -767,11 +884,13 @@
     <span class="pill-dot"></span>
     <span id="status-text">Fase regular en curso</span>
   </div>
+  <div class="po-countdown" id="po-countdown" hidden></div>
 </div>
 
 <!-- ══ MAIN ══ -->
 <main>
   <!-- BRACKET -->
+  <div class="live-bar" id="live-bar" hidden></div>
   <div class="projection-banner" id="projection-banner" hidden></div>
   <div class="bracket-page" id="bracket-container"></div>
 
@@ -811,7 +930,7 @@
 const CONFIG = {
   divisions: {
     primera: {
-      label: 'Primera División', dbTable: 'games',
+      label: 'Primera División', dbTable: 'games', playersTable: 'players', gameDay: 4,
       teams: {
         EXMAN: { abbr:'EX-MAN', name:'EX-Manquehue',          color:'#1E3A8A', logo:'logos/exman.png' },
         ANANA: { abbr:'ORTHO',  name:'Orthobullets',                  color:'#7A1F3D', logo:'logos/anana.png' },
@@ -825,7 +944,7 @@ const CONFIG = {
       },
     },
     segunda: {
-      label: 'Segunda División', dbTable: 'games_segunda',
+      label: 'Segunda División', dbTable: 'games_segunda', playersTable: 'players_segunda', gameDay: 2,
       teams: {
         T2B: { abbr:'DYN',  name:'Dynamos',              color:'#7C1D1D', logo:'logos/dynamos.png' },
         T2C: { abbr:'DER',  name:'Derazzo',              color:'#B33A3A', logo:'logos/derazzo.png' },
@@ -882,7 +1001,7 @@ async function loadDivision(div) {
       if (!g) return { ...m, team1: null, team2: null, score1: null, score2: null, winner: null, seeds: [] };
       const played = g.type === 'finished' || g.type === 'live';
       return {
-        ...m, gameId: g.type === 'scheduled' ? null : g.id, live: g.type === 'live',
+        ...m, game: g, gameId: g.type === 'scheduled' ? null : g.id, live: g.type === 'live', mvp: g.type === 'finished' ? (g.mvp || '') : '',
         team1: g.home, team2: g.away, seeds: [g.home_seed, g.away_seed],
         score1: played ? g.home_score : null, score2: played ? g.away_score : null,
         winner: g.type === 'finished' ? (+g.home_score > +g.away_score ? g.home : g.away) : null,
@@ -908,7 +1027,13 @@ async function loadDivision(div) {
     const { data: st } = await _sb.from('game_stats').select('*').eq('division', div).in('game_id', ids);
     stats = st || [];
   }
-  divData[div] = { games, playoffs, bracket, projected: !confirmed, pendingRounds, stats };
+  // Puntos del MVP de cada partido jugado, para mostrarlos en el cuadro.
+  bracket.forEach(m => {
+    if (m.mvp) m.mvpPts = stats.find(s => s.game_id === m.gameId && s.player_name === m.mvp)?.points ?? null;
+  });
+  const { data: pl } = await _sb.from(cfg.playersTable).select('*');
+  const table = regularStandings(games, Object.keys(cfg.teams));
+  divData[div] = { games, playoffs, bracket, projected: !confirmed, pendingRounds, stats, players: pl || [], table };
 }
 
 /* ═══ SWITCH DIV ═══ */
@@ -932,11 +1057,17 @@ async function switchDiv(div) {
 
   if (!divData[div]) await loadDivision(div);
 
+  renderAll();
+  setTimeout(activateReveal, 80);
+}
+
+function renderAll() {
   renderBracket();
   renderPlayoffGames();
   renderScorers();
   updateStatus();
-  setTimeout(activateReveal, 80);
+  renderLiveBar();
+  renderCountdown();
 }
 
 /* ═══ STATUS ═══ */
@@ -997,13 +1128,15 @@ function renderMatchup(m, cls = '') {
   const isFinal = m.id === 'F1';
   const isSF    = m.round === 'SF';
   const cardCls = isFinal ? 'final champion-match' : isSF ? 'semifinal' : '';
-  const tag = m.gameId ? 'a' : 'div';
-  const href = m.gameId ? ` href="partido.html?div=${activeDivision}&id=${m.gameId}"` : '';
-  return `<${tag}${href} class="matchup ${cardCls} ${cls}">
-    <div class="matchup-round-tag">${m.label}${m.live ? '<span class="matchup-live">● En vivo</span>' : ''}</div>
+  const open = m.team1 && m.team2;
+  const cta = !open ? '' : m.live ? '<span class="matchup-live">● En vivo</span>' : `<span class="matchup-cta">${m.winner ? 'Detalle' : 'Previa'} →</span>`;
+  const attrs = open ? ` onclick="openPreview('${m.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openPreview('${m.id}')"` : '';
+  return `<div${attrs} class="matchup ${cardCls} ${cls} ${open ? 'clickable' : ''} ${m.live ? 'is-live' : ''}">
+    <div class="matchup-round-tag"><span>${m.label}</span>${cta}</div>
     ${renderTeamRow(m.team1, m.score1, !!m.winner && m.winner === m.team1, m.seeds?.[0])}
     ${renderTeamRow(m.team2, m.score2, !!m.winner && m.winner === m.team2, m.seeds?.[1])}
-  </${tag}>`;
+    ${m.mvp ? `<div class="matchup-mvp" title="MVP: ${m.mvp}">⭐ MVP <b>${m.mvp}</b>${m.mvpPts != null ? ` · ${m.mvpPts} pts` : ''}</div>` : ''}
+  </div>`;
 }
 
 function renderBracket() {
@@ -1203,34 +1336,267 @@ function renderPlayoffGames() {
     '<div class="games-empty">No hay partidos en esta categoría.</div>';
 }
 
-/* ═══ ANOTADORES DE PLAYOFFS (game_stats de partidos de playoffs) ═══ */
+/* ═══ ANOTADORES DE PLAYOFFS (game_stats de partidos de playoffs) ═══
+   Carrera de anotadores con barras y cambio de puesto respecto de la
+   fecha anterior, más el "Jugador de la ronda" (más puntos en la última
+   ronda jugada; empate: menos faltas). */
+function scorerRanking(stats) {
+  const byPlayer = {};
+  stats.forEach(s => {
+    if (!(s.points > 0 || s.played)) return;
+    const key = s.player_id ?? `${s.team}:${s.player_name}`;
+    const p = byPlayer[key] ||= { key, id: s.player_id, name: s.player_name, team: s.team, pts: 0, games: new Set() };
+    p.pts += s.points || 0; p.games.add(s.game_id);
+  });
+  return Object.values(byPlayer).filter(p => p.pts > 0)
+    .sort((a, b) => b.pts - a.pts || a.games.size - b.games.size || a.name.localeCompare(b.name));
+}
+
+function playerLink(p) {
+  return p.id ? `<a href="player.html?id=${p.id}&div=${activeDivision}">${p.name}</a>` : p.name;
+}
+
 function renderScorers() {
   const d = divData[activeDivision]; const teams = divTeams();
   const el = document.getElementById('playoff-scorers');
-  const byPlayer = {};
-  (d?.stats || []).forEach(s => {
-    if (!(s.points > 0 || s.played)) return;
-    const key = s.player_id ?? `${s.team}:${s.player_name}`;
-    const p = byPlayer[key] ||= { id: s.player_id, name: s.player_name, team: s.team, pts: 0, games: new Set() };
-    p.pts += s.points || 0; p.games.add(s.game_id);
-  });
-  const rows = Object.values(byPlayer).filter(p => p.pts > 0)
-    .sort((a, b) => b.pts - a.pts || a.games.size - b.games.size).slice(0, 10);
+  const stats = d?.stats || [];
+  const rows = scorerRanking(stats);
   if (!rows.length) {
     el.innerHTML = '<div class="games-empty">Los anotadores aparecerán cuando se juegue el primer partido de playoffs.</div>';
     return;
   }
-  el.innerHTML = `<div class="po-scorers reveal">
-    <div class="po-scorer head"><span class="rank">#</span><span>Jugador</span><span class="num">PJ</span><span class="num">PTS</span><span class="num">PPG</span></div>
-    ${rows.map((p, i) => `<div class="po-scorer">
-      <span class="rank">${i + 1}</span>
-      <span class="who">${teamLogoSmall(p.team)}<span>${p.id ? `<a href="player.html?id=${p.id}&div=${activeDivision}" style="color:inherit;text-decoration:none;">${p.name}</a>` : p.name}<small>${teams[p.team]?.name || p.team}</small></span></span>
-      <span class="num">${p.games.size}</span>
-      <span class="pts">${p.pts}</span>
-      <span class="num">${(p.pts / p.games.size).toFixed(1)}</span>
+
+  // Jugador de la ronda: última ronda con partidos terminados.
+  const done = d.playoffs.filter(g => g.type === 'finished');
+  let potrHTML = '';
+  if (done.length) {
+    const r = Math.max(...done.map(g => g.round));
+    const roundIds = new Set(done.filter(g => g.round === r).map(g => g.id));
+    const best = stats.filter(s => roundIds.has(s.game_id) && s.points > 0)
+      .sort((a, b) => b.points - a.points || (a.fouls || 0) - (b.fouls || 0))[0];
+    if (best) {
+      const g = done.find(x => x.id === best.game_id);
+      const rival = g.home === best.team ? g.away : g.home;
+      const won = (g.home === best.team) === (+g.home_score > +g.away_score);
+      const [mine, theirs] = g.home === best.team ? [g.home_score, g.away_score] : [g.away_score, g.home_score];
+      potrHTML = `<div class="potr reveal">
+        <div class="lg">${teamLogoBig(best.team)}</div>
+        <div><div class="k">⭐ Jugador de la ronda · ${roundName(r)}</div>
+          <div class="nm">${playerLink({ id: best.player_id, name: best.player_name })}</div>
+          <div class="sub">${teams[best.team]?.name || best.team} · ${won ? 'ganó' : 'perdió'} ${mine}–${theirs} a ${teams[rival]?.name || rival}</div></div>
+        <div class="pts">${best.points}<small>PUNTOS</small></div>
+      </div>`;
+    }
+  }
+
+  // Cambio de puesto: ranking sin los partidos de la última fecha jugada.
+  const dates = [...new Set(done.map(g => g.game_date).filter(Boolean))].sort();
+  let prevRank = null;
+  if (dates.length > 1) {
+    const lastIds = new Set(done.filter(g => g.game_date === dates[dates.length - 1]).map(g => g.id));
+    prevRank = new Map(scorerRanking(stats.filter(s => !lastIds.has(s.game_id))).map((p, i) => [p.key, i]));
+  }
+  const top = rows.slice(0, 8), max = top[0].pts;
+  const delta = (p, i) => {
+    if (!prevRank) return '<span class="dl"></span>';
+    if (!prevRank.has(p.key)) return '<span class="dl nw">NUEVO</span>';
+    const dlt = prevRank.get(p.key) - i;
+    return dlt > 0 ? `<span class="dl up">▲${dlt}</span>` : dlt < 0 ? `<span class="dl dn">▼${-dlt}</span>` : '<span class="dl">–</span>';
+  };
+  el.innerHTML = `${potrHTML}<div class="race reveal">
+    ${top.map((p, i) => `<div class="race-row">
+      <span class="rk">${i + 1}</span>
+      ${delta(p, i)}
+      <div class="who">
+        <div class="top">${teamLogoSmall(p.team)}${playerLink(p)}<small>${teams[p.team]?.abbr || p.team}</small></div>
+        <div class="track"><div class="bar" style="--w:${Math.max(4, Math.round(p.pts / max * 100))}%"></div></div>
+      </div>
+      <span class="pts">${p.pts}<small>${(p.pts / p.games.size).toFixed(1)} PPG</small></span>
     </div>`).join('')}
   </div>`;
 }
+
+function teamLogoBig(teamId) {
+  const t = divTeams()[teamId];
+  if (!t) return '';
+  return t.logo ? `<img src="${t.logo}" alt="${t.abbr}" onerror="this.onerror=null;this.style.display='none'">`
+    : `<div class="ph" style="background:${t.color}">${t.abbr}</div>`;
+}
+
+/* ═══ EN VIVO: barra arriba del cuadro + refresco automático ═══ */
+function renderLiveBar() {
+  const d = divData[activeDivision]; const teams = divTeams();
+  const el = document.getElementById('live-bar');
+  const live = (d?.playoffs || []).filter(g => g.type === 'live');
+  el.hidden = !live.length;
+  el.innerHTML = live.map(g => `<a class="live-item" href="envivo.html">
+    <span class="dot">●</span> En vivo · ${roundName(g)}
+    <span>${teams[g.home]?.name || g.home}</span><span class="sc">${g.home_score ?? 0} – ${g.away_score ?? 0}</span><span>${teams[g.away]?.name || g.away}</span>
+    <span class="go">Ver en vivo →</span></a>`).join('');
+}
+
+const hoyISO = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
+
+// Cada 30 s, si hay un partido en vivo o uno de hoy, recarga los datos de la división.
+async function refreshLive() {
+  if (document.hidden) return;
+  const d = divData[activeDivision]; if (!d) return;
+  const today = hoyISO();
+  if (!d.playoffs.some(g => g.type === 'live' || (g.type === 'upcoming' && g.game_date === today))) return;
+  const div = activeDivision;
+  await loadDivision(div);
+  if (div !== activeDivision) return;
+  renderAll();
+  document.querySelectorAll('.reveal').forEach(r => r.classList.add('visible'));
+}
+setInterval(refreshLive, 30000);
+
+/* ═══ CUENTA REGRESIVA al próximo partido de playoffs ═══ */
+let _cdTimer = null;
+function toDate(iso, hora) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const [hh, mm] = (hora || '19:30').split(':').map(Number);
+  return new Date(y, m - 1, d, hh || 0, mm || 0);
+}
+function countdownTarget() {
+  const d = divData[activeDivision]; if (!d) return null;
+  if (d.bracket.find(m => m.id === 'F1')?.winner) return null;
+  const live = d.playoffs.find(g => g.type === 'live');
+  if (live) return { live: true, label: roundName(live) };
+  const next = d.playoffs.filter(g => g.type === 'upcoming' && g.game_date)
+    .sort((a, b) => toDate(a.game_date, a.slot_time) - toDate(b.game_date, b.slot_time))[0];
+  if (next) {
+    const nombre = next.round === 102 ? 'la gran final' : roundName(next).toLowerCase();
+    return { when: toDate(next.game_date, next.slot_time), label: `Faltan para ${nombre}`, sub: next.date };
+  }
+  // Fase regular terminada y playoffs sin publicar: fecha estimada de inicio.
+  if (!d.pendingRounds && !d.playoffs.length) {
+    const last = d.games.filter(g => g.type === 'finished' && g.game_date).map(g => g.game_date).sort().pop();
+    if (!last) return null;
+    const dt = toDate(last, '00:00');
+    do { dt.setDate(dt.getDate() + 1); } while (dt.getDay() !== divCfg().gameDay);
+    const hora = d.games.filter(g => g.round === PLAYOFF_ROUND && g.slot_time).map(g => g.slot_time).sort()[0] || '19:30';
+    const [hh, mm] = hora.split(':').map(Number); dt.setHours(hh, mm);
+    const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return { when: dt, label: 'Faltan para el inicio de los playoffs', sub: `${DIAS[dt.getDay()]} ${dt.getDate()} de ${MES[dt.getMonth()]} · ${hora} (fecha estimada)` };
+  }
+  return null;
+}
+function renderCountdown() {
+  clearInterval(_cdTimer);
+  const el = document.getElementById('po-countdown');
+  const t = countdownTarget();
+  el.hidden = !t;
+  if (!t) return;
+  if (t.live) { el.innerHTML = `<div class="cd-now">● Se está jugando · ${t.label}</div>`; return; }
+  const tick = () => {
+    const ms = t.when - new Date();
+    if (ms <= 0) { el.innerHTML = `<div class="cd-now">¡Hoy se juega!</div>${t.sub ? `<div class="cd-sub">${t.sub}</div>` : ''}`; clearInterval(_cdTimer); return; }
+    const s = Math.floor(ms / 1000);
+    const parts = [[Math.floor(s / 86400), 'días'], [Math.floor(s / 3600) % 24, 'horas'], [Math.floor(s / 60) % 60, 'min'], [s % 60, 'seg']];
+    el.innerHTML = `<div class="cd-label">${t.label}</div>
+      <div class="cd-boxes">${parts.map(([n, u]) => `<div class="cd-box"><div class="n">${String(n).padStart(2, '0')}</div><div class="u">${u}</div></div>`).join('')}</div>
+      ${t.sub ? `<div class="cd-sub">${t.sub}</div>` : ''}`;
+  };
+  tick(); _cdTimer = setInterval(tick, 1000);
+}
+
+/* ═══ PREVIA DEL CRUCE ═══
+   Comparación de los dos equipos con datos de la fase regular:
+   posición, récord, puntos a favor/en contra, últimos 5, máximo anotador
+   y enfrentamientos directos. En semis y final, además, su camino. */
+function teamProfile(d, id) {
+  const reg = d.games.filter(g => g.type === 'finished' && !isPlayoff(g) && (g.home === id || g.away === id))
+    .sort((a, b) => (a.game_date || '').localeCompare(b.game_date || '') || a.round - b.round);
+  const res = reg.map(g => {
+    const mine = g.home === id ? +g.home_score : +g.away_score, theirs = g.home === id ? +g.away_score : +g.home_score;
+    return { g, mine, theirs, won: mine > theirs, wo: !!g.walkover };
+  });
+  const real = res.filter(r => !r.wo);
+  const avg = k => real.length ? real.reduce((a, r) => a + r[k], 0) / real.length : null;
+  const pos = d.table.findIndex(r => r.teamId === id);
+  const row = d.table[pos] || { w: 0, l: 0, diff: 0 };
+  let streak = 0;
+  for (let i = res.length - 1; i >= 0 && res[i].won === res[res.length - 1].won; i--) streak++;
+  const top = d.players.filter(p => p.team === id && p.games > 0)
+    .sort((a, b) => (b.points / b.games) - (a.points / a.games) || b.points - a.points)[0];
+  const path = d.playoffs.filter(g => g.type === 'finished' && (g.home === id || g.away === id))
+    .sort((a, b) => a.round - b.round);
+  return { pos: pos + 1, w: row.w, l: row.l, diff: row.diff, pf: avg('mine'), pa: avg('theirs'),
+           last5: res.slice(-5), streak: res.length ? { n: streak, won: res[res.length - 1].won } : null, top, path };
+}
+
+function openPreview(slot) {
+  const d = divData[activeDivision]; const teams = divTeams();
+  const m = d?.bracket.find(x => x.id === slot); if (!m || !m.team1 || !m.team2) return;
+  const [A, B] = [m.team1, m.team2];
+  const pa = teamProfile(d, A), pb = teamProfile(d, B);
+  const g = m.game;
+  const played = g && (g.type === 'finished' || g.type === 'live');
+
+  const team = (id, p, seed) => `<div class="pv-team ${m.winner === id ? 'won' : ''}">
+    <div class="lg">${teamLogoBig(id)}</div>
+    <div class="nm">${teams[id]?.name || id}</div>
+    <div class="sd">${seed ? seed + '° de la tabla' : ''}</div></div>`;
+  const mid = played
+    ? `<div class="pv-mid">${g.type === 'live' ? '<div class="lv">● EN VIVO</div>' : ''}<div class="sc">${g.home_score ?? 0}–${g.away_score ?? 0}</div></div>`
+    : '<div class="pv-mid">VS</div>';
+
+  const f1 = n => n == null ? '–' : n.toFixed(1);
+  // [etiqueta, valor A, valor B, comparador (+1: más es mejor, -1: menos es mejor, 0: sin destacar)]
+  const rows = [
+    ['Posición', `${pa.pos}°`, `${pb.pos}°`, pa.pos && pb.pos ? Math.sign(pb.pos - pa.pos) : 0],
+    ['Récord', `${pa.w}–${pa.l}`, `${pb.w}–${pb.l}`, Math.sign((pa.w - pa.l) - (pb.w - pb.l))],
+    ['Puntos por partido', f1(pa.pf), f1(pb.pf), pa.pf != null && pb.pf != null ? Math.sign(pa.pf - pb.pf) : 0],
+    ['Puntos recibidos', f1(pa.pa), f1(pb.pa), pa.pa != null && pb.pa != null ? Math.sign(pb.pa - pa.pa) : 0],
+    ['Diferencia', `${pa.diff > 0 ? '+' : ''}${pa.diff}`, `${pb.diff > 0 ? '+' : ''}${pb.diff}`, Math.sign(pa.diff - pb.diff)],
+  ];
+  const form = p => `<span class="pv-form">${p.last5.map(r => `<i class="${r.won ? 'w' : 'l'}" title="${r.mine}–${r.theirs}">${r.won ? 'G' : 'P'}</i>`).join('')}</span>
+    ${p.streak && p.streak.n >= 2 ? `<small>${p.streak.n} ${p.streak.won ? 'victorias' : 'derrotas'} seguidas</small>` : ''}`;
+  const star = p => p.top ? `${p.top.name}<small>${(p.top.points / p.top.games).toFixed(1)} pts por partido</small>` : '–';
+  const rowHTML = ([l, a, b, c]) => `<div class="pv-row"><div class="v ${c > 0 ? 'best' : ''}">${a}</div><div class="l">${l}</div><div class="v ${c < 0 ? 'best' : ''}">${b}</div></div>`;
+
+  const h2h = d.games.filter(x => x.type === 'finished' && !isPlayoff(x) &&
+    ((x.home === A && x.away === B) || (x.home === B && x.away === A)));
+  const h2hHTML = h2h.length ? `<div class="pv-h2h">${h2h.map(x => {
+      const hw = +x.home_score > +x.away_score;
+      return `<div><span class="${hw ? 'w' : ''}">${teams[x.home]?.name || x.home}</span> ${x.home_score}–${x.away_score} <span class="${hw ? '' : 'w'}">${teams[x.away]?.name || x.away}</span> <em>· ${roundName(x)}${x.walkover ? ' · W.O.' : ''}</em></div>`;
+    }).join('')}</div>` : '<div class="pv-empty">No se enfrentaron en la fase regular.</div>';
+
+  const pathTxt = (id, p) => p.path.filter(x => x.id !== g?.id).map(x => {
+    const rival = x.home === id ? x.away : x.home;
+    const [mi, th] = x.home === id ? [x.home_score, x.away_score] : [x.away_score, x.home_score];
+    return `${PLAYOFF_ROUND_SHORT[x.round] || ''} ${mi}–${th} a ${teams[rival]?.abbr || rival}`;
+  }).join(' · ') || '–';
+  const showPath = m.round !== 'QF';
+
+  let foot = '';
+  if (g && g.type === 'live') foot = `<a class="pv-btn live" href="envivo.html">● Ver en vivo →</a>`;
+  else if (m.gameId) foot = `<a class="pv-btn" href="partido.html?div=${activeDivision}&id=${m.gameId}">${g.type === 'finished' ? 'Ver estadísticas del partido' : 'Ver ficha del partido'} →</a>`;
+
+  const when = g && g.type !== 'scheduled' && g.date && g.date !== 'Por definir' ? `${g.date} · ${(g.venue || '').split('·')[0].trim()}` : '';
+  document.getElementById('pv-box').innerHTML = `
+    <div class="pv-head"><div><div class="t">${m.label}</div><div class="d">${when || (d.projected ? 'Cruce proyectado según la tabla actual' : 'Fecha por confirmar')}</div></div>
+      <button class="pv-close" onclick="closePreview()" aria-label="Cerrar">×</button></div>
+    <div class="pv-teams">${team(A, pa, m.seeds?.[0])}${mid}${team(B, pb, m.seeds?.[1])}</div>
+    <div class="pv-sec"><h4>Fase regular</h4>
+      ${rows.map(rowHTML).join('')}
+      <div class="pv-row"><div class="v">${form(pa)}</div><div class="l">Últimos 5</div><div class="v">${form(pb)}</div></div>
+      <div class="pv-row"><div class="v">${star(pa)}</div><div class="l">Máx. anotador</div><div class="v">${star(pb)}</div></div>
+      ${showPath ? `<div class="pv-row"><div class="v"><small>${pathTxt(A, pa)}</small></div><div class="l">Camino en playoffs</div><div class="v"><small>${pathTxt(B, pb)}</small></div></div>` : ''}
+    </div>
+    <div class="pv-sec"><h4>Enfrentamientos esta temporada</h4>${h2hHTML}</div>
+    ${foot ? `<div class="pv-foot">${foot}</div>` : ''}
+    ${m.mvp ? `<div class="pv-note">⭐ MVP: <b style="color:var(--gold)">${m.mvp}</b>${m.mvpPts != null ? ` · ${m.mvpPts} pts` : ''}</div>` : ''}`;
+  document.getElementById('pv-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePreview() {
+  document.getElementById('pv-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
 
 /* ── Helpers ── */
 function showToast(msg) {
