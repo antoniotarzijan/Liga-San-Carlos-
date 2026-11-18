@@ -117,6 +117,9 @@
     .match { display: grid; grid-template-columns: 120px 1fr auto; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); }
     .match:last-child { border-bottom: none; }
     .match-slot { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; }
+    .qf-slot { display: flex; flex-direction: column; gap: 4px; }
+    .qf-slot input { padding: 5px 8px; font-size: 13px; }
+    .qf-slot .qf-hora { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; }
     .match-slot span { display: block; font-size: 11px; color: var(--muted); letter-spacing: 1px; font-weight: 500; }
     .match-teams { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; }
     .match-teams .vs { color: var(--muted); font-weight: 500; margin: 0 6px; font-size: 13px; }
@@ -168,6 +171,7 @@
       .form-row { grid-template-columns: 1fr; }
       .match { grid-template-columns: 1fr; gap: 6px; }
       .match-slot span { display: inline; margin-left: 6px; }
+      .qf-slot { flex-direction: row; }
     }
   </style>
 </head>
@@ -897,7 +901,10 @@ function playoffConfirmHTML() {
   const table = regularStandings(GAMES, Object.keys(divTeams()));
   const out = table.slice(8).map(r => teamName(r.teamId));
   const row = q => `<div class="match">
-      <div class="match-slot">${q.hora}<span>${q.cancha}</span></div>
+      <div class="qf-slot">
+        <input class="qf-hora" data-slot="${q.slot}" list="time-options" value="${q.hora}" aria-label="Hora" />
+        <input class="qf-cancha" data-slot="${q.slot}" list="court-options" value="${q.cancha}" aria-label="Cancha" />
+      </div>
       <div class="match-teams">${q.homeSeed}° ${teamName(q.home.teamId)}<span class="vs">vs</span>${q.awaySeed}° ${teamName(q.away.teamId)}</div>
       <div></div>
     </div>`;
@@ -905,6 +912,7 @@ function playoffConfirmHTML() {
     <div class="status-kicker">Fase regular terminada</div>
     <div class="status-title">Cuartos de final</div>
     <div class="status-text">Cruces según la tabla final (1° vs 8°, 4° vs 5°, 2° vs 7°, 3° vs 6°); el mejor ubicado juega de local.
+      Puedes cambiar la hora y la cancha de cada partido antes de confirmar.
       Al confirmarlos, se publican solos a las 10:00 del día siguiente al último partido, para el ${DIAS[divCfg().gameDay].toLowerCase()} siguiente.
       Las semifinales y la final se arman solas.</div>
     <div class="round-card" style="margin-bottom:12px;">${quarterFinals().map(row).join('')}
@@ -915,7 +923,17 @@ function playoffConfirmHTML() {
 async function confirmPlayoffs() {
   if (GAMES.some(isPlayoff)) { showToast('⚠ Los cruces ya están confirmados', true); return; }
   const qf = quarterFinals();
-  const txt = qf.map(q => `${q.homeSeed}° ${teamName(q.home.teamId)} vs ${q.awaySeed}° ${teamName(q.away.teamId)} (${q.hora})`).join('\n');
+  // Hora y cancha elegidas en la vista previa (si no se tocan, las por defecto).
+  for (const q of qf) {
+    const rawHora = document.querySelector(`.qf-hora[data-slot="${q.slot}"]`)?.value.trim() ?? q.hora;
+    const hora = normHora(rawHora);
+    if (!hora) { showToast(`⚠ Hora no válida en ${q.homeSeed}° vs ${q.awaySeed}° (ej: 19:30)`, true); return; }
+    q.hora = hora;
+    q.cancha = canchaCorta(canchaVenue(document.querySelector(`.qf-cancha[data-slot="${q.slot}"]`)?.value.trim() || q.cancha));
+  }
+  const clash = qf.find((q, i) => qf.some((o, j) => j < i && o.hora === q.hora && canchaVenue(o.cancha) === canchaVenue(q.cancha)));
+  if (clash) { showToast(`⚠ Hay dos partidos a las ${clash.hora} en ${clash.cancha}`, true); return; }
+  const txt = qf.map(q => `${q.homeSeed}° ${teamName(q.home.teamId)} vs ${q.awaySeed}° ${teamName(q.away.teamId)} (${q.hora} · ${q.cancha})`).join('\n');
   if (!confirm(`¿Confirmar los cuartos de final de ${divCfg().label}?\n\n${txt}`)) return;
   const { error } = await _supabase.from(divCfg().dbTable).insert(qf.map(q => ({
     type: 'scheduled', round: PLAYOFF_ROUND, bracket_slot: q.slot,
