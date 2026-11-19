@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Marcador, estadísticas y jugada a jugada del partido." />
+  <!-- Vista previa al compartir el link (WhatsApp, Instagram, Facebook) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Liga San Carlos" />
+  <meta property="og:title" content="Partido · Liga San Carlos" />
+  <meta property="og:description" content="Marcador, estadísticas y jugada a jugada del partido." />
+  <meta property="og:image" content="https://ligasancarloscc.cl/images/og-liga.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
   <title>Partido · Liga San Carlos</title>
   <link rel="icon" type="image/png" href="images/logo liga.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -104,6 +115,9 @@
     .hero-clock{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,42px);letter-spacing:1px;color:var(--text);}
     .hero-clock.paused{color:var(--muted);}
     .hero-fouls-line{text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:14px;}
+    .ig-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px auto 0;padding:11px 20px;border-radius:8px;border:1.5px solid rgba(242,179,78,.55);background:rgba(242,179,78,.08);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .ig-btn:hover{background:rgba(242,179,78,.16);}
+    .ig-btn:disabled{opacity:.6;cursor:wait;}
     .hero-mvp{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;background:rgba(242,179,78,.07);border:1px solid rgba(242,179,78,.2);border-radius:8px;margin:16px auto 0;max-width:360px;}
     .hero-mvp-label{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
     .hero-mvp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--gold);}
@@ -284,6 +298,7 @@ function divCfg(){ return CONFIG.divisions[activeDivision]; }
 function divTeams(){ return divCfg().teams; }
 
 let _refreshInterval = null;
+let _lastRow = null, _lastStats = [];
 let _statsView = 'stats';
 
 function setStatsView(view){
@@ -605,6 +620,7 @@ async function renderGame(row){
   const { data: stats } = await _supabase.from('game_stats').select('*')
     .eq('game_id', gameId).eq('division', activeDivision).order('points', { ascending: false });
   const statsData = stats || [];
+  _lastRow = row; _lastStats = statsData;
   const homeStats = statsData.filter(s => s.team === row.home).sort((a,b) => b.points - a.points);
   const awayStats = statsData.filter(s => s.team === row.away).sort((a,b) => b.points - a.points);
   const topPerformers = [...statsData].filter(s => (s.points||0) > 0).sort((a,b) => b.points - a.points).slice(0, 4);
@@ -697,6 +713,7 @@ async function renderGame(row){
       </div>
 
       ${isLive ? `<div class="hero-fouls-line">Faltas de equipo: ${row.home_fouls||0} – ${row.away_fouls||0}</div>` : ''}
+      ${(!isLive && !row.walkover) ? `<button class="ig-btn" id="ig-btn" onclick="downloadResultImage()">📸 Imagen para Instagram</button>` : ''}
       ${(!isLive && row.mvp) ? `<div class="hero-mvp"><span style="font-size:18px;">⭐</span><div><div class="hero-mvp-label">MVP del partido</div><div class="hero-mvp-name">${row.mvp}</div></div></div>` : ''}
     </div>
 
@@ -733,6 +750,217 @@ async function renderGame(row){
     <div id="plays-panel" ${_statsView!=='plays'?'hidden':''}>
       ${timelineHTML}
     </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IMAGEN DE RESULTADO PARA INSTAGRAM (1080×1350)
+   Marcador, MVP, siguientes goleadores del ganador, próximo partido
+   (en playoffs) y auspiciador de la premiación.
+═══════════════════════════════════════════════════════════════ */
+const IG_SPONSOR = { logo: 'images/premios pais.png', label: 'PREMIACIÓN' };
+
+function igLoad(src) {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+// Recorta los bordes transparentes de un logo para dibujarlo a su tamaño real.
+function igTrim(img) {
+  try {
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height).data;
+    let t = c.height, l = c.width, r = 0, b = 0;
+    for (let yy = 0; yy < c.height; yy++) for (let xx = 0; xx < c.width; xx++) {
+      if (d[(yy * c.width + xx) * 4 + 3] > 12) { if (yy < t) t = yy; if (yy > b) b = yy; if (xx < l) l = xx; if (xx > r) r = xx; }
+    }
+    if (r <= l || b <= t) return { img, sx: 0, sy: 0, sw: img.naturalWidth, sh: img.naturalHeight };
+    return { img, sx: l, sy: t, sw: r - l + 1, sh: b - t + 1 };
+  } catch { return { img, sx: 0, sy: 0, sw: img.naturalWidth, sh: img.naturalHeight }; }
+}
+// Dibuja un logo recortado dentro de una caja, sin deformarlo. align: 'left' | 'center' | 'right'.
+function igLogo(ctx, t, x, y, w, h, align = 'center') {
+  if (!t) return 0;
+  const k = Math.min(w / t.sw, h / t.sh), dw = t.sw * k, dh = t.sh * k;
+  const dx = align === 'left' ? x : align === 'right' ? x + w - dw : x + (w - dw) / 2;
+  ctx.drawImage(t.img, t.sx, t.sy, t.sw, t.sh, dx, y + (h - dh) / 2, dw, dh);
+  return dw;
+}
+function igText(ctx, txt, x, y, font, size, color, { align = 'left', spacing = 0, maxW = 0 } = {}) {
+  let sz = size;
+  ctx.font = `${font.replace('{s}', sz)}`;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = spacing + 'px';
+  while (maxW && ctx.measureText(txt).width > maxW && sz > 12) { sz -= 2; ctx.font = font.replace('{s}', sz); }
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(txt, x, y);
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+  return sz;
+}
+function igRound(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+// "Ricardo Arturo Casarino Espinoza" → "Ricardo Casarino" si no cabe.
+function igShortName(name) {
+  const p = (name || '').trim().split(/\s+/);
+  return p.length >= 4 ? `${p[0]} ${p[p.length - 2]}` : p.length === 3 ? `${p[0]} ${p[1]}` : name;
+}
+
+async function buildResultImage() {
+  const row = _lastRow, teams = divTeams();
+  const W = 1080, H = 1350;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  await Promise.all(['110px "Bebas Neue"', '700 30px "Barlow Condensed"', '400 22px Barlow'].map(f => document.fonts.load(f).catch(() => {})));
+  const BEBAS = '{s}px "Bebas Neue", Impact, sans-serif', COND = '700 {s}px "Barlow Condensed", Arial, sans-serif', BAR = '{s}px Barlow, Arial, sans-serif';
+
+  const hs = +row.home_score || 0, as = +row.away_score || 0;
+  const winner = hs > as ? row.home : row.away, loser = winner === row.home ? row.away : row.home;
+  const po = isPlayoff(row);
+
+  // Datos de playoffs: próximo partido del ganador.
+  let next = null;
+  if (po && row.round < 102 && row.bracket_slot) {
+    const { data: all } = await _supabase.from(divCfg().dbTable).select('*').gte('round', PLAYOFF_ROUND);
+    const games = all || [];
+    const pair = { QF1: ['QF2', 'SF1'], QF2: ['QF1', 'SF1'], QF3: ['QF4', 'SF2'], QF4: ['QF3', 'SF2'], SF1: ['SF2', 'F1'], SF2: ['SF1', 'F1'] }[row.bracket_slot];
+    if (pair) {
+      const other = games.find(g => g.bracket_slot === pair[0]);
+      const nextGame = games.find(g => g.bracket_slot === pair[1]);
+      let rival = 'Por definir';
+      if (other?.type === 'finished') rival = teams[+other.home_score > +other.away_score ? other.home : other.away]?.name || '';
+      else if (other) rival = `ganador de ${teams[other.home]?.name || other.home} – ${teams[other.away]?.name || other.away}`;
+      const fecha = nextGame && nextGame.type !== 'scheduled' && nextGame.date && nextGame.date !== 'Por definir' ? nextGame.date : '';
+      next = { label: row.round === 100 ? 'Semifinal' : 'Gran final', txt: `${teams[winner]?.name || winner} vs ${rival}`, fecha };
+    }
+  }
+
+  // Imágenes
+  const [bg, lgL, lgH, lgA, lgS] = await Promise.all([
+    igLoad('images/hero-bg.jpg'), igLoad('images/logo liga grande.png'),
+    igLoad(teams[row.home]?.logo), igLoad(teams[row.away]?.logo), igLoad(IG_SPONSOR.logo)]);
+
+  // Fondo
+  ctx.fillStyle = '#08090C'; ctx.fillRect(0, 0, W, H);
+  if (bg) {
+    ctx.save(); ctx.globalAlpha = .16;
+    if ('filter' in ctx) ctx.filter = 'grayscale(1)';
+    const k = Math.max(W / bg.naturalWidth, H / bg.naturalHeight);
+    ctx.drawImage(bg, (W - bg.naturalWidth * k) / 2, 0, bg.naturalWidth * k, bg.naturalHeight * k);
+    ctx.restore();
+  }
+  const glow = ctx.createRadialGradient(W / 2, 480, 0, W / 2, 480, 620);
+  glow.addColorStop(0, 'rgba(242,179,78,.16)'); glow.addColorStop(1, 'rgba(242,179,78,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#f80808'; ctx.fillRect(0, 0, 10, H / 2);
+  ctx.fillStyle = '#3009dc'; ctx.fillRect(0, H / 2, 10, H / 2);
+
+  // Encabezado
+  igLogo(ctx, lgL && igTrim(lgL), 70, 50, 90, 125, 'left');
+  igText(ctx, po ? 'PLAYOFFS 2026' : 'TEMPORADA 2026', W - 70, 112, COND, 28, '#f2b34e', { align: 'right', spacing: 5 });
+  igText(ctx, divCfg().label.toUpperCase(), W - 70, 146, COND, 24, '#9aa0ab', { align: 'right', spacing: 5 });
+  igText(ctx, 'RESULTADO FINAL', W / 2, 228, COND, 26, '#f2b34e', { align: 'center', spacing: 8 });
+  igText(ctx, roundName(row).toUpperCase(), W / 2, 318, BEBAS, 100, '#E8EAF0', { align: 'center', spacing: 3, maxW: 900 });
+
+  // Equipos y marcador
+  const CY = 455, R = 102;
+  const team = (id, cx, isWin, seed) => {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, CY, R, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
+    if (isWin) { ctx.shadowColor = 'rgba(242,179,78,.6)'; ctx.shadowBlur = 50; }
+    ctx.lineWidth = 3; ctx.strokeStyle = isWin ? '#f2b34e' : 'rgba(255,255,255,.1)'; ctx.stroke();
+    ctx.restore();
+    ctx.save(); if (!isWin) ctx.globalAlpha = .55;
+    igLogo(ctx, (id === row.home ? lgH : lgA) && igTrim(id === row.home ? lgH : lgA), cx - 76, CY - 76, 152, 152);
+    igText(ctx, (teams[id]?.name || id).toUpperCase(), cx, CY + R + 66, BEBAS, 54, '#E8EAF0', { align: 'center', spacing: 1.5, maxW: 330 });
+    igText(ctx, seed ? `${seed}° DE LA TABLA` : (id === row.home ? 'LOCAL' : 'VISITA'), cx, CY + R + 106, COND, 21, '#7c818b', { align: 'center', spacing: 3 });
+    ctx.restore();
+  };
+  team(row.home, 200, winner === row.home, po ? row.home_seed : null);
+  team(row.away, W - 200, winner === row.away, po ? row.away_seed : null);
+  igText(ctx, `${hs}`, W / 2 - 38, CY + 62, BEBAS, 170, '#E8EAF0', { align: 'right' });
+  igText(ctx, `${as}`, W / 2 + 38, CY + 62, BEBAS, 170, '#E8EAF0', { align: 'left' });
+  ctx.fillStyle = '#7c818b'; ctx.fillRect(W / 2 - 20, CY + 2, 40, 9);
+  const fechaTxt = (row.date || '').split('·')[0].trim().toUpperCase();
+  if (fechaTxt && fechaTxt !== 'POR DEFINIR') igText(ctx, fechaTxt, W / 2, CY + 120, COND, 22, '#7c818b', { align: 'center', spacing: 6 });
+
+  // Avanza / campeón (texto blanco)
+  const wName = (teams[winner]?.name || winner).toUpperCase();
+  const lineTxt = !po ? `VICTORIA DE ${wName}` : row.round === 102 ? `${wName} CAMPEÓN 2026` : `${wName} AVANZA ${row.round === 100 ? 'A SEMIFINAL' : 'A LA FINAL'}`;
+  igText(ctx, lineTxt, W / 2, 742, COND, 34, '#FFFFFF', { align: 'center', spacing: 4, maxW: 900 });
+
+  // MVP
+  const st = _lastStats || [];
+  const mvpPts = st.find(s => s.player_name === row.mvp)?.points;
+  let y = 776;
+  if (row.mvp) {
+    ctx.save(); igRound(ctx, 70, y, W - 140, 150, 18);
+    const g = ctx.createLinearGradient(70, y, W - 70, y); g.addColorStop(0, 'rgba(242,179,78,.16)'); g.addColorStop(1, 'rgba(242,179,78,.03)');
+    ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(242,179,78,.4)'; ctx.stroke(); ctx.restore();
+    igText(ctx, '⭐', 108, y + 96, BAR, 56, '#f2b34e');
+    igText(ctx, 'MVP DEL PARTIDO', 196, y + 46, COND, 22, '#f2b34e', { spacing: 5 });
+    igText(ctx, row.mvp.toUpperCase(), 196, y + 102, BEBAS, 56, '#E8EAF0', { spacing: 1, maxW: 600 });
+    igText(ctx, teams[winner]?.name || '', 196, y + 132, BAR, 22, '#b4b8c0');
+    if (mvpPts != null) {
+      igText(ctx, String(mvpPts), W - 120, y + 98, BEBAS, 96, '#f2b34e', { align: 'center' });
+      igText(ctx, 'PUNTOS', W - 120, y + 128, COND, 19, '#9aa0ab', { align: 'center', spacing: 4 });
+    }
+    y += 168;
+  }
+
+  // Siguientes goleadores del ganador
+  const scorers = st.filter(s => s.team === winner && (s.points || 0) > 0 && s.player_name !== row.mvp)
+    .sort((a, b) => b.points - a.points).slice(0, 3);
+  if (scorers.length) {
+    ctx.save(); igRound(ctx, 70, y, W - 140, 118, 16);
+    ctx.fillStyle = 'rgba(255,255,255,.03)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.stroke(); ctx.restore();
+    igText(ctx, `GOLEADORES DE ${wName}`, 100, y + 38, COND, 20, '#7c818b', { spacing: 3, maxW: 860 });
+    const colW = (W - 200) / 3;
+    scorers.forEach((s, i) => {
+      const x = 100 + i * colW;
+      igText(ctx, String(s.points), x, y + 94, BEBAS, 44, '#f2b34e');
+      ctx.font = BEBAS.replace('{s}', 44);
+      const off = ctx.measureText(String(s.points)).width + 12;
+      let nm = s.player_name;
+      ctx.font = BEBAS.replace('{s}', 32);
+      if (ctx.measureText(nm.toUpperCase()).width > colW - off - 20) nm = igShortName(nm);
+      igText(ctx, nm.toUpperCase(), x + off, y + 92, BEBAS, 32, '#E8EAF0', { spacing: .5, maxW: colW - off - 20 });
+    });
+    y += 136;
+  }
+
+  // Próximo partido (playoffs)
+  if (next && y < 1120) {
+    ctx.save(); igRound(ctx, 70, y, W - 140, 92, 16);
+    ctx.fillStyle = 'rgba(255,255,255,.03)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.stroke(); ctx.restore();
+    igText(ctx, `PRÓXIMO PARTIDO · ${next.label.toUpperCase()}${next.fecha ? ' · ' + next.fecha.toUpperCase() : ''}`, 100, y + 34, COND, 19, '#7c818b', { spacing: 3, maxW: 860 });
+    igText(ctx, next.txt.toUpperCase(), 100, y + 74, BEBAS, 34, '#E8EAF0', { spacing: .5, maxW: 860 });
+  }
+
+  // Pie: web, Instagram y auspiciador (logo grande)
+  ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(70, 1196, W - 140, 1.5);
+  igText(ctx, 'LIGASANCARLOSCC.CL', 70, 1262, COND, 24, '#9aa0ab', { spacing: 3 });
+  igText(ctx, '@LIGASANCARLOSCC', 70, 1296, COND, 24, '#9aa0ab', { spacing: 3 });
+  const sw = igLogo(ctx, lgS && igTrim(lgS), W - 70 - 260, 1212, 260, 118, 'right');
+  if (sw) igText(ctx, IG_SPONSOR.label, W - 70 - sw - 22, 1280, COND, 22, '#9aa0ab', { align: 'right', spacing: 4 });
+  return cv;
+}
+
+async function downloadResultImage() {
+  const btn = document.getElementById('ig-btn'); if (!_lastRow || !btn) return;
+  btn.disabled = true; const txt = btn.textContent; btn.textContent = 'Generando…';
+  try {
+    const cv = await buildResultImage();
+    const t = divTeams();
+    const name = `resultado-${(t[_lastRow.home]?.abbr || _lastRow.home)}-vs-${(t[_lastRow.away]?.abbr || _lastRow.away)}.png`.toLowerCase();
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const file = new File([blob], name, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      await navigator.share({ files: [file], title: 'Resultado · Liga San Carlos' }).catch(() => {});
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    }
+  } finally { btn.disabled = false; btn.textContent = txt; }
 }
 
 load();
